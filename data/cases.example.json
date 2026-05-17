@@ -1,0 +1,107 @@
+[
+  {
+    "case_id": "case_marriott_walk_gold_member",
+    "source_type": "synthetic_example",
+    "source_name": "Synthetic demo case",
+    "source_url": "",
+    "provider_type": "hotel",
+    "provider": "Marriott",
+    "brand_or_airline": "Sheraton",
+    "issue_type": "hotel_walk",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Bonvoy Gold",
+    "reservation_type": "paid",
+    "facts": "Guest arrived late with a confirmed Sheraton reservation and was told the property was oversold with no room available.",
+    "requested_compensation": [
+      "Comparable nearby hotel",
+      "Transportation to alternate hotel",
+      "Cash or points under the Ultimate Reservation Guarantee"
+    ],
+    "actual_outcome": "Hotel arranged a nearby property, reimbursed rideshare, and provided points after corporate follow-up.",
+    "evidence_used": [
+      "Confirmation email",
+      "Screenshot of app reservation",
+      "Front desk notes",
+      "Receipt from alternate hotel"
+    ],
+    "escalation_path": [
+      "Front desk",
+      "Hotel manager",
+      "Marriott customer care"
+    ],
+    "reusable_lesson": "Ask the property to document that it could not honor a confirmed reservation, then reference the brand guarantee in writing.",
+    "confidence": "medium",
+    "notes": "Synthetic example for the first demo."
+  },
+  {
+    "case_id": "case_united_controllable_overnight_delay",
+    "source_type": "synthetic_example",
+    "source_name": "Synthetic demo case",
+    "source_url": "",
+    "provider_type": "airline",
+    "provider": "United",
+    "brand_or_airline": "United",
+    "issue_type": "controllable_airline_delay",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "None",
+    "reservation_type": "paid",
+    "facts": "A crew-related delay caused an overnight misconnect. Passenger requested hotel, meal, and transportation support.",
+    "requested_compensation": [
+      "Hotel voucher",
+      "Meal voucher",
+      "Ground transportation",
+      "Rebooking on the next available flight"
+    ],
+    "actual_outcome": "Airline provided hotel and meal vouchers at the airport service desk.",
+    "evidence_used": [
+      "Delay notification",
+      "Boarding passes",
+      "Hotel receipt",
+      "Meal receipt"
+    ],
+    "escalation_path": [
+      "Airport customer service",
+      "Airline chat",
+      "DOT complaint if denied"
+    ],
+    "reusable_lesson": "For controllable disruptions, use the airline's DOT dashboard commitments and ask for care before paying out of pocket.",
+    "confidence": "medium",
+    "notes": "Synthetic example for the first demo."
+  },
+  {
+    "case_id": "case_eu261_three_hour_arrival_delay",
+    "source_type": "synthetic_example",
+    "source_name": "Synthetic demo case",
+    "source_url": "",
+    "provider_type": "airline",
+    "provider": "European Union",
+    "brand_or_airline": "EU carrier",
+    "issue_type": "eu261_delay_or_cancellation",
+    "location_country": "EU",
+    "booking_channel": "unknown",
+    "loyalty_status": "Unknown",
+    "reservation_type": "unknown",
+    "facts": "Passenger arrived more than three hours late on a qualifying EU itinerary and requested fixed compensation plus care.",
+    "requested_compensation": [
+      "EU261 fixed compensation if eligible",
+      "Meals and care expenses",
+      "Written explanation for the delay reason"
+    ],
+    "actual_outcome": "Passenger received a written denial first, then compensation after providing itinerary and arrival-time evidence.",
+    "evidence_used": [
+      "Ticket receipt",
+      "Actual arrival time screenshot",
+      "Airline delay reason",
+      "Expense receipts"
+    ],
+    "escalation_path": [
+      "Airline claim form",
+      "National enforcement body"
+    ],
+    "reusable_lesson": "Anchor the request on actual arrival delay, route eligibility, and whether extraordinary circumstances apply.",
+    "confidence": "medium",
+    "notes": "Synthetic example for the first demo."
+  }
+]

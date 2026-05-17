@@ -1,0 +1,895 @@
+Travel Claims Copilot 对话迁移上下文
+1. 项目定位
+
+这是一个“旅行权益案例搜索与沟通助手”。
+
+用户输入自己遇到的酒店或航司异常经历，系统基于官方政策、政府法规、航司/酒店公开承诺、社区相似案例 DP 和历史用户反馈结果，帮助用户判断可以合理提出哪些诉求，并生成可复制的沟通话术。
+
+产品不提供法律意见，不承诺赔偿结果，不做代理索赔。核心价值是帮助用户更快找到依据、组织证据、提出请求并记录结果。
+
+2. 灵感来源
+
+灵感来自旅行、信用卡、常旅客社区里的“怎么撕”内容。
+
+用户遇到酒店超售、航班延误、取消、misconnection、会员权益未兑现、房间问题、餐宿券未给等情况时，想知道：
+
+类似情况别人有没有成功过？
+应该引用什么官方政策？
+诉求应该怎么提？
+要求现金、点数、voucher、酒店、餐券还是报销？
+前台、电话客服、corporate escalation 分别该怎么说？
+被拒之后下一步去哪儿升级？
+3. 核心方向
+
+原始方向是航班延误 / EU261 索赔 agent。
+
+新方向更广：
+
+旅行不正常情况“怎么撕” Copilot：帮用户找到相似案例、官方规则、品牌政策、别人成功要到的补偿，并生成合理诉求和沟通话术。
+
+这个方向比单纯做法律赔偿判断更容易冷启动，也更适合社区传播和产品化。
+
+4. 核心用户场景
+4.1 酒店被 walk / confirmed reservation not honored
+
+示例：
+
+用户是 Marriott Titanium，官网订 Sheraton，到店后酒店说没房，把用户安排到附近更差酒店，没有主动给补偿。
+
+系统应输出：
+
+问题类型：hotel_walk
+官方依据：Marriott Ultimate Reservation Guarantee / Elite Benefit Guarantees
+相似案例：Marriott walk, Titanium, direct booking
+建议诉求：附近酒店、交通、cash / points compensation、case number
+话术：前台现场话术、客服邮件、corporate escalation
+4.2 美国航司可控延误 / 取消
+
+示例：
+
+用户 United 航班因为 crew issue 取消，被改到第二天，机场不给酒店。
+
+系统应输出：
+
+问题类型：controllable_cancellation / controllable_delay
+官方依据：DOT Airline Cancellation and Delay Dashboard、航司 customer commitment
+建议诉求：rebooking、hotel、meal voucher、transportation
+话术：机场柜台话术、customer relations 邮件
+4.3 航司超售 / denied boarding / voluntary bump
+
+示例：
+
+用户遇到 AA oversold，航司询问是否有人愿意自愿改签。
+
+系统应输出：
+
+区分 voluntary bump 和 involuntary denied boarding
+法规或官方规则
+相似 DP 中的谈判区间
+谈判策略和话术
+4.4 EU261 / UK261 航班延误、取消、missed connection
+
+示例：
+
+用户从 EU 出发，最终目的地晚到 4 小时。
+
+系统应输出：
+
+是否可能适用 EU261 / UK261
+care / refund / rerouting / compensation 的区别
+需要补充的证据
+claim letter 草稿
+5. 产品输出结构
+
+每次分析应输出：
+
+问题类型
+初步判断强度
+可引用依据
+官方政策 / 法规
+相似社区案例
+建议诉求
+保守诉求
+标准诉求
+进取诉求
+需要收集的证据
+可复制话术
+现场 / 电话版
+邮件版
+被拒后的升级版
+风险和注意事项
+6. 产品边界
+
+必须避免：
+
+承诺用户一定能获得赔偿
+编造政策、金额、案例或来源
+把社区 DP 说成官方规则
+提供诉讼策略或正式法律意见
+处理人身伤害、重大财产损失、复杂保险理赔等高风险场景
+
+必须强调：
+
+官方政策 / 法规是强依据
+社区案例 / DP 是参考依据
+goodwill request 不保证成功
+用户应保留证据
+7. MVP 范围
+
+第一版 demo 只做：
+
+Marriott / hotel walk
+美国航司 controllable delay / cancellation
+denied boarding / voluntary bump
+EU261 delay / cancellation
+
+暂时不做：
+
+登录
+支付
+代索赔
+自动发邮件
+自动爬虫
+复杂保险理赔
+行李永久丢失
+人身伤害
+法律诉讼
+8. 推荐技术路线
+
+你有基础前后端开发经验，但没有 agent 开发经验。因此第一版不要做复杂 autonomous agent，而是做确定性 workflow。
+
+推荐第一版流程：
+
+用户输入问题。
+系统提取结构化事实。
+分类 provider_type、provider、issue_type。
+从 policies、cases、scripts 中检索相关内容。
+用固定模板生成分析结果。
+用户反馈最终拿到什么补偿，沉淀为 outcome 数据。
+
+第一版可以使用：
+
+Next.js
+TypeScript
+Tailwind
+本地 JSON seed data
+后续迁移到 Supabase Postgres + pgvector
+后续接 OpenAI API 做结构化事实提取和自然语言生成
+9. 推荐仓库结构
+
+travel-claims-copilot/
+AGENTS.md
+PROJECT_BRIEF.md
+DATA_SCHEMA.md
+ROADMAP.md
+DATA_COLLECTION_GUIDE.md
+TEST_CASES.md
+prompts/
+system-prompt.md
+answer-template.md
+codex-first-task.md
+codex-refactor-task.md
+codex-llm-task.md
+data/
+policies.example.json
+cases.example.json
+scripts.example.json
+app/
+lib/
+
+10. AGENTS.md 建议内容
+AGENTS.md
+Project
+
+This repo implements Travel Claims Copilot: a travel disruption claims intelligence assistant.
+
+Read before making product or architecture decisions:
+
+PROJECT_BRIEF.md
+DATA_SCHEMA.md
+ROADMAP.md
+DATA_COLLECTION_GUIDE.md
+Product Goal
+
+Build a demo web app where a user describes a hotel or airline disruption, and the app returns:
+
+issue type
+relevant official policies / regulations
+similar community cases
+conservative / standard / aggressive asks
+evidence checklist
+reusable communication scripts
+cautions and uncertainty
+Product Boundaries
+
+Do not present the app as legal advice.
+Do not promise compensation.
+Do not fabricate policies, cases, URLs, or compensation amounts.
+
+Clearly separate:
+
+official policy / regulation
+company commitment
+community DP / goodwill reference
+synthetic examples
+
+High-risk issues such as injury, litigation, large property loss, or complex insurance claims should trigger a professional-help warning.
+
+Recommended Implementation
+
+Prefer a simple deterministic workflow over a complex autonomous agent.
+
+Initial workflow:
+
+Extract structured facts from user input.
+Classify provider_type, provider, and issue_type.
+Search policies and cases.
+Generate a structured response using retrieved data.
+Allow user feedback / outcome logging.
+
+Start with local JSON files if faster. Later migrate to Supabase Postgres and pgvector.
+
+Suggested Tech Stack
+Next.js
+TypeScript
+Tailwind
+Local JSON seed data for MVP
+Later: Supabase Postgres + pgvector
+LLM API abstraction in lib/llm.ts
+Retrieval logic in lib/retrieval.ts
+Classification logic in lib/classifier.ts
+Code Style
+Use TypeScript strict mode.
+Keep business logic in lib/.
+Keep UI components small.
+Avoid over-engineering.
+Prefer explicit types for Policy, Case, Script, AnalysisResult.
+Add sample data before building complex infrastructure.
+Write code that can later swap local JSON search for vector search.
+First Demo Scope
+
+Only support:
+
+hotel_walk
+controllable_airline_delay
+controllable_airline_cancellation
+denied_boarding
+eu261_delay_or_cancellation
+
+Do not build:
+
+payments
+login
+automated scraping
+email sending
+claim submission
+mobile app
+complex multi-agent orchestration
+Expected Demo UX
+
+Home page:
+
+textarea for user problem
+Analyze button
+
+Result page:
+
+issue type
+case strength
+official basis
+similar cases
+suggested asks
+evidence checklist
+scripts with copy buttons
+feedback section
+11. 数据结构
+11.1 Policy
+type Policy = {
+  policy_id: string;
+  provider_type: "hotel" | "airline" | "credit_card" | "ota" | "government";
+  provider: string;
+  policy_name: string;
+  issue_type: string;
+  source_url: string;
+  source_type:
+    | "official_policy"
+    | "government_regulation"
+    | "official_dashboard"
+    | "terms";
+  authority_level: "high" | "medium" | "low";
+  applicable_conditions: string[];
+  compensation_or_rights: string[];
+  summary: string;
+  last_checked: string;
+};
+11.2 TravelCase
+type TravelCase = {
+  case_id: string;
+  source_type: "community_dp" | "user_submitted" | "synthetic_example";
+  source_name: string;
+  source_url: string;
+  provider_type: "hotel" | "airline" | "credit_card" | "ota";
+  provider: string;
+  brand_or_airline: string;
+  issue_type: string;
+  location_country: string;
+  booking_channel: "direct" | "ota" | "portal" | "unknown";
+  loyalty_status: string;
+  reservation_type: "paid" | "points" | "award" | "unknown";
+  facts: string;
+  requested_compensation: string[];
+  actual_outcome: string;
+  evidence_used: string[];
+  escalation_path: string[];
+  reusable_lesson: string;
+  confidence: "high" | "medium" | "low";
+  notes: string;
+};
+11.3 Script
+type Script = {
+  script_id: string;
+  issue_type: string;
+  provider: string;
+  channel:
+    | "front_desk"
+    | "phone"
+    | "chat"
+    | "email"
+    | "corporate_escalation"
+    | "regulator_complaint";
+  tone: "polite" | "polite_firm" | "firm";
+  language: "en" | "zh";
+  template: string;
+  when_to_use: string;
+};
+11.4 Outcome
+type Outcome = {
+  outcome_id: string;
+  user_case_summary: string;
+  issue_type: string;
+  provider: string;
+  suggested_ask: string[];
+  actual_result: string;
+  communication_rounds: number;
+  successful_script_id: string;
+  user_rating: "useful" | "not_useful" | "unclear";
+  notes: string;
+};
+11.5 AnalysisResult
+type AnalysisResult = {
+  issueType: string;
+  provider?: string;
+  strength: "strong" | "medium" | "weak" | "unknown";
+  summary: string;
+  officialBasis: Policy[];
+  similarCases: TravelCase[];
+  suggestedAsks: {
+    conservative: string[];
+    standard: string[];
+    aggressive: string[];
+  };
+  evidenceChecklist: string[];
+  scripts: Script[];
+  cautions: string[];
+};
+12. 示例 data/policies.example.json
+[
+  {
+    "policy_id": "marriott_ultimate_reservation_guarantee",
+    "provider_type": "hotel",
+    "provider": "Marriott",
+    "policy_name": "Ultimate Reservation Guarantee",
+    "issue_type": "hotel_walk",
+    "source_url": "https://www.marriott.com/loyalty/member-benefits/guarantee.mi",
+    "source_type": "official_policy",
+    "authority_level": "high",
+    "applicable_conditions": [
+      "Bonvoy member",
+      "Member number attached to reservation",
+      "Property unable to honor confirmed reservation"
+    ],
+    "compensation_or_rights": [
+      "Nearby hotel accommodation",
+      "Potential cash compensation depending on brand and status",
+      "Potential points compensation depending on brand and status"
+    ],
+    "summary": "Marriott describes an Ultimate Reservation Guarantee for situations where a participating hotel cannot honor a reservation. Compensation depends on brand and member status.",
+    "last_checked": "2026-05-12"
+  },
+  {
+    "policy_id": "dot_airline_cancellation_delay_dashboard",
+    "provider_type": "government",
+    "provider": "US DOT",
+    "policy_name": "Airline Cancellation and Delay Dashboard",
+    "issue_type": "controllable_airline_delay",
+    "source_url": "https://www.transportation.gov/airconsumer/airline-cancellation-delay-dashboard",
+    "source_type": "official_dashboard",
+    "authority_level": "high",
+    "applicable_conditions": [
+      "US airline disruption",
+      "Controllable delay or cancellation",
+      "Airline commitment listed on DOT dashboard"
+    ],
+    "compensation_or_rights": [
+      "Rebooking",
+      "Meal voucher",
+      "Hotel accommodation",
+      "Ground transportation",
+      "Travel credit or miles in some cases"
+    ],
+    "summary": "The DOT dashboard summarizes airline commitments for controllable cancellations and delays, such as meals, hotels, transportation, and rebooking.",
+    "last_checked": "2026-05-12"
+  },
+  {
+    "policy_id": "eu261_air_passenger_rights",
+    "provider_type": "government",
+    "provider": "European Union",
+    "policy_name": "EU Air Passenger Rights",
+    "issue_type": "eu261_delay_or_cancellation",
+    "source_url": "https://europa.eu/youreurope/citizens/travel/passenger-rights/air/index_en.htm",
+    "source_type": "government_regulation",
+    "authority_level": "high",
+    "applicable_conditions": [
+      "Flight departing from EU",
+      "Or flight arriving in EU operated by EU carrier",
+      "Delay, cancellation, denied boarding, or missed connection under applicable conditions"
+    ],
+    "compensation_or_rights": [
+      "Care",
+      "Refund or rerouting",
+      "Potential fixed compensation depending on delay, distance, and reason"
+    ],
+    "summary": "EU air passenger rights may provide care, refund/rerouting, and fixed compensation for qualifying delays, cancellations, denied boarding, or missed connections.",
+    "last_checked": "2026-05-12"
+  },
+  {
+    "policy_id": "us_denied_boarding_compensation",
+    "provider_type": "government",
+    "provider": "US DOT",
+    "policy_name": "Denied Boarding Compensation",
+    "issue_type": "denied_boarding",
+    "source_url": "https://www.transportation.gov/individuals/aviation-consumer-protection/bumping-oversales",
+    "source_type": "government_regulation",
+    "authority_level": "high",
+    "applicable_conditions": [
+      "Involuntary denied boarding",
+      "Oversold flight",
+      "Passenger meets check-in and boarding requirements"
+    ],
+    "compensation_or_rights": [
+      "Potential cash compensation depending on arrival delay and fare",
+      "Written statement of rights",
+      "Alternative transportation"
+    ],
+    "summary": "US DOT rules distinguish voluntary bumping from involuntary denied boarding. Involuntary denied boarding may trigger compensation depending on delay and ticket price.",
+    "last_checked": "2026-05-12"
+  }
+]
+13. 示例 data/cases.example.json
+[
+  {
+    "case_id": "marriott_walk_synthetic_001",
+    "source_type": "synthetic_example",
+    "source_name": "Synthetic demo case",
+    "source_url": "",
+    "provider_type": "hotel",
+    "provider": "Marriott",
+    "brand_or_airline": "Sheraton",
+    "issue_type": "hotel_walk",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Titanium",
+    "reservation_type": "paid",
+    "facts": "Guest had a confirmed direct booking with Bonvoy number attached. At check-in, the hotel said it was oversold and moved the guest to a nearby lower-tier property.",
+    "requested_compensation": [
+      "Nearby hotel accommodation",
+      "Transportation",
+      "Ultimate Reservation Guarantee compensation",
+      "Goodwill points"
+    ],
+    "actual_outcome": "Demo example: hotel covered relocation and added points after escalation.",
+    "evidence_used": [
+      "Confirmation email",
+      "App screenshot",
+      "Front desk statement"
+    ],
+    "escalation_path": [
+      "Front desk",
+      "Duty manager",
+      "Corporate customer care"
+    ],
+    "reusable_lesson": "Emphasize confirmed reservation, Bonvoy number attached, and ask for the Ultimate Reservation Guarantee to be applied in writing.",
+    "confidence": "medium",
+    "notes": "Synthetic example for demo only. Replace with real summarized DP before public launch."
+  },
+  {
+    "case_id": "united_crew_delay_synthetic_001",
+    "source_type": "synthetic_example",
+    "source_name": "Synthetic demo case",
+    "source_url": "",
+    "provider_type": "airline",
+    "provider": "United",
+    "brand_or_airline": "United",
+    "issue_type": "controllable_airline_cancellation",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "None",
+    "reservation_type": "paid",
+    "facts": "Flight was cancelled due to crew availability. Passenger was rebooked to the next morning and needed overnight accommodation.",
+    "requested_compensation": [
+      "Hotel",
+      "Meal voucher",
+      "Ground transportation",
+      "Rebooking"
+    ],
+    "actual_outcome": "Demo example: passenger received hotel and meal voucher after asking whether cancellation was controllable.",
+    "evidence_used": [
+      "Cancellation email",
+      "App notification",
+      "Boarding pass"
+    ],
+    "escalation_path": [
+      "Airport customer service",
+      "Customer relations"
+    ],
+    "reusable_lesson": "Ask the airline to confirm whether the cancellation was within airline control and reference the airline's DOT-listed customer commitment.",
+    "confidence": "medium",
+    "notes": "Synthetic example for demo only."
+  },
+  {
+    "case_id": "denied_boarding_synthetic_001",
+    "source_type": "synthetic_example",
+    "source_name": "Synthetic demo case",
+    "source_url": "",
+    "provider_type": "airline",
+    "provider": "American Airlines",
+    "brand_or_airline": "AA",
+    "issue_type": "denied_boarding",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "None",
+    "reservation_type": "paid",
+    "facts": "Flight was oversold and airline asked for volunteers. Passenger wanted to understand the difference between voluntary bump negotiation and involuntary denied boarding rights.",
+    "requested_compensation": [
+      "Travel credit",
+      "Hotel",
+      "Meal voucher",
+      "Alternative flight"
+    ],
+    "actual_outcome": "Demo example: passenger negotiated travel credit before accepting a later flight.",
+    "evidence_used": [
+      "Boarding pass",
+      "Gate announcement",
+      "Written offer"
+    ],
+    "escalation_path": [
+      "Gate agent"
+    ],
+    "reusable_lesson": "Before accepting voluntary bumping, clarify amount, form of compensation, expiration, hotel, meals, and confirmed rebooking.",
+    "confidence": "medium",
+    "notes": "Synthetic example for demo only."
+  }
+]
+14. 示例 data/scripts.example.json
+[
+  {
+    "script_id": "marriott_walk_frontdesk_en",
+    "issue_type": "hotel_walk",
+    "provider": "Marriott",
+    "channel": "front_desk",
+    "tone": "polite_firm",
+    "language": "en",
+    "template": "I have a confirmed reservation with my Marriott Bonvoy number attached. Since the property is unable to honor the reservation, could you please apply Marriott's Ultimate Reservation Guarantee, arrange comparable nearby accommodation, cover transportation, and confirm the applicable compensation in writing?",
+    "when_to_use": "Use at the front desk when a Marriott property says it cannot honor a confirmed reservation."
+  },
+  {
+    "script_id": "hotel_walk_escalation_en",
+    "issue_type": "hotel_walk",
+    "provider": "generic_hotel",
+    "channel": "corporate_escalation",
+    "tone": "polite_firm",
+    "language": "en",
+    "template": "I had a confirmed reservation that the property was unable to honor at check-in. I would like this documented as a formal case, including the relocation details, transportation costs, and any applicable brand guarantee or goodwill compensation.",
+    "when_to_use": "Use when the front desk refuses to document or resolve a hotel walk situation."
+  },
+  {
+    "script_id": "airline_controllable_delay_hotel_en",
+    "issue_type": "controllable_airline_delay",
+    "provider": "generic_airline",
+    "channel": "airport_counter",
+    "tone": "polite_firm",
+    "language": "en",
+    "template": "Can you please confirm whether this delay or cancellation is within the airline's control? If so, I would like hotel accommodation, transportation to and from the hotel, meal vouchers, and rebooking on the earliest available flight, consistent with the airline's customer service commitment.",
+    "when_to_use": "Use at the airport when a controllable airline delay or cancellation requires an overnight stay."
+  },
+  {
+    "script_id": "denied_boarding_voluntary_bump_en",
+    "issue_type": "denied_boarding",
+    "provider": "generic_airline",
+    "channel": "gate",
+    "tone": "polite_firm",
+    "language": "en",
+    "template": "Before I agree to volunteer, could you please confirm the exact compensation amount, whether it is cash or travel credit, the expiration date, my confirmed rebooking, and whether hotel, meals, and transportation will be covered if the new flight is tomorrow?",
+    "when_to_use": "Use before accepting voluntary bumping on an oversold flight."
+  }
+]
+15. 推荐 system prompt
+
+你是一个旅行权益和补偿案例助手。你的任务不是提供法律意见，也不承诺用户一定能获得赔偿。你需要基于给定知识库中的官方政策、法规摘要和社区案例，帮助用户理解类似情况中可以提出哪些合理诉求。
+
+回答时必须：
+
+区分“官方政策 / 法规支持”和“社区案例 / Goodwill 参考”。
+不得承诺结果。
+不得编造政策、金额、案例或来源。
+如果证据不足，需要明确列出缺失信息。
+输出保守、标准、进取三档诉求。
+输出可复制的英文沟通话术。
+对重要结论标注依据来源。
+遇到人身伤害、重大财产损失、诉讼、保险复杂理赔等高风险问题，提示用户寻求专业帮助。
+16. 输出模板
+## 1. 你的问题类型
+
+[识别 issue_type]
+
+## 2. 初步判断
+
+强度：[强 / 中 / 弱 / 信息不足]
+
+说明为什么。
+
+## 3. 可引用依据
+
+### 官方政策 / 法规
+
+- [来源 1]
+- [来源 2]
+
+### 相似社区案例
+
+- [案例 A]
+- [案例 B]
+- [案例 C]
+
+## 4. 建议诉求
+
+### 保守诉求
+
+[最低合理请求]
+
+### 标准诉求
+
+[最建议请求]
+
+### 进取诉求
+
+[可以尝试但不保证]
+
+## 5. 你还需要收集的证据
+
+- [证据 1]
+- [证据 2]
+- [证据 3]
+
+## 6. 可直接复制的话术
+
+### 现场 / 电话版
+
+[...]
+
+### 邮件版
+
+[...]
+
+### 被拒后的升级版
+
+[...]
+
+## 7. 风险和注意事项
+
+[哪些是官方支持，哪些只是 goodwill]
+17. Codex 首次任务 Prompt
+
+请先阅读 AGENTS.md、PROJECT_BRIEF.md、DATA_SCHEMA.md 和 data/*.json。
+
+我要做一个 Travel Claims Copilot 的展示 demo。请帮我用 Next.js + TypeScript + Tailwind 搭一个最小可运行版本。
+
+第一版要求：
+
+首页有一个 textarea，用户输入旅行纠纷描述。
+点击 Analyze 后调用 /api/analyze。
+/api/analyze 使用本地 data/policies.example.json、cases.example.json、scripts.example.json。
+先不用真实 LLM API，先用简单 keyword / classification 逻辑完成 demo：
+输入包含 Marriott / Sheraton / hotel / walk / no room / oversold → issue_type = hotel_walk
+输入包含 United / airline / crew / cancellation / delay / overnight → issue_type = controllable_airline_cancellation 或 controllable_airline_delay
+输入包含 denied boarding / oversold / bump → issue_type = denied_boarding
+输入包含 EU261 / Europe / EU / delayed 3 hours → issue_type = eu261_delay_or_cancellation
+根据 issue_type 检索相关 policies、cases、scripts。
+返回结构化 AnalysisResult：
+issueType
+strength
+officialBasis
+similarCases
+suggestedAsks: conservative / standard / aggressive
+evidenceChecklist
+scripts
+cautions
+前端以卡片形式展示结果，并给 scripts 加 copy button。
+不要实现登录、支付、数据库、爬虫、真实 agent。
+请尽量保持代码简单、可读，并给出如何运行的说明。
+18. Codex 重构任务 Prompt
+
+现在请把 /api/analyze 拆成三个模块：
+
+lib/classifier.ts
+classifyInput(message): ExtractedFacts
+先保留 keyword fallback
+预留未来接 LLM 的接口
+lib/retrieval.ts
+searchPolicies(facts)
+searchCases(facts)
+searchScripts(facts)
+先使用本地 JSON + issue_type/provider 过滤
+lib/generator.ts
+generateAnalysis(message, facts, policies, cases, scripts)
+目前用 deterministic template
+预留未来接 OpenAI API
+
+请定义清楚 TypeScript types：
+
+Policy
+TravelCase
+Script
+ExtractedFacts
+AnalysisResult
+
+保持现有前端功能不变。
+
+19. Codex 接入 LLM 任务 Prompt
+
+请接入 OpenAI API，但保留 deterministic fallback。
+
+要求：
+
+新增 lib/llm.ts。
+使用环境变量 OPENAI_API_KEY。
+LLM 只负责：
+从用户输入中提取 provider_type、provider、issue_type、loyalty_status、booking_channel、facts。
+根据检索到的政策和案例生成自然语言分析。
+LLM 不得编造政策、案例、金额或来源。
+如果没有检索到相关政策或案例，必须明确说“当前知识库没有找到足够依据”。
+prompt 必须区分 official policy/regulation 和 community DP。
+保留 keyword classifier 作为 fallback。
+更新 README 说明如何配置 OPENAI_API_KEY。
+20. Roadmap
+Phase 0：种子数据和本地 demo
+
+目标：用最小成本做出一个能展示产品价值的 demo。
+
+任务：
+
+整理 10 条官方政策
+整理 30 条真实或模拟案例摘要
+整理 10 个话术模板
+准备 20 个测试问题
+用 Next.js + TypeScript + Tailwind 搭一个本地 demo
+先用 local JSON + keyword classifier，不接数据库，不接真实 LLM
+Phase 1：结构化代码和真实 LLM
+
+任务：
+
+拆出 lib/classifier.ts
+拆出 lib/retrieval.ts
+拆出 lib/generator.ts
+接 OpenAI API 做结构化事实提取和自然语言生成
+保留 keyword fallback
+Phase 2：数据库和管理后台
+
+任务：
+
+迁移到 Supabase Postgres
+建 policies / cases / scripts / outcomes 表
+做简单 admin 页面
+加用户反馈 / outcome logging
+Phase 3：向量检索和混合搜索
+
+任务：
+
+接 pgvector 或其他向量库
+对 case summary、facts、reusable_lesson 做 embedding
+检索时先结构化过滤，再向量搜索
+Phase 4：产品化体验
+
+任务：
+
+优化结果页
+增加 copy script button
+增加证据清单
+增加保守 / 标准 / 进取诉求
+增加 feedback flow
+增加匿名 DP 投稿
+增加来源引用展示
+21. 案例收集指南
+
+第一阶段目标：
+
+30-50 条高质量案例
+10 条官方政策
+10 个话术模板
+20 个测试问题
+
+P0 必须收：
+
+Marriott walk / Ultimate Reservation Guarantee
+United / AA / Delta 可控取消或延误导致过夜
+航司 denied boarding / voluntary bump
+EU261 延误 3 小时以上
+
+P1 很有价值：
+
+酒店房型不符
+酒店 elite breakfast / lounge / late checkout 没给
+酒店卫生严重问题
+航司 downgrade
+misconnection
+schedule change
+
+P2 以后再做：
+
+信用卡旅行保险
+OTA dispute
+行李永久丢失
+租车
+邮轮
+复杂退款
+chargeback
+22. 单条案例摘要模板
+
+标题：
+来源：
+原始链接：
+场景：
+Provider：
+Brand / Airline：
+用户身份 / 会员等级：
+预订渠道：
+发生了什么：
+用户怎么沟通：
+引用了什么依据：
+最终结果：
+可借鉴点：
+不确定点：
+
+23. 版权和隐私
+
+可以做：
+
+自己重写摘要
+保留来源链接
+不复制大段原文
+不保留用户名、订单号、PNR、确认号、邮箱、电话
+隐去敏感个人信息
+
+不要做：
+
+批量爬取全文
+把论坛原帖整段放进知识库
+复制用户隐私信息
+把社区 DP 包装成官方规则
+24. Demo 测试问题
+Hotel walk
+我是 Marriott Titanium，官网订的 Sheraton，到店以后前台说没房，把我安排到旁边一个便宜酒店，也没主动给补偿。我应该怎么撕？
+I have a confirmed Marriott reservation but the hotel is oversold and wants to move me to another property. What should I ask for?
+Marriott app 里还有我的预订，但前台说 no room available，让我自己找酒店。
+Airline controllable delay / cancellation
+United 航班因为 crew issue 取消，被安排第二天飞，机场不给酒店。
+My airline cancelled the flight due to maintenance and rebooked me tomorrow. Can I ask for hotel and meal vouchers?
+AA 机械故障延误到第二天，客服说没有酒店券。
+Denied boarding / voluntary bump
+AA 航班 oversold，gate agent 问有没有人愿意 volunteer，我应该怎么谈？
+I was involuntarily denied boarding on an oversold US domestic flight. What should I ask for?
+Delta offered $400 voucher for a voluntary bump but the next flight is tomorrow. What should I clarify?
+EU261
+我从巴黎飞纽约，航班晚到 4 个小时，可以申请 EU261 吗？
+EU flight delayed 3.5 hours at final destination, airline says operational reasons.
+我联程航班第一段延误导致错过第二段，最终晚到 5 小时。

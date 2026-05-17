@@ -1,0 +1,70 @@
+[
+  {
+    "policy_id": "marriott_ultimate_reservation_guarantee",
+    "provider_type": "hotel",
+    "provider": "Marriott",
+    "policy_name": "Ultimate Reservation Guarantee",
+    "issue_type": "hotel_walk",
+    "source_url": "https://www.marriott.com/loyalty/member-benefits/guarantee.mi",
+    "source_type": "official_policy",
+    "authority_level": "high",
+    "applicable_conditions": [
+      "Bonvoy member",
+      "Member number attached to reservation",
+      "Property unable to honor confirmed reservation"
+    ],
+    "compensation_or_rights": [
+      "Nearby hotel accommodation",
+      "Potential cash compensation depending on brand and status",
+      "Potential points compensation depending on brand and status"
+    ],
+    "summary": "Marriott describes an Ultimate Reservation Guarantee for situations where a participating hotel cannot honor a reservation. Compensation depends on brand and member status.",
+    "last_checked": "2026-05-12"
+  },
+  {
+    "policy_id": "dot_airline_cancellation_delay_dashboard",
+    "provider_type": "government",
+    "provider": "US DOT",
+    "policy_name": "Airline Cancellation and Delay Dashboard",
+    "issue_type": "controllable_airline_delay",
+    "source_url": "https://www.transportation.gov/airconsumer/airline-cancellation-delay-dashboard",
+    "source_type": "official_dashboard",
+    "authority_level": "high",
+    "applicable_conditions": [
+      "US airline disruption",
+      "Controllable delay or cancellation",
+      "Airline commitment listed on DOT dashboard"
+    ],
+    "compensation_or_rights": [
+      "Rebooking",
+      "Meal voucher",
+      "Hotel accommodation",
+      "Ground transportation",
+      "Travel credit or miles in some cases"
+    ],
+    "summary": "The DOT dashboard summarizes airline commitments for controllable cancellations and delays, such as meals, hotels, transportation, and rebooking.",
+    "last_checked": "2026-05-12"
+  },
+  {
+    "policy_id": "eu261_air_passenger_rights",
+    "provider_type": "government",
+    "provider": "European Union",
+    "policy_name": "EU Air Passenger Rights",
+    "issue_type": "eu261_delay_or_cancellation",
+    "source_url": "https://europa.eu/youreurope/citizens/travel/passenger-rights/air/index_en.htm",
+    "source_type": "government_regulation",
+    "authority_level": "high",
+    "applicable_conditions": [
+      "Flight departing from EU",
+      "Or flight arriving in EU operated by EU carrier",
+      "Delay, cancellation, denied boarding, or missed connection under applicable conditions"
+    ],
+    "compensation_or_rights": [
+      "Care",
+      "Refund or rerouting",
+      "Potential fixed compensation depending on delay, distance, and reason"
+    ],
+    "summary": "EU air passenger rights may provide care, refund/rerouting, and fixed compensation for qualifying delays, cancellations, denied boarding, or missed connections.",
+    "last_checked": "2026-05-12"
+  }
+]
