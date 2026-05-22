@@ -1,0 +1,42 @@
+import { getIssueAliases, issueLabels, normalizeIssueType } from "./issueTaxonomy";
+import type { Case, IssueType, Policy, ScenarioSummary, Script } from "./types";
+
+function getKnownIssueTypes(cases: Case[]): IssueType[] {
+  return Array.from(new Set(cases.map((item) => item.issue_type)))
+    .map(normalizeIssueType)
+    .filter((issueType): issueType is IssueType => Boolean(issueType));
+}
+
+export function buildScenarioSummaries(
+  policies: Policy[],
+  cases: Case[],
+  scripts: Script[]
+): ScenarioSummary[] {
+  return getKnownIssueTypes(cases)
+    .map((issueType) => {
+      const aliases = new Set<string>(getIssueAliases(issueType));
+      const matchingCases = cases.filter((item) => aliases.has(item.issue_type));
+      const matchingPolicies = policies.filter((policy) => aliases.has(policy.issue_type));
+      const matchingScripts = scripts.filter((script) => aliases.has(script.issue_type));
+      const providers = Array.from(new Set(matchingCases.map((item) => item.provider))).sort();
+      const sampleCase = matchingCases[0];
+
+      return {
+        issueType,
+        label: issueLabels[issueType],
+        caseCount: matchingCases.length,
+        officialBasisCount: matchingPolicies.length,
+        scriptCount: matchingScripts.length,
+        providers,
+        sampleCase: sampleCase
+          ? {
+              caseId: sampleCase.case_id,
+              provider: sampleCase.provider,
+              brandOrAirline: sampleCase.brand_or_airline,
+              facts: sampleCase.facts
+            }
+          : undefined
+      };
+    })
+    .sort((left, right) => left.label.localeCompare(right.label));
+}

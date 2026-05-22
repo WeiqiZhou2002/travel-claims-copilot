@@ -3,11 +3,24 @@ export type IssueType =
   | "controllable_airline_cancellation"
   | "controllable_airline_delay"
   | "eu261_delay_or_cancellation"
+  | "denied_boarding"
+  | "baggage_delay"
+  | "airline_delay_trip_insurance"
+  | "airline_baggage_not_checked"
+  | "airline_rebooking_mixed_carrier_delay"
+  | "hotel_billing_dispute"
+  | "hotel_service_issue"
+  | "hotel_property_loss"
+  | "hotel_relocation_before_opening"
+  | "hotel_room_feature_mismatch"
+  | "hotel_elite_benefit_closure"
   | "unknown";
+
+export type ProviderType = "hotel" | "airline" | "credit_card" | "ota" | "government";
 
 export type Policy = {
   policy_id: string;
-  provider_type: "hotel" | "airline" | "credit_card" | "ota" | "government";
+  provider_type: ProviderType;
   provider: string;
   policy_name: string;
   issue_type: string;
@@ -29,7 +42,7 @@ export type Case = {
   source_type: "community_dp" | "user_submitted" | "synthetic_example";
   source_name: string;
   source_url: string;
-  provider_type: "hotel" | "airline" | "credit_card" | "ota";
+  provider_type: Exclude<ProviderType, "government">;
   provider: string;
   brand_or_airline: string;
   issue_type: string;
@@ -64,6 +77,31 @@ export type Script = {
   when_to_use: string;
 };
 
+export type AnalyzeOptions = {
+  caseId?: string;
+  issueType?: IssueType;
+};
+
+export type ExtractedFacts = {
+  description: string;
+  issueType: IssueType;
+  provider?: string;
+  providerType?: ProviderType;
+  caseId?: string;
+  confidence: "low" | "medium" | "high";
+  signals: string[];
+  source: "keyword" | "selected_case" | "selected_issue" | "fallback";
+};
+
+export type RetrievalResult = {
+  facts: ExtractedFacts;
+  issueAliases: IssueType[];
+  officialBasis: Policy[];
+  similarCases: Case[];
+  scripts: Script[];
+  selectedCase?: Case;
+};
+
 export type SuggestedAsks = {
   conservative: string[];
   standard: string[];
@@ -73,10 +111,26 @@ export type SuggestedAsks = {
 export type AnalysisResult = {
   issueType: IssueType;
   strength: "low" | "medium" | "high";
+  summary: string;
   officialBasis: Policy[];
   similarCases: Case[];
   suggestedAsks: SuggestedAsks;
   evidenceChecklist: string[];
   scripts: Script[];
   cautions: string[];
+};
+
+export type ScenarioSummary = {
+  issueType: IssueType;
+  label: string;
+  caseCount: number;
+  officialBasisCount: number;
+  scriptCount: number;
+  providers: string[];
+  sampleCase?: {
+    caseId: string;
+    provider: string;
+    brandOrAirline: string;
+    facts: string;
+  };
 };

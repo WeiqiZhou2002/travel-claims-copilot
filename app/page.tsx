@@ -7,11 +7,22 @@ import type { AnalysisResult, Case, Policy, Script, SuggestedAsks } from "../lib
 const exampleText =
   "I had a confirmed Sheraton reservation, but the hotel said they were oversold and had no room when I arrived.";
 
-const issueLabels: Record<AnalysisResult["issueType"], string> = {
+const issueLabels: Partial<Record<AnalysisResult["issueType"], string>> = {
   hotel_walk: "Hotel walk",
   controllable_airline_cancellation: "Controllable airline cancellation",
   controllable_airline_delay: "Controllable airline delay",
   eu261_delay_or_cancellation: "EU261 delay or cancellation",
+  denied_boarding: "Denied boarding or voluntary bump",
+  baggage_delay: "Baggage delay",
+  airline_delay_trip_insurance: "Airline delay and trip insurance",
+  airline_baggage_not_checked: "Baggage not accepted at check-in",
+  airline_rebooking_mixed_carrier_delay: "Mixed-carrier rebooking delay",
+  hotel_billing_dispute: "Hotel billing dispute",
+  hotel_service_issue: "Hotel service issue",
+  hotel_property_loss: "Hotel property loss",
+  hotel_relocation_before_opening: "Hotel relocation before opening",
+  hotel_room_feature_mismatch: "Hotel room feature mismatch",
+  hotel_elite_benefit_closure: "Hotel elite benefit closure",
   unknown: "Needs more detail"
 };
 
@@ -147,7 +158,9 @@ function SummaryPanel({ result }: { result: AnalysisResult | null }) {
         <div className="mt-4 flex flex-col gap-4">
           <div>
             <p className="text-sm text-ink/60">Issue type</p>
-            <p className="mt-1 text-xl font-semibold text-ink">{issueLabels[result.issueType]}</p>
+            <p className="mt-1 text-xl font-semibold text-ink">
+              {issueLabels[result.issueType] ?? result.issueType.replaceAll("_", " ")}
+            </p>
           </div>
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm text-ink/60">Claim strength</span>
