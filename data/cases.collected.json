@@ -1,0 +1,819 @@
+[
+  {
+    "case_id": "uscf_aa127_mechanical_delay_overnight_2026_07",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/516057",
+    "provider_type": "airline",
+    "provider": "American Airlines",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "controllable_airline_delay",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "award",
+    "facts": "Passenger booked AA127 DFW-PVG in premium economy using Alaska miles. After boarding, the aircraft's AC malfunctioned, passengers were deplaned, and the flight was cancelled due to crew timing-out. Rebooked to the next day with a $12 meal voucher and hotel voucher. The same captain/FO was involved in both days' cancellations for AC issues. On the third day, a different captain decided the AC was sufficient and the flight departed. During the flight, a medical emergency occurred (another passenger had a doctor available). Arrived at PVG at 11:30pm on July 3.",
+    "requested_compensation": [
+      "Hotel and meal reimbursement beyond initial vouchers",
+      "Credit card trip delay insurance claim",
+      "Goodwill miles or travel voucher"
+    ],
+    "actual_outcome": "Outcome not fully reported. Passenger received basic hotel and meal vouchers at the airport. Forum replies suggested claiming credit card trip delay insurance if booked with a qualifying card, noting that Alaska miles bookings may not carry the same coverage.",
+    "evidence_used": [
+      "Boarding pass",
+      "Delay notification from AA",
+      "Hotel and meal receipts",
+      "Alaska Airlines mileage booking confirmation"
+    ],
+    "escalation_path": [
+      "AA airport customer service",
+      "AA customer relations",
+      "Credit card trip delay insurance"
+    ],
+    "reusable_lesson": "For controllable mechanical delays causing overnight disruption, document the delay reason in writing and keep all receipts. If the ticket was booked with an award, check whether the mileage program or booking card triggers trip delay coverage separately.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic. Clear facts: AC mechanical, crew timeout, overnight delay, rebooked next day."
+  },
+  {
+    "case_id": "uscf_marriott_renaissance_nyc_breakfast_denied_2026_03",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/487919",
+    "provider_type": "hotel",
+    "provider": "Marriott",
+    "brand_or_airline": "Renaissance New York Times Square",
+    "issue_type": "hotel_elite_benefit_closure",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Marriott Platinum",
+    "reservation_type": "paid",
+    "facts": "Marriott Platinum member staying at Renaissance New York Times Square was denied breakfast benefit. The hotel offered only 1,000 points or two cookies as breakfast alternative, while a full hot breakfast cost $57 per person plus tax and tip. The hotel charged $7 for Costco-style bottled water. Guest opened the Brilliant card specifically expecting the breakfast benefit.",
+    "requested_compensation": [
+      "Proper breakfast benefit as per Marriott Platinum policy",
+      "Points compensation for denied elite benefit"
+    ],
+    "actual_outcome": "Outcome not reported in the captured thread. The guest appeared resigned to not getting the breakfast benefit at this property.",
+    "evidence_used": [
+      "Marriott Bonvoy Platinum membership",
+      "Hotel folio showing breakfast charges",
+      "Marriott elite benefit terms"
+    ],
+    "escalation_path": [
+      "Front desk manager",
+      "Marriott Bonvoy customer care"
+    ],
+    "reusable_lesson": "Not all Marriott properties honor elite breakfast benefits consistently. Check property-specific policies on FlyerTalk before booking, and consider choosing properties with confirmed breakfast benefits for Platinum+ members.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Facts clear but outcome incomplete. Property may not participate in the breakfast benefit program."
+  },
+  {
+    "case_id": "uscf_hilton_home2_amenities_missing_diamond_2026_07",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/516796",
+    "provider_type": "hotel",
+    "provider": "Hilton",
+    "brand_or_airline": "Home2 Suites",
+    "issue_type": "hotel_walk",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Hilton Diamond",
+    "reservation_type": "paid",
+    "facts": "Hilton Diamond member booked a Home2 Suites studio room for three people. At 4pm check-in, the system was down and only mobile key was available. The room lacked basic amenities for the confirmed occupancy: only one set of towels for three people, insufficient pillows, sheets, pillowcases, and blankets. Multiple requests to front desk from 4pm until 10:30pm resulted in no resolution — the property claimed sold out with no extra linens. No manager was on site. Hilton Diamond desk was closed.",
+    "requested_compensation": [
+      "Full refund for the stay",
+      "Reimbursement for additional expenses due to unusable accommodations",
+      "Additional points or cash compensation"
+    ],
+    "actual_outcome": "Outcome not reported in the captured thread. Forum advice recommended contacting Hilton Diamond Desk or Guest Assistance to open a case against the property.",
+    "evidence_used": [
+      "Hilton app mobile key record",
+      "Timeline of requests to front desk",
+      "Photos of room conditions",
+      "Hilton Diamond membership"
+    ],
+    "escalation_path": [
+      "Front desk (ineffective)",
+      "Hotel general manager",
+      "Hilton Diamond Desk",
+      "Hilton Guest Assistance"
+    ],
+    "reusable_lesson": "When a property cannot provide basic accommodations for a confirmed booking, document every request and response in writing. Contact elite customer service directly rather than relying on the front desk.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic. Clear facts: confirmed booking, property failed to provide usable accommodations, no resolution after 6+ hours of requests."
+  },
+  {
+    "case_id": "uscf_as16_diverted_alb_equipment_2026_07",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/516805",
+    "provider_type": "airline",
+    "provider": "Alaska Airlines",
+    "brand_or_airline": "Alaska Airlines",
+    "issue_type": "controllable_airline_delay",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "AS16 JFK-SEA was diverted to ALB (Albany) after circling due to JFK weather and low fuel. After landing, the aircraft developed a technical/equipment issue and could not continue. Passengers deplaned at 2am and were told to find their own transport home. AS offered travel reimbursement and baggage delivery. AS initially cited severe weather as cancellation reason, but the aircraft also had equipment problems after diverting. Passenger held status and paid with Marriott Boundless card.",
+    "requested_compensation": [
+      "Travel reimbursement for train/transport from ALB to home",
+      "Baggage delay insurance from credit card",
+      "Goodwill miles for the equipment-related disruption"
+    ],
+    "actual_outcome": "Alaska Airlines initially cited weather to avoid responsibility. Passenger received a $200 travel coupon from AS. The baggage was not retrievable at ALB as the airline said it could not unload bags there. Forum noted weather gives the airline no duty to compensate.",
+    "evidence_used": [
+      "AS cancellation email citing weather",
+      "Marriott Boundless card payment receipt",
+      "Train ticket from ALB to NYC",
+      "Baggage delay report"
+    ],
+    "escalation_path": [
+      "AS airport customer service",
+      "AS customer relations",
+      "Marriott Boundless card benefits"
+    ],
+    "reusable_lesson": "When diversion involves both weather and equipment, the airline may cite weather to avoid responsibility. If possible, obtain written confirmation of the equipment issue separately. For baggage left on the diverted aircraft, file a claim promptly even if the airline says bags cannot be unloaded.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Weather + equipment chain makes it a mixed case, classified as controllable delay because the eventual cancellation reason was equipment-related."
+  },
+  {
+    "case_id": "uscf_hyatt_rome_central_relocation_hgi_2026_04",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/500900",
+    "provider_type": "hotel",
+    "provider": "Hyatt",
+    "brand_or_airline": "Hyatt Regency Rome Central",
+    "issue_type": "hotel_relocation_before_opening",
+    "location_country": "Italy",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "points",
+    "facts": "The new Hyatt Regency Rome Central (Cat 4) repeatedly delayed its opening from January to September. Initially, Hyatt offered to cancel and refund points or arrange comparable hotel accommodation. As Rome entered peak summer season with high hotel prices, Hyatt began relocating guests to a Hilton Garden Inn — a significantly lower-tier property. Forum discussion noted Hyatt has a JDV property in Rome (The RomeHello) that would be more comparable but was not being used.",
+    "requested_compensation": [
+      "Comparable hotel in Rome",
+      "Written confirmation of relocation booking",
+      "Return of points if substitute is lower value",
+      "Goodwill points for accepting a lower-tier substitute"
+    ],
+    "actual_outcome": "Hyatt's relocation policy evolved from generous (cancel + comparable hotel) to less favorable (Hilton Garden Inn) as peak season arrived. Outcomes varied per guest; some were still waiting for relocation arrangements.",
+    "evidence_used": [
+      "Original Hyatt confirmation",
+      "Opening delay notices",
+      "Replacement hotel confirmation",
+      "Cash rate comparison between original booking and substitute"
+    ],
+    "escalation_path": [
+      "Hyatt concierge",
+      "Property reservations team",
+      "World of Hyatt customer care"
+    ],
+    "reusable_lesson": "For pre-arrival hotel relocation due to delayed opening, proactively contact Hyatt concierge to discuss substitute options rather than waiting for a default assignment. If points were used, ask for them back if the substitute is materially lower quality.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic. Clear ongoing situation with multiple guest data points."
+  },
+  {
+    "case_id": "uscf_conrad_borabora_paid_upgrade_denied_2026_07",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/516328",
+    "provider_type": "hotel",
+    "provider": "Hilton",
+    "brand_or_airline": "Conrad Bora Bora Nui",
+    "issue_type": "hotel_room_feature_mismatch",
+    "location_country": "FP",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "points",
+    "facts": "Guest booked 4 nights base room at Conrad Bora Bora Nui with points. Paid $800/night to upgrade to overwater villa, confirmed via email one week before arrival. On the last day of a prior stay at St. Regis, received an email reverting the room to base. Hotel manager at check-in claimed no overwater villas were available despite the website showing availability. Offered a 'first two nights base, last two nights possible free upgrade' which was not guaranteed. Guest cancelled and booked Four Seasons at $11,000 for 4 nights instead.",
+    "requested_compensation": [
+      "Refund of paid upgrade amount ($800/night)",
+      "Compensation for breach of confirmed upgrade",
+      "Points goodwill"
+    ],
+    "actual_outcome": "Guest cancelled the reservation entirely and booked Four Seasons instead. Outcome of any refund or compensation claim not reported.",
+    "evidence_used": [
+      "Email confirmation of paid upgrade",
+      "Payment receipt for upgrade",
+      "Website screenshots showing villa availability",
+      "Hotel manager conversation notes"
+    ],
+    "escalation_path": [
+      "Hotel manager (ineffective)",
+      "Hilton customer care",
+      "Credit card dispute for paid upgrade"
+    ],
+    "reusable_lesson": "When a paid upgrade is confirmed in writing and then reneged, preserve all written confirmations and website availability screenshots. Cancelling the reservation may make compensation harder. Consider proceeding with the stay and disputing the upgrade charge afterward.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic. Very clear facts with written confirmation and documented bait-and-switch."
+  },
+  {
+    "case_id": "uscf_aa_buf_dca_cancel_weather_dispute_2026_06",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/512557",
+    "provider_type": "airline",
+    "provider": "American Airlines",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "controllable_airline_cancellation",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "AA BUF-DCA Sunday 5pm flight delayed 30 min then cancelled for weather. Passenger rebooked to Monday 5am, spent the night at a nearby hotel. That flight was also cancelled at 3:30am for weather. System auto-rebooked to Tuesday. Passenger bought Southwest BUF-BWI out of pocket for ~$200/person. Passenger observed other flights landing/departing during both cancellation periods and disputed the weather claim. Ticket was purchased with Chase Freedom Unlimited (no travel insurance).",
+    "requested_compensation": [
+      "Reimbursement for extra hotel night in BUF",
+      "Reimbursement for Southwest tickets ($200/person)",
+      "Goodwill miles or travel voucher"
+    ],
+    "actual_outcome": "Outcome not reported in the captured thread. Forum suggested filing a DOT complaint if AA does not provide reasonable compensation, noting weather cancellations are generally not AA's responsibility but the competing flight evidence challenges the weather claim.",
+    "evidence_used": [
+      "AA cancellation notifications",
+      "Hotel receipt for overnight stay",
+      "Southwest ticket purchase receipt",
+      "Evidence of other flights operating during the same period"
+    ],
+    "escalation_path": [
+      "AA customer relations",
+      "DOT complaint if AA denies responsibility"
+    ],
+    "reusable_lesson": "When an airline cites weather but competing flights are operating, document the evidence and challenge the weather claim through DOT. Always book airfare with a card that provides trip delay/cancellation insurance. For last-minute self-rebookings, ask the original airline to endorse the ticket to another carrier before buying a new ticket.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Weather claim disputed by passenger with observable evidence. Outcome not yet reported."
+  },
+  {
+    "case_id": "uscf_delta_six_hours_cancel_sfo_lax_2026_02",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/483836",
+    "provider_type": "airline",
+    "provider": "Delta",
+    "brand_or_airline": "Delta",
+    "issue_type": "controllable_airline_cancellation",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "Delta cancelled a SFO-LAX flight 6 hours before departure. The only same-day Delta option was a late SFO-LAX flight that was too late. Passenger bought Alaska Airlines First Class with 25k miles ($907 value) to reach destination same day. Passenger asked whether Delta would reimburse the self-booked alternate transport.",
+    "requested_compensation": [
+      "Reimbursement for Alaska Airlines ticket",
+      "Delta goodwill compensation"
+    ],
+    "actual_outcome": "Outcome not reported. Forum advice noted Delta can endorse tickets to Alaska under interline agreements if asked before buying a separate ticket, but self-booking a new ticket is generally the passenger's own expense.",
+    "evidence_used": [
+      "Delta cancellation notice",
+      "Alaska Airlines ticket receipt (25k miles)"
+    ],
+    "escalation_path": [
+      "Delta customer service (ask for interline endorsement first)",
+      "Delta customer relations (goodwill after the fact)"
+    ],
+    "reusable_lesson": "When a same-day cancellation occurs, call the airline to ask for interline endorsement to another carrier before buying a new ticket. Airlines can often rebook onto partner airlines at no extra cost, especially on the day of travel.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Clear situation but outcome not reported. Good lesson about interline rebooking."
+  },
+  {
+    "case_id": "uscf_aa_bag_not_checked_visa_system_2026_05",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/504904",
+    "provider_type": "airline",
+    "provider": "American Airlines",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "airline_baggage_not_checked",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "Passenger on AA connecting itinerary to Paris. Check-in system would not recognize Schengen visa, requiring manual verification by phone. This took so long that only 20 minutes remained before departure — too late to check a bag. Passenger left the suitcase at the airport for a family member to retrieve and boarded without checked luggage. No baggage report or Property Irregularity Report was filed because the bag was never accepted by AA.",
+    "requested_compensation": [
+      "Written explanation of the check-in system issue",
+      "Reimbursement for necessary replacement items in Paris",
+      "Customer relations review"
+    ],
+    "actual_outcome": "Outcome not reported. Forum noted that without a baggage tag or PIR, standard baggage delay rules (Montreal Convention) don't apply, though a goodwill request could still be attempted.",
+    "evidence_used": [
+      "Boarding pass (showing late check-in time)",
+      "Timeline of document verification delay",
+      "Receipts for necessary purchases at destination"
+    ],
+    "escalation_path": [
+      "AA customer relations",
+      "Employer travel reimbursement if business trip"
+    ],
+    "reusable_lesson": "If airline check-in processing prevents baggage acceptance, ask for written documentation immediately. Without a bag tag or property irregularity report, the claim is weaker and should be framed as a customer-service failure rather than a standard baggage delay claim. Consider asking the agent to hand-carry the bag to the gate or arrange for checked bag delivery to the destination separately.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic. Very clear facts. Good example of the 'baggage not checked' issue type."
+  },
+  {
+    "case_id": "uscf_southwest_baggage_delay_misconnect_2025_01",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/345212",
+    "provider_type": "airline",
+    "provider": "Southwest",
+    "brand_or_airline": "Southwest",
+    "issue_type": "baggage_delay",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "Passenger's checked bag did not arrive after landing. Multiple passengers on the same flight were also missing bags. Agent said the connecting airport loaded bags onto the wrong plane. The bag was eventually tracked to New Orleans, where the airport was closed due to weather. Passenger had clothes for a 2-week trip in the bag. Ticket was not purchased with a travel insurance card.",
+    "requested_compensation": [
+      "Reimbursement for necessary clothing and items",
+      "Compensation for delayed baggage"
+    ],
+    "actual_outcome": "Forum reported mixed outcomes: one user received a $120 voucher from Southwest for a similar situation. DOT rules allow up to $3,800 for necessary expenses. Passenger planned to buy essentials and argue for reimbursement.",
+    "evidence_used": [
+      "Baggage claim tag",
+      "Airport baggage report",
+      "Receipts for necessary purchases"
+    ],
+    "escalation_path": [
+      "Southwest baggage office",
+      "Southwest claims department"
+    ],
+    "reusable_lesson": "File a baggage report at the airport immediately and get a claim number. Keep all receipts for necessary purchases. DOT rules allow reasonable reimbursement for essential items during baggage delay. Even without a travel insurance card, the airline is responsible under DOT rules for delayed bag expenses.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Good DP on Southwest baggage delay procedures."
+  },
+  {
+    "case_id": "uscf_aa_damaged_luggage_missing_items_2026_03",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/491435",
+    "provider_type": "airline",
+    "provider": "American Airlines",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "baggage_delay",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "award",
+    "facts": "Passenger flew AS-issued AA award ticket (paid with BOA Summit card). AA severely damaged the suitcase and some personal items were lost. AA filed a damage report and offered a replacement suitcase (low quality but higher labeled value). Passenger accepted the suitcase which later precluded further suitcase damage claims. Passenger then submitted $900+ in missing item claims with receipts. AA approved $800+ within days, close to the amount claimed. Passenger noted the suitcase was from China with no original receipt.",
+    "requested_compensation": [
+      "Compensation for lost personal items",
+      "Suitcase damage compensation",
+      "Credit card lost luggage insurance"
+    ],
+    "actual_outcome": "AA approved $800+ for missing items within days. Passenger considered this reasonable and did not further pursue the $100 gap. However, accepting AA's replacement suitcase blocked further damage claims on the suitcase itself.",
+    "evidence_used": [
+      "AA damage report and ticket",
+      "Receipts for missing items (some from China without receipts)",
+      "Photos of damaged suitcase",
+      "BOA Summit card purchase protection"
+    ],
+    "escalation_path": [
+      "AA airport baggage office",
+      "AA/Rynn's claims department",
+      "BOA Summit card lost luggage insurance"
+    ],
+    "reusable_lesson": "Do not accept a replacement suitcase from the airline at the airport if you intend to claim for the original suitcase's value. File a damage claim immediately and photograph everything. Submit missing item claims quickly (deadlines vary from 7-30 days). Credit card lost luggage insurance can supplement airline compensation.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic. Very complete DP with reported outcome and lessons learned."
+  },
+  {
+    "case_id": "uscf_hotel_water_outage_hampton_fn_2026_06",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/515382",
+    "provider_type": "hotel",
+    "provider": "Hilton",
+    "brand_or_airline": "Hampton Inn",
+    "issue_type": "hotel_service_issue",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "points",
+    "facts": "Guest staying at a Hampton Inn on a free night award. A car accident broke a water main, causing the entire hotel to lose water from evening through the next day. No water for showering, flushing toilets, or breakfast. The hotel was also noisy overnight and in the early morning. Guest requested compensation for the unusable stay.",
+    "requested_compensation": [
+      "Refund of the free night or points return",
+      "Compensation for loss of basic hotel services"
+    ],
+    "actual_outcome": "At check-out, the front desk offered a refund. Since the booking was a free night certificate, they said they would ask Hilton about points compensation. Guest mentioned the maximum value of 80,000 points. Hilton was to decide on the amount.",
+    "evidence_used": [
+      "Free night certificate booking confirmation",
+      "Photos or documentation of water outage",
+      "Front desk interaction notes"
+    ],
+    "escalation_path": [
+      "Front desk manager",
+      "Hilton customer care"
+    ],
+    "reusable_lesson": "For major service failures (no water, no power) that make a hotel stay unusable, request compensation immediately at check-out. For award bookings, points compensation should reflect the reasonable cash value of the room rather than the minimum award rate.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic. Clear facts and reported partial outcome (refund offered, points compensation pending)."
+  },
+  {
+    "case_id": "uscf_fairmont_banff_springs_fhr_room_misrepresentation_2026_06",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/512211",
+    "provider_type": "hotel",
+    "provider": "Fairmont (Accor)",
+    "brand_or_airline": "Fairmont Banff Springs",
+    "issue_type": "hotel_room_feature_mismatch",
+    "location_country": "CA",
+    "booking_channel": "ota",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "Guest booked Fairmont Banff Springs via Amex FHR. Check-in was rude and FHR benefits were not explained. Guest was told they were upgraded to a 'Gatehouse Queen' (claimed 350 sqft), but the actual room was approximately 150 sqft with no desk and barely space for a second chair. The hotel insisted it was an upgrade. Amex Travel called the hotel on the guest's behalf and the hotel lied to Amex claiming the room was large. Guest escalated to the front desk manager, explained the principle of being lied to rather than the room size, and threatened to escalate to FHR de-listing.",
+    "requested_compensation": [
+      "Full refund of the stay",
+      "Acknowledgment of the room misrepresentation"
+    ],
+    "actual_outcome": "Front desk manager handled it professionally: agreed to full refund of the entire stay, waived all extra charges including valet parking and dining not covered by FHR credit. Guest was satisfied with the resolution.",
+    "evidence_used": [
+      "Amex FHR booking confirmation",
+      "Photos of the undersized room",
+      "Amex Travel call record",
+      "Front desk manager conversation notes"
+    ],
+    "escalation_path": [
+      "Front desk (ineffective)",
+      "Amex Travel (partial help)",
+      "Front desk manager (successful)"
+    ],
+    "reusable_lesson": "When a hotel misrepresents a room assignment, escalate to the front desk manager directly. Leverage the booking channel's reputation (e.g., Amex FHR de-listing threat) as leverage. Document everything in writing or screenshots. Communicate in text when possible rather than by phone for evidence.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic. Very complete DP with clear outcome and actionable lessons."
+  },
+  {
+    "case_id": "uscf_ua_hawaii_cancel_rebook_aa_2026_01",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/479581",
+    "provider_type": "airline",
+    "provider": "United",
+    "brand_or_airline": "United",
+    "issue_type": "controllable_airline_cancellation",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "UA ORD-HNL (first class cash) was cancelled the morning of departure. The agent could only offer a connecting economy rebooking. The passenger asked about options and the agent was eventually able to rebook onto AA premium economy via interline agreement instead. Forum noted UA has interline agreements with AA and DL, and same-day agent authority is greater than phone support.",
+    "requested_compensation": [
+      "Comparable cabin rebooking (premium economy instead of economy)",
+      "Goodwill miles or travel voucher for the downgrade"
+    ],
+    "actual_outcome": "UA agent rebooked onto AA premium economy (a downgrade from UA first class). Passenger accepted the AA PE rebooking and planned to pursue further compensation later.",
+    "evidence_used": [
+      "UA cancellation notification",
+      "Original UA first class itinerary",
+      "AA rebooking confirmation (premium economy)"
+    ],
+    "escalation_path": [
+      "UA phone agent",
+      "UA airport agent (more authority)",
+      "UA customer relations (post-travel)"
+    ],
+    "reusable_lesson": "When an airline cancels and offers a downgraded rebooking, ask about interline agreements with other airlines. Same-day airport agents and phone agents often have more authority to rebook on partner airlines than standard policy suggests.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Facts clear but outcome of compensation request not reported."
+  },
+  {
+    "case_id": "uscf_ac_syd_yvr_delay_missed_connection_2026_02",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/483768",
+    "provider_type": "airline",
+    "provider": "Air Canada",
+    "brand_or_airline": "Air Canada",
+    "issue_type": "controllable_airline_delay",
+    "location_country": "CA",
+    "booking_channel": "portal",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "AC34 SYD-YVR was delayed 5 hours, causing a misconnect to the onward YVR-SEA flight. The ticket was a single itinerary (PER-SYD-YVR-SEA, first segment operated by Virgin Australia). Ticket was booked through BOA Premium Rewards travel portal. Passenger did not receive automatic rebooking and needed to call AC.",
+    "requested_compensation": [
+      "Rebooking on an earlier or direct alternative",
+      "AC care obligations (meal, hotel if overnight)"
+    ],
+    "actual_outcome": "Outcome not reported in the captured thread. Forum advised calling AC to get rebooked, noting that on a single ticket the airline is responsible for re-accommodation. AC may reroute through partner airlines.",
+    "evidence_used": [
+      "AC delay notification",
+      "Original itinerary showing protected connection",
+      "BOA Premium Rewards portal record"
+    ],
+    "escalation_path": [
+      "AC phone customer service (for rebooking)",
+      "AC airport desk",
+      "Canadian Transportation Agency"
+    ],
+    "reusable_lesson": "For a missed connection on a single ticket, the operating/issuing carrier is responsible for re-accommodation even if the delay occurred on a codeshare partner. Call immediately for rebooking options, which may include partner airlines or a direct routing.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Facts clear but outcome not reported."
+  },
+  {
+    "case_id": "uscf_hyatt_naked_intruder_unauthorized_entry_2026_06",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/511434",
+    "provider_type": "hotel",
+    "provider": "Hyatt",
+    "brand_or_airline": "Hyatt (airport Category 2)",
+    "issue_type": "hotel_service_issue",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Globalist",
+    "reservation_type": "unknown",
+    "facts": "Globalist guest staying at a Hyatt airport property. The guest's partner was in bed (naked) while the guest was out. A hotel employee entered the room without knocking or announcing — likely housekeeping who had not been informed of a late checkout request made by phone at 10am. The physical security latch was not engaged. Partner was distressed by the intrusion.",
+    "requested_compensation": [
+      "Written apology from hotel management",
+      "Points compensation for privacy violation",
+      "Globalist customer care review of hotel procedures"
+    ],
+    "actual_outcome": "Outcome not reported. Forum was divided: some said to complain to corporate for the privacy breach, others noted the guest should have used the security latch and that late checkout communication failure was partially responsible.",
+    "evidence_used": [
+      "Phone call log showing late checkout request time",
+      "Front desk conversation notes"
+    ],
+    "escalation_path": [
+      "Hotel manager",
+      "Hyatt Globalist line (dedicated email preferred)",
+      "Hyatt customer care"
+    ],
+    "reusable_lesson": "Always use the physical security latch when in the room, even for a moment. When requesting late checkout by phone, ask the front desk to note it in the system immediately. For serious privacy violations at a Hyatt, the Globalist email channel provides better documentation than phone calls.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Privacy/security issue. Outcome not reported."
+  },
+  {
+    "case_id": "uscf_lxr_honolulu_power_outage_2026_03",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/491346",
+    "provider_type": "hotel",
+    "provider": "Hilton",
+    "brand_or_airline": "LXR Honolulu (formerly Trump Hotel)",
+    "issue_type": "hotel_service_issue",
+    "location_country": "US",
+    "booking_channel": "unknown",
+    "loyalty_status": "Unknown",
+    "reservation_type": "unknown",
+    "facts": "Hotel experienced a power outage. The backup generator also failed, leaving no electricity, elevator, or大堂 services. Guest was unsure whether the hotel would relocate guests if power was not restored. Power was still out after 3 hours. Other forum users shared similar experiences: one had a Hyatt power outage in Bakersville, CA with no compensation beyond an apology despite being a Globalist.",
+    "requested_compensation": [
+      "Relocation to a functioning hotel if power not restored",
+      "Points or refund for the unusable portion of the stay"
+    ],
+    "actual_outcome": "Outcome not reported. Forum shared experiences from other power outages where hotels provided apologies but minimal compensation.",
+    "evidence_used": [
+      "Photos of power outage conditions",
+      "Front desk communication notes"
+    ],
+    "escalation_path": [
+      "Front desk manager",
+      "Hotel general manager",
+      "Hilton customer care"
+    ],
+    "reusable_lesson": "During a power outage, ask whether the hotel has a relocation policy for guests whose rooms are unusable. If the backup generator also fails, the room is effectively uninhabitable and the hotel should offer a solution. Points bookings may have different compensation than cash bookings.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Facts clear but outcome not reported."
+  },
+  {
+    "case_id": "uscf_marriott_nanjing_mouse_pest_issue_2026_06",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/509711",
+    "provider_type": "hotel",
+    "provider": "Marriott",
+    "brand_or_airline": "Autograph Collection (Nanjing mountain resort)",
+    "issue_type": "hotel_service_issue",
+    "location_country": "CN",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "Guest staying at a Marriott Autograph Collection property in Nanjing during a flash promo. First night: leftover ketchup packet found torn open in a suspicious way. Hotel did pest control but did not change rooms. Second night: heard scratching sounds. Morning: found bite marks on bar soap. AI analysis suggested rats/mice. Guest changed rooms after reporting. Manager offered one bottle of wine + 5,000 points as compensation. Guest declined, considering 5,000 points insufficient for a pest issue. Manager noted that a full refund would forfeit the 4,000 flash promo bonus points per night ($400/night rate).",
+    "requested_compensation": [
+      "More than 5,000 points for pest infestation",
+      "Partial refund or additional compensation"
+    ],
+    "actual_outcome": "Outcome not reported. Guest was considering next steps and wanted advice on reasonable compensation amount.",
+    "evidence_used": [
+      "Photos of torn ketchup packet",
+      "Photo of bite marks on soap",
+      "Room change record",
+      "Manager's written compensation offer"
+    ],
+    "escalation_path": [
+      "Front desk",
+      "Hotel manager",
+      "Marriott Bonvoy customer care"
+    ],
+    "reusable_lesson": "For pest-related hotel issues, provide clear photographic evidence and escalate to corporate customer care if the property's offer seems inadequate. Consider whether accepting a partial compensation (points) is better than a full refund that forfeits flash promo bonuses. Request written confirmation of any agreed compensation.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. Pest/sanitation issue at a Chinese Marriott property."
+  },
+  {
+    "case_id": "uscf_hotel_false_fire_alarm_ascott_penang_2026_03",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/489590",
+    "provider_type": "hotel",
+    "provider": "Ascott",
+    "brand_or_airline": "Lyf Georgetown Penang",
+    "issue_type": "hotel_service_issue",
+    "location_country": "MY",
+    "booking_channel": "ota",
+    "loyalty_status": "None",
+    "reservation_type": "paid",
+    "facts": "Guest booked 3 rooms for 3 nights via Agoda at Lyf Georgetown Penang (Ascott). At 1am on the last night, a false fire alarm sounded for ~30 seconds with flashing lights throughout the building. Guest's elderly mother was severely frightened and could not sleep afterward. Guest had to wake up at 5am for a flight. Guest requested a refund for the last night. Hotel refused, claiming they 'handled it well.' Agoda relayed the denial. Guest noted additional issues: AC water leaking onto furniture and a gecko in the bathroom.",
+    "requested_compensation": [
+      "Refund for the last night",
+      "Compensation for distress caused to elderly guest"
+    ],
+    "actual_outcome": "Hotel refused refund. Agoda relayed the decision. Guest was considering credit card chargeback but forum was divided on whether this was a valid dispute.",
+    "evidence_used": [
+      "Agoda booking confirmation",
+      "Front desk interaction at check-out",
+      "Photos of AC water leak and gecko",
+      "Phone call records with hotel/Agoda"
+    ],
+    "escalation_path": [
+      "Hotel front desk (refused)",
+      "Agoda customer service (refused)",
+      "Credit card chargeback (considered)"
+    ],
+    "reusable_lesson": "Third-party bookings (Agoda, etc.) complicate dispute resolution as the hotel and OTA may pass responsibility. For service issues at OTA-booked stays, collect evidence immediately and consider whether the issue is serious enough for a credit card chargeback. False fire alarms alone rarely justify a full refund, but may be combined with other service failures (leaks, pests) for a stronger case.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. OTA booking complicates resolution. Forum consensus was that a false alarm alone is hard to claim compensation for."
+  },
+  {
+    "case_id": "uscf_hyatt_regency_maui_club_closed_2026_02",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/485621",
+    "provider_type": "hotel",
+    "provider": "Hyatt",
+    "brand_or_airline": "Hyatt Regency Maui",
+    "issue_type": "hotel_elite_benefit_closure",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Globalist",
+    "reservation_type": "points",
+    "facts": "Hyatt Regency Maui notified guests that the Regency Club would be closed during a renovation period. The property offered daily breakfast at another restaurant for Globalists and options for guests using club-related awards, such as keeping breakfast access or having an award returned.",
+    "requested_compensation": [
+      "Daily breakfast for registered guests",
+      "Return of club access or Guest of Honor award if preferred",
+      "Possible goodwill if evening club value was important"
+    ],
+    "actual_outcome": "Forum consensus was that restaurant breakfast was a reasonable or even favorable substitute for this property, and additional compensation beyond the stated options was uncertain.",
+    "evidence_used": [
+      "Hotel pre-arrival notice",
+      "Reservation showing club access or elite status",
+      "Terms of the award or elite benefit"
+    ],
+    "escalation_path": [
+      "Property front desk or reservations",
+      "Hyatt concierge",
+      "World of Hyatt customer care"
+    ],
+    "reusable_lesson": "For temporary club lounge closures, compare the substitute breakfast and award-return options against the lost benefit. Stronger asks need evidence that the closure materially reduced the booked benefit.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic read via Nitan."
+  },
+  {
+    "case_id": "uscf_hyatt_andaz_5th_suite_amenity_mismatch_2026_05",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/504861",
+    "provider_type": "hotel",
+    "provider": "Hyatt",
+    "brand_or_airline": "Andaz 5th Avenue",
+    "issue_type": "hotel_room_feature_mismatch",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "points",
+    "facts": "Guest used points and suite upgrade benefits at Andaz 5th Avenue, then paid a nightly upgrade charge for a Wellness Suite mainly for the bathtub. The room allegedly lacked or had broken advertised amenities. Engineering could not fix one feature, and a promised points adjustment reportedly appeared incorrectly later.",
+    "requested_compensation": [
+      "Refund or partial refund of paid upgrade charge",
+      "Points compensation for broken or missing advertised amenities",
+      "Correction of incorrect points adjustment",
+      "Manager review"
+    ],
+    "actual_outcome": "Partial outcome was discussed but not fully resolved in the captured thread.",
+    "evidence_used": [
+      "Upgrade charge receipt",
+      "Room type description or website screenshots",
+      "Photos of missing or broken amenities",
+      "Engineer or front desk notes",
+      "Points activity screenshot"
+    ],
+    "escalation_path": [
+      "Front desk manager",
+      "Property director or rooms manager",
+      "Hyatt customer care"
+    ],
+    "reusable_lesson": "When paying for a specific room feature, document the advertised feature, the paid upgrade amount, and the defect while still on property. If points are promised in compensation, ask for the amount and case note in writing.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic."
+  },
+  {
+    "case_id": "uscf_cx_cancel_rebook_ua_delay_mixed_carrier_2026_05",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/504658",
+    "provider_type": "airline",
+    "provider": "Cathay Pacific / United",
+    "brand_or_airline": "Cathay Pacific / United",
+    "issue_type": "airline_rebooking_mixed_carrier_delay",
+    "location_country": "US",
+    "booking_channel": "portal",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "Passenger booked a Cathay Pacific itinerary through Chase Travel Portal. The original Cathay flight was delayed for mechanical reasons then cancelled overnight. Cathay rebooked the passenger onto a United flight, which was also delayed for mechanical reasons after boarding. This created uncertainty over which carrier should handle disruption support (Cathay for the original cancellation, United for the operating delay).",
+    "requested_compensation": [
+      "Clear operating-carrier responsibility for current delay support",
+      "Rebooking or rerouting if delay becomes extended",
+      "Meal or hotel support if overnight",
+      "Written delay reasons from each carrier"
+    ],
+    "actual_outcome": "Outcome not reported. Forum advice suggested pursuing both carriers separately: Cathay for the original cancellation handling, United for the operating delay it controlled.",
+    "evidence_used": [
+      "Original Chase Travel Portal itinerary",
+      "Cathay cancellation notice",
+      "United delay notification",
+      "Boarding passes",
+      "Written reason for each disruption"
+    ],
+    "escalation_path": [
+      "Operating carrier airport desk for immediate care",
+      "Cathay customer service for original cancellation",
+      "Chase Travel if ticket control issues arise",
+      "DOT complaint only after documenting denied commitments"
+    ],
+    "reusable_lesson": "For mixed-carrier irregular operations, separate the original carrier's cancellation responsibility from the operating carrier's current delay support. Collect written reasons from both before making reimbursement or goodwill requests.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic."
+  },
+  {
+    "case_id": "uscf_aa_delay_trip_insurance_amex_plat_2024_06",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/269310",
+    "provider_type": "airline",
+    "provider": "American Airlines / Amex",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "airline_delay_trip_insurance",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "AAdvantage Platinum Pro",
+    "reservation_type": "paid",
+    "facts": "Weather-related first-segment delay made a same-day connection impractical. Passenger proactively searched alternate routing before contacting the airline. After rebooking, they incurred hotel, food, rental car, and fuel expenses. Passenger pursued both AA goodwill (miles + voucher) and Amex Platinum trip delay insurance ($500).",
+    "requested_compensation": [
+      "Rebooking on workable alternate routing",
+      "Airline goodwill miles or voucher",
+      "Trip delay insurance reimbursement"
+    ],
+    "actual_outcome": "Passenger reported AA goodwill (miles and voucher) plus $500 Amex Platinum trip delay insurance reimbursement after submitting supporting documents.",
+    "evidence_used": [
+      "Delay emails and app screenshots",
+      "Written airline statement mentioning weather",
+      "Expense receipts",
+      "Updated ticket number",
+      "Insurance claim documents"
+    ],
+    "escalation_path": [
+      "Airport agent",
+      "Airline customer relations",
+      "Amex benefits administrator"
+    ],
+    "reusable_lesson": "Search alternate routes before contacting the airline, ask for the new ticket number after rebooking, and obtain a written delay reason early for trip insurance. Both airline goodwill and credit card trip delay insurance can be pursued separately.",
+    "confidence": "high",
+    "notes": "Summarized from USCardForum topic."
+  },
+  {
+    "case_id": "uscf_aa128_denied_boarding_cbp_evus_2026_04",
+    "source_type": "community_dp",
+    "source_name": "USCardForum thread summary via Nitan",
+    "source_url": "https://www.uscardforum.com/t/topic/480105",
+    "provider_type": "airline",
+    "provider": "American Airlines",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "denied_boarding",
+    "location_country": "US",
+    "booking_channel": "direct",
+    "loyalty_status": "Unknown",
+    "reservation_type": "paid",
+    "facts": "AA128 was delayed/impacted because the airline's check-in system connects with CBP to verify EVUS/ESTA status. The passenger's visa validation through this system failed, preventing check-in completion. This affects passengers with B1/B2 visas returning to the US — even non-B visa travelers with a B visa in their passport get flagged. Forum discussion centered on the airline's CBP interface being the bottleneck rather than passenger documentation.",
+    "requested_compensation": [
+      "Re-accommodation on the next available flight",
+      "Compensation for the delay caused by the airline's system"
+    ],
+    "actual_outcome": "Partial outcome described in the thread: another passenger with the same situation was eventually able to board after the EVUS issue was resolved manually, but the thread primarily focused on explaining how the CBP check-in system works.",
+    "evidence_used": [
+      "AA check-in screen showing ESTA error",
+      "EVUS confirmation",
+      "Passport and visa documentation"
+    ],
+    "escalation_path": [
+      "AA check-in counter",
+      "AA customer relations",
+      "CBP/EVUS help desk"
+    ],
+    "reusable_lesson": "When an airline's document verification system rejects valid travel documents, ask the check-in agent to manually verify and override the system. The airline's CBP interface may reject documents that are actually valid, and both the airline and CBP can resolve this at the counter.",
+    "confidence": "medium",
+    "notes": "Summarized from USCardForum topic. More of an informational thread about CBP check-in systems."
+  }
+]

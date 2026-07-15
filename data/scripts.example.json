@@ -1,52 +1,22 @@
 [
   {
-    "script_id": "script_hotel_walk_front_desk_en",
+    "script_id": "marriott_walk_frontdesk_en",
     "issue_type": "hotel_walk",
     "provider": "Marriott",
     "channel": "front_desk",
     "tone": "polite_firm",
     "language": "en",
-    "template": "I have a confirmed reservation under this name and my Bonvoy number is attached. Since the property cannot honor it tonight, please confirm that this is a walk situation and help arrange comparable nearby accommodation, transportation, and the applicable Ultimate Reservation Guarantee compensation.",
-    "when_to_use": "Use at the front desk when the hotel says no room is available."
+    "template": "I have a confirmed reservation with my Marriott Bonvoy number attached. Since the property is unable to honor the reservation, could you please apply Marriott's Ultimate Reservation Guarantee, arrange comparable nearby accommodation, cover transportation, and confirm the applicable compensation in writing?",
+    "when_to_use": "Use at the front desk when a Marriott property says it cannot honor a confirmed reservation."
   },
   {
-    "script_id": "script_hotel_walk_corporate_en",
-    "issue_type": "hotel_walk",
-    "provider": "Marriott",
-    "channel": "corporate_escalation",
-    "tone": "polite_firm",
-    "language": "en",
-    "template": "I am requesting review under Marriott's Ultimate Reservation Guarantee. The hotel could not honor my confirmed reservation, and I incurred time and transportation costs to secure alternate lodging. Attached are my confirmation, receipts, and notes from the property. Please confirm the applicable cash or points compensation and reimbursement.",
-    "when_to_use": "Use after the stay if the property did not resolve compensation."
-  },
-  {
-    "script_id": "script_airline_delay_airport_en",
+    "script_id": "airline_controllable_delay_hotel_en",
     "issue_type": "controllable_airline_delay",
-    "provider": "US DOT",
-    "channel": "phone",
+    "provider": "generic_airline",
+    "channel": "airport_counter",
     "tone": "polite_firm",
     "language": "en",
-    "template": "My trip was disrupted by a controllable airline delay or cancellation and I now need overnight accommodation. Please provide rebooking, hotel, meal, and ground transportation support consistent with the airline commitments listed on the DOT dashboard.",
-    "when_to_use": "Use with airport customer service, phone support, or chat during a controllable disruption."
-  },
-  {
-    "script_id": "script_airline_cancellation_email_en",
-    "issue_type": "controllable_airline_cancellation",
-    "provider": "US DOT",
-    "channel": "email",
-    "tone": "polite_firm",
-    "language": "en",
-    "template": "I am requesting reimbursement and review for a controllable cancellation that caused overnight expenses. Please review the attached boarding passes, cancellation notice, hotel, meal, and transportation receipts, and apply the customer-care commitments reflected on the DOT dashboard.",
-    "when_to_use": "Use after a controllable cancellation if support was denied or paid out of pocket."
-  },
-  {
-    "script_id": "script_eu261_claim_en",
-    "issue_type": "eu261_delay_or_cancellation",
-    "provider": "European Union",
-    "channel": "email",
-    "tone": "firm",
-    "language": "en",
-    "template": "I am submitting a claim under EU air passenger rights. My itinerary appears to qualify and my arrival delay was at least three hours. Please provide the delay reason in writing and confirm whether fixed compensation, care expenses, refund, or rerouting rights apply.",
-    "when_to_use": "Use when the itinerary may fall under EU261 and arrival delay or cancellation thresholds are met."
+    "template": "Can you please confirm whether this delay or cancellation is within the airline's control? If so, I would like hotel accommodation, transportation to and from the hotel, meal vouchers, and rebooking on the earliest available flight, consistent with the airline's customer service commitment.",
+    "when_to_use": "Use at the airport when a controllable airline delay or cancellation requires an overnight stay."
   }
 ]
