@@ -53,6 +53,18 @@ describe("deterministic intake fallback", () => {
     expect(result.facts.disruptionReason).toBe("late_inbound_aircraft");
     expect(result.facts.issueType).toBe("airline_cancellation");
   });
+
+  it("asks a hotel-specific provider question for a Chinese walk report", async () => {
+    const result = await processIntake(
+      "我订了酒店但是到店无房",
+      emptyClaimFacts(),
+      { llmClient: null }
+    );
+
+    expect(result.facts.issueType).toBe("hotel_walk");
+    expect(result.missingFields).toEqual(["provider"]);
+    expect(result.question).toBe("是哪家酒店或酒店集团？");
+  });
 });
 
 describe("LLM intake", () => {
@@ -67,6 +79,27 @@ describe("LLM intake", () => {
     });
     const client: StructuredOutputClient = {
       generate: vi.fn().mockResolvedValue(llmFacts)
+    };
+
+    const result = await processIntake("酒店说超售没房", emptyClaimFacts(), {
+      llmClient: client
+    });
+
+    expect(result.status).toBe("ready");
+    expect(result.extractionMode).toBe("llm");
+    expect(result.facts.provider).toBe("Marriott");
+  });
+
+  it("normalizes a Chinese Marriott name returned by the model", async () => {
+    const client: StructuredOutputClient = {
+      generate: vi.fn().mockResolvedValue({
+        ...emptyClaimFacts(),
+        issueType: "hotel_walk",
+        providerType: "hotel",
+        provider: "万豪酒店",
+        disruptionType: "hotel_walk",
+        confidence: "high"
+      })
     };
 
     const result = await processIntake("酒店说超售没房", emptyClaimFacts(), {

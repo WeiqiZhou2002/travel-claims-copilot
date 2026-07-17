@@ -1,5 +1,6 @@
 import { normalizeIssueType } from "./issueTaxonomy";
 import { inferRouteLocations } from "./jurisdiction";
+import { findProviderMatch, type ProviderMatch } from "./provider";
 import type {
   AnalyzeOptions,
   Case,
@@ -24,114 +25,6 @@ type MatchResult = {
   signals: string[];
 };
 
-type ProviderDefinition = {
-  provider: string;
-  providerType: Exclude<ProviderType, "government">;
-  operatingCarrierRegion?: PolicyRouteRegion;
-  terms: string[];
-};
-
-const providerDefinitions: ProviderDefinition[] = [
-  {
-    provider: "American Airlines",
-    providerType: "airline",
-    operatingCarrierRegion: "US",
-    terms: ["american airlines", "american flight", "aa flight", "aa", "美国航空", "美航"]
-  },
-  {
-    provider: "United",
-    providerType: "airline",
-    operatingCarrierRegion: "US",
-    terms: ["united airlines", "united flight", "united", "ua", "美联航"]
-  },
-  {
-    provider: "Delta",
-    providerType: "airline",
-    operatingCarrierRegion: "US",
-    terms: ["delta air lines", "delta flight", "delta", "dl", "达美"]
-  },
-  {
-    provider: "Alaska Airlines",
-    providerType: "airline",
-    operatingCarrierRegion: "US",
-    terms: ["alaska airlines", "alaska flight", "阿拉斯加航空"]
-  },
-  {
-    provider: "Air France",
-    providerType: "airline",
-    operatingCarrierRegion: "EU_EEA_CH",
-    terms: ["air france", "af flight", "法航"]
-  },
-  {
-    provider: "Lufthansa",
-    providerType: "airline",
-    operatingCarrierRegion: "EU_EEA_CH",
-    terms: ["lufthansa", "lh flight", "汉莎"]
-  },
-  {
-    provider: "British Airways",
-    providerType: "airline",
-    operatingCarrierRegion: "UK",
-    terms: ["british airways", "ba flight", "英国航空", "英航"]
-  },
-  {
-    provider: "Virgin Atlantic",
-    providerType: "airline",
-    operatingCarrierRegion: "UK",
-    terms: ["virgin atlantic", "维珍航空"]
-  },
-  {
-    provider: "Air Canada",
-    providerType: "airline",
-    operatingCarrierRegion: "CA",
-    terms: ["air canada", "加拿大航空", "加航"]
-  },
-  {
-    provider: "Qantas",
-    providerType: "airline",
-    operatingCarrierRegion: "AU",
-    terms: ["qantas", "澳洲航空"]
-  },
-  {
-    provider: "Air China",
-    providerType: "airline",
-    operatingCarrierRegion: "CN",
-    terms: ["air china", "中国国际航空", "国航"]
-  },
-  {
-    provider: "China Eastern Airlines",
-    providerType: "airline",
-    operatingCarrierRegion: "CN",
-    terms: ["china eastern", "东航"]
-  },
-  {
-    provider: "China Southern Airlines",
-    providerType: "airline",
-    operatingCarrierRegion: "CN",
-    terms: ["china southern", "南航"]
-  },
-  {
-    provider: "Marriott",
-    providerType: "hotel",
-    terms: ["marriott", "sheraton", "bonvoy", "万豪", "喜来登"]
-  },
-  {
-    provider: "Hyatt",
-    providerType: "hotel",
-    terms: ["hyatt", "凯悦"]
-  },
-  {
-    provider: "Hilton",
-    providerType: "hotel",
-    terms: ["hilton", "hampton", "conrad", "希尔顿", "康莱德"]
-  },
-  {
-    provider: "IHG",
-    providerType: "hotel",
-    terms: ["ihg", "holiday inn", "crowne plaza", "洲际", "假日酒店"]
-  }
-];
-
 const loyaltyStatuses = [
   { status: "Titanium", terms: ["titanium", "钛金"] },
   { status: "Platinum Pro", terms: ["platinum pro"] },
@@ -150,41 +43,8 @@ function hasTerm(text: string, term: string): boolean {
   return text.includes(term);
 }
 
-function findTermIndex(text: string, term: string): number {
-  if (/^[a-z0-9]+$/i.test(term) && term.length <= 3) {
-    return text.search(new RegExp(`\\b${term}\\b`, "i"));
-  }
-
-  return text.indexOf(term);
-}
-
 function hasAny(text: string, terms: string[]): string[] {
   return terms.filter((term) => hasTerm(text, term));
-}
-
-function findProvider(
-  text: string
-): Pick<MatchResult, "provider" | "providerType" | "operatingCarrierRegion"> {
-  const providerText = text.replaceAll("united states", "");
-  const match = providerDefinitions
-    .flatMap((definition) =>
-      definition.terms.map((term) => ({
-        definition,
-        index: findTermIndex(providerText, term),
-        termLength: term.length
-      }))
-    )
-    .filter(({ index }) => index >= 0)
-    .sort((left, right) => left.index - right.index || right.termLength - left.termLength)[0]
-    ?.definition;
-
-  return match
-    ? {
-        provider: match.provider,
-        providerType: match.providerType,
-        operatingCarrierRegion: match.operatingCarrierRegion
-      }
-    : {};
 }
 
 function findCountry(text: string): string | undefined {
@@ -342,7 +202,7 @@ function buildFacts(
 
 function matchIssue(description: string): MatchResult {
   const text = description.toLowerCase();
-  const provider = findProvider(text);
+  const provider: Partial<ProviderMatch> = findProviderMatch(text) ?? {};
   const country = findCountry(text);
   const bookingChannel = findBookingChannel(text);
   const loyaltyStatus = findLoyaltyStatus(text);
@@ -378,6 +238,7 @@ function matchIssue(description: string): MatchResult {
     "hotel oversold",
     "hotel overbooked",
     "到店没房",
+    "到店无房",
     "酒店超售",
     "没有房间",
     "无法安排房间"

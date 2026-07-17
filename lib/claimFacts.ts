@@ -1,4 +1,5 @@
 import { enrichClaimJurisdiction } from "./jurisdiction";
+import { canonicalizeProviderName } from "./provider";
 import type { MvpIssueType, PolicyRouteRegion } from "./types";
 
 export type ClaimIssueType = MvpIssueType | "unknown";
@@ -324,7 +325,13 @@ export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
         : "unknown"
     : normalized.providerType;
 
-  return { ...normalized, providerType, disruptionType };
+  return {
+    ...normalized,
+    providerType,
+    provider: canonicalizeProviderName(normalized.provider, providerType),
+    operatingCarrier: canonicalizeProviderName(normalized.operatingCarrier, "airline"),
+    disruptionType
+  };
 }
 
 function hasLocation(location: ClaimLocation): boolean {
