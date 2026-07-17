@@ -34,6 +34,18 @@ const euOperatingCarriers = new Set([
   "swiss"
 ]);
 
+function locationFromKnownPlace(place: KnownPlace, matchedTerm: string): ClaimLocation {
+  const airport = /^[a-z]{3}$/i.test(matchedTerm) ? matchedTerm.toUpperCase() : null;
+  const city = airport || normalize(matchedTerm) === normalize(place.country) ? null : matchedTerm;
+
+  return {
+    city,
+    airport,
+    country: place.country,
+    region: place.region
+  };
+}
+
 function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -46,6 +58,34 @@ function findKnownPlace(location: ClaimLocation): KnownPlace | undefined {
   return knownPlaces.find((place) =>
     place.terms.some((term) => values.some((value) => value === term || value.includes(term)))
   );
+}
+
+function findPlaceAfterMarker(text: string, markers: string[]): ClaimLocation | undefined {
+  const normalizedText = normalize(text);
+  const matches = knownPlaces.flatMap((place) =>
+    place.terms.flatMap((term) =>
+      markers.map((marker) => ({
+        place,
+        term,
+        index: normalizedText.indexOf(`${marker}${normalize(term)}`)
+      }))
+    )
+  );
+  const match = matches
+    .filter(({ index }) => index >= 0)
+    .sort((left, right) => left.index - right.index || right.term.length - left.term.length)[0];
+
+  return match ? locationFromKnownPlace(match.place, match.term) : undefined;
+}
+
+export function inferRouteLocations(text: string): {
+  origin?: ClaimLocation;
+  destination?: ClaimLocation;
+} {
+  return {
+    origin: findPlaceAfterMarker(text, ["from ", "departing ", "leaving ", "从", "由"]),
+    destination: findPlaceAfterMarker(text, ["to ", "flying to ", "到", "飞往", "前往"])
+  };
 }
 
 export function enrichClaimLocation(location: ClaimLocation): ClaimLocation {
@@ -104,4 +144,3 @@ export function assessEu261Candidate(facts: ClaimFacts): Eu261CandidateAssessmen
     reasons: ["arrival_region_eu_eea_ch", "operating_carrier_unconfirmed"]
   };
 }
-

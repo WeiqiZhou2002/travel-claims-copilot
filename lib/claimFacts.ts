@@ -95,7 +95,9 @@ const deniedBoardingKinds: ClaimDeniedBoardingKind[] = [
 const bookingChannels: ClaimBookingChannel[] = ["direct", "ota", "portal", "unknown"];
 const confidenceLevels: ClaimFacts["confidence"][] = ["low", "medium", "high"];
 
-const nullableStringSchema = { type: ["string", "null"] } as const;
+const nullableStringSchema = {
+  anyOf: [{ type: "string" }, { type: "null" }]
+} as const;
 const locationSchema = {
   type: "object",
   additionalProperties: false,
@@ -121,7 +123,7 @@ export const claimFactsJsonSchema = {
     disruptionType: { type: "string", enum: disruptionTypes },
     disruptionReason: { type: "string", enum: disruptionReasons },
     arrivalDelayMinutes: { anyOf: [{ type: "integer", minimum: 0 }, { type: "null" }] },
-    isOvernight: { type: ["boolean", "null"] },
+    isOvernight: { anyOf: [{ type: "boolean" }, { type: "null" }] },
     deniedBoardingKind: { type: "string", enum: deniedBoardingKinds },
     bookingChannel: { type: "string", enum: bookingChannels },
     loyaltyStatus: nullableStringSchema,
@@ -360,4 +362,3 @@ export function getMissingClaimFields(facts: ClaimFacts): ClaimFactField[] {
 
   return missing;
 }
-
