@@ -58,6 +58,8 @@ export type Case = {
   reusable_lesson: string;
   confidence: "high" | "medium" | "low";
   notes: string;
+  review_status: "approved" | "needs_review" | "excluded";
+  review_notes: string[];
 };
 
 export type Script = {
@@ -66,6 +68,7 @@ export type Script = {
   provider: string;
   channel:
     | "front_desk"
+    | "airport_counter"
     | "phone"
     | "chat"
     | "email"

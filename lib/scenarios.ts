@@ -2,7 +2,9 @@ import { getIssueAliases, issueLabels, normalizeIssueType } from "./issueTaxonom
 import type { Case, IssueType, Policy, ScenarioSummary, Script } from "./types";
 
 function getKnownIssueTypes(cases: Case[]): IssueType[] {
-  return Array.from(new Set(cases.map((item) => item.issue_type)))
+  return Array.from(
+    new Set(cases.filter((item) => item.review_status === "approved").map((item) => item.issue_type))
+  )
     .map(normalizeIssueType)
     .filter((issueType): issueType is IssueType => Boolean(issueType));
 }
@@ -12,10 +14,12 @@ export function buildScenarioSummaries(
   cases: Case[],
   scripts: Script[]
 ): ScenarioSummary[] {
-  return getKnownIssueTypes(cases)
+  const approvedCases = cases.filter((item) => item.review_status === "approved");
+
+  return getKnownIssueTypes(approvedCases)
     .map((issueType) => {
       const aliases = new Set<string>(getIssueAliases(issueType));
-      const matchingCases = cases.filter((item) => aliases.has(item.issue_type));
+      const matchingCases = approvedCases.filter((item) => aliases.has(item.issue_type));
       const matchingPolicies = policies.filter((policy) => aliases.has(policy.issue_type));
       const matchingScripts = scripts.filter((script) => aliases.has(script.issue_type));
       const providers = Array.from(new Set(matchingCases.map((item) => item.provider))).sort();

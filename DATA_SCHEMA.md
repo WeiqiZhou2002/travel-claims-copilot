@@ -45,6 +45,10 @@
 - reusable_lesson: string
 - confidence: "high" | "medium" | "low"
 - notes: string
+- review_status: "approved" | "needs_review" | "excluded"
+- review_notes: string[]
+
+`review_status` controls product retrieval. Only `approved` cases may appear as similar cases. Records marked `needs_review` or `excluded` remain in the consolidated file for provenance and future cleanup, but must not be presented to users.
 
 ## Script
 
@@ -55,7 +59,7 @@
 - script_id: string
 - issue_type: string
 - provider: string
-- channel: "front_desk" | "phone" | "chat" | "email" | "corporate_escalation" | "regulator_complaint"
+- channel: "front_desk" | "airport_counter" | "phone" | "chat" | "email" | "corporate_escalation" | "regulator_complaint"
 - tone: "polite" | "polite_firm" | "firm"
 - language: "en" | "zh"
 - template: string

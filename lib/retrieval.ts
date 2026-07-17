@@ -1,6 +1,10 @@
 import { getIssueAliases, normalizeIssueType } from "./issueTaxonomy";
 import type { Case, ExtractedFacts, Policy, RetrievalResult, Script } from "./types";
 
+function isApprovedCase(item: Case): boolean {
+  return item.review_status === "approved";
+}
+
 function withSelectedCaseFacts(facts: ExtractedFacts, selectedCase?: Case): ExtractedFacts {
   if (!selectedCase) {
     return facts;
@@ -27,7 +31,7 @@ export function searchPolicies(facts: ExtractedFacts, policies: Policy[]): Polic
 export function searchCases(facts: ExtractedFacts, cases: Case[]): Case[] {
   const aliases = new Set<string>(getIssueAliases(facts.issueType));
 
-  return cases.filter((item) => aliases.has(item.issue_type));
+  return cases.filter((item) => isApprovedCase(item) && aliases.has(item.issue_type));
 }
 
 export function searchScripts(facts: ExtractedFacts, scripts: Script[]): Script[] {
@@ -43,7 +47,7 @@ export function retrieveKnowledge(
   scripts: Script[]
 ): RetrievalResult {
   const selectedCase = facts.caseId
-    ? cases.find((item) => item.case_id === facts.caseId)
+    ? cases.find((item) => isApprovedCase(item) && item.case_id === facts.caseId)
     : undefined;
   const resolvedFacts = withSelectedCaseFacts(facts, selectedCase);
 

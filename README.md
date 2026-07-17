@@ -98,9 +98,10 @@ app/
   page.tsx                Frontend demo page
 
 data/
-  policies.example.json   Official policy / regulation seed data
-  cases.example.json      Community and synthetic case seed data
-  scripts.example.json    Communication script seed data
+  policies.json           Official policy / regulation data
+  cases.json              Consolidated, quality-reviewed case data
+  scripts.json            Communication script data
+  README.md               Review rules and current quality summary
 
 lib/
   analyze.ts              Thin orchestration compatibility wrapper
@@ -182,7 +183,7 @@ Analyze by selected case:
 
 ```json
 {
-  "caseId": "nitan_uscf_cx_cancel_rebook_ua_delay_2026_05"
+  "caseId": "uscf_cx_ua_rebooking_mixed_carrier_2026_05"
 }
 ```
 
@@ -208,7 +209,7 @@ Returns:
 
 ## Data Files
 
-### `data/policies.example.json`
+### `data/policies.json`
 
 Official policies, regulations, dashboards, or company commitments.
 
@@ -218,13 +219,15 @@ Examples:
 - DOT Airline Cancellation and Delay Dashboard
 - EU passenger rights
 
-### `data/cases.example.json`
+### `data/cases.json`
 
 Community datapoints, user-submitted cases, and synthetic demo examples.
 
 Important rule: community cases are reference datapoints, not official rules. Forum cases should be rewritten as summaries and should preserve source links without copying full posts or personal information.
 
-### `data/scripts.example.json`
+Each case has a `review_status`. Only `approved` cases are eligible for retrieval; `needs_review` and `excluded` records remain in the consolidated file for provenance. See `data/README.md` for the current review summary and rules.
+
+### `data/scripts.json`
 
 Reusable communication templates for channels such as:
 

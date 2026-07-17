@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import cases from "../../../data/cases.example.json";
-import policies from "../../../data/policies.example.json";
-import scripts from "../../../data/scripts.example.json";
+import cases from "../../../data/cases.json";
+import policies from "../../../data/policies.json";
+import scripts from "../../../data/scripts.json";
 import { buildScenarioSummaries } from "../../../lib/scenarios";
 import type { Case, Policy, Script } from "../../../lib/types";
 

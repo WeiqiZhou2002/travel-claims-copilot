@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "validate:data": "node scripts/validate-data.mjs"
   },
   "dependencies": {
     "next": "^15.0.0",
