@@ -30,7 +30,7 @@ const suggestedAsksByIssue: Partial<Record<IssueType, SuggestedAsks>> = {
       "Highest applicable guarantee compensation for brand and status"
     ]
   },
-  controllable_airline_cancellation: {
+  airline_cancellation: {
     conservative: ["Rebooking on the next available flight", "Meal voucher if waiting"],
     standard: [
       "Rebooking",
@@ -43,7 +43,7 @@ const suggestedAsksByIssue: Partial<Record<IssueType, SuggestedAsks>> = {
       "DOT complaint review if commitments were denied"
     ]
   },
-  controllable_airline_delay: {
+  airline_delay: {
     conservative: ["Rebooking help", "Meal voucher during the delay"],
     standard: [
       "Meal voucher",
@@ -54,19 +54,6 @@ const suggestedAsksByIssue: Partial<Record<IssueType, SuggestedAsks>> = {
       "Reimbursement for out-of-pocket hotel, meal, and transport costs",
       "Travel credit or miles for the disruption",
       "Written explanation of controllability"
-    ]
-  },
-  eu261_delay_or_cancellation: {
-    conservative: ["Care expenses such as meals and hotel if applicable"],
-    standard: [
-      "Refund or rerouting if applicable",
-      "Care expenses",
-      "Written delay or cancellation reason"
-    ],
-    aggressive: [
-      "Fixed EU261 compensation if eligibility is met",
-      "Care expense reimbursement",
-      "Escalation to the relevant national enforcement body"
     ]
   },
   denied_boarding: {
@@ -241,26 +228,19 @@ const evidenceByIssue: Partial<Record<IssueType, string[]>> = {
     "Property notes confirming no room was available",
     "Alternate hotel, transportation, and incidental receipts"
   ],
-  controllable_airline_cancellation: [
+  airline_cancellation: [
     "Cancellation notice",
     "Boarding pass or ticket receipt",
     "Written reason for cancellation if available",
     "Hotel, meal, and ground transportation receipts",
     "Screenshots of airline chat or airport desk response"
   ],
-  controllable_airline_delay: [
+  airline_delay: [
     "Delay notification",
     "Boarding pass or ticket receipt",
     "Actual departure and arrival times",
     "Hotel, meal, and ground transportation receipts",
     "Screenshots of any airline voucher denial"
-  ],
-  eu261_delay_or_cancellation: [
-    "Full itinerary and ticket receipt",
-    "Scheduled and actual arrival times",
-    "Departure and arrival airport details",
-    "Airline's written delay or cancellation reason",
-    "Receipts for care expenses"
   ],
   denied_boarding: [
     "Boarding pass and ticket receipt",
@@ -352,17 +332,13 @@ const cautionsByIssue: Partial<Record<IssueType, string[]>> = {
     "Brand guarantees often depend on membership, brand, status, and whether the reservation was booked through an eligible channel.",
     "Ask for written confirmation before leaving the property if possible."
   ],
-  controllable_airline_cancellation: [
+  airline_cancellation: [
     "DOT dashboard commitments generally turn on whether the airline treats the disruption as controllable.",
     "Keep receipts if the airline cannot issue vouchers immediately."
   ],
-  controllable_airline_delay: [
+  airline_delay: [
     "Delay rights vary by airline commitment, cause, and length of delay.",
     "A weather or air traffic control delay may weaken a controllable-disruption claim."
-  ],
-  eu261_delay_or_cancellation: [
-    "EU261 eligibility depends on route, carrier, delay length at arrival, and extraordinary-circumstance defenses.",
-    "Fixed compensation is separate from care, refund, or rerouting rights."
   ],
   denied_boarding: [
     "Voluntary bump negotiation is different from involuntary denied boarding rights.",

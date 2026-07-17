@@ -37,7 +37,7 @@ const goldenScenarios: GoldenScenario[] = [
     name: "United controllable cancellation",
     description:
       "My United flight was cancelled because the crew timed out. I was rebooked the next morning and needed an overnight hotel.",
-    expectedIssue: "controllable_airline_cancellation",
+    expectedIssue: "airline_cancellation",
     expectedProvider: "United",
     expectedPolicyId: "dot_airline_cancellation_delay_dashboard",
     expectedTopCaseId: "united_crew_delay_synthetic_001"
@@ -46,7 +46,7 @@ const goldenScenarios: GoldenScenario[] = [
     name: "American mechanical delay",
     description:
       "My American Airlines flight was delayed overnight because of a mechanical problem with the aircraft.",
-    expectedIssue: "controllable_airline_delay",
+    expectedIssue: "airline_delay",
     expectedProvider: "American Airlines",
     expectedPolicyId: "dot_airline_cancellation_delay_dashboard",
     expectedTopCaseId: "uscf_aa127_mechanical_delay_overnight_2026_07"
@@ -61,13 +61,13 @@ const goldenScenarios: GoldenScenario[] = [
     expectedTopCaseId: "uscf_delta_voluntary_bump_2026_01"
   },
   {
-    name: "EU261 Air France delay",
+    name: "EU-region Air France delay",
     description:
       "My Air France flight from the EU arrived four hours late after a technical issue. I want the airline to assess EU261 eligibility.",
-    expectedIssue: "eu261_delay_or_cancellation",
+    expectedIssue: "airline_delay",
     expectedProvider: "Air France",
     expectedPolicyId: "eu261_air_passenger_rights",
-    expectedTopCaseId: "uscf_af_eu261_cancellation_2026_03"
+    expectedTopCaseId: "uscf_lh_eu261_claim_2022_05"
   }
 ];
 
@@ -109,20 +109,20 @@ describe("classification safeguards", () => {
     expect(facts.issueType).toBe("unknown");
   });
 
-  it("does not label a weather cancellation as controllable", () => {
+  it("keeps weather separate from the cancellation incident type", () => {
     const facts = classifyInput(
       "My American Airlines flight was cancelled because of severe weather at the airport."
     );
 
-    expect(facts.issueType).toBe("unknown");
+    expect(facts.issueType).toBe("airline_cancellation");
     expect(facts.disruptionReason).toBe("weather");
   });
 
-  it("keeps an unexplained cancellation in the clarification path", () => {
+  it("classifies an unexplained cancellation while keeping its reason unknown", () => {
     const facts = classifyInput("United cancelled my flight and did not give me a reason.");
 
-    expect(facts.issueType).toBe("unknown");
-    expect(facts.confidence).toBe("low");
+    expect(facts.issueType).toBe("airline_cancellation");
+    expect(facts.confidence).toBe("medium");
   });
 
   it("distinguishes voluntary and involuntary bumping", () => {

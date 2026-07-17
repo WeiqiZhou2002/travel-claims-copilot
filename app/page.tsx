@@ -26,9 +26,8 @@ const initialMessages: ConversationMessage[] = [
 
 const issueLabels: Partial<Record<AnalysisResult["issueType"], string>> = {
   hotel_walk: "Hotel walk",
-  controllable_airline_cancellation: "Controllable airline cancellation",
-  controllable_airline_delay: "Controllable airline delay",
-  eu261_delay_or_cancellation: "EU261 delay or cancellation",
+  airline_cancellation: "Airline cancellation",
+  airline_delay: "Airline delay",
   denied_boarding: "Denied boarding or voluntary bump",
   baggage_delay: "Baggage delay",
   airline_delay_trip_insurance: "Airline delay and trip insurance",

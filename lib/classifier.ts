@@ -359,9 +359,10 @@ function matchIssue(description: string): MatchResult {
     "欧洲出发"
   ]);
   if (euSignals.length > 0 && (disruptionSignals.length > 0 || hasTerm(text, "eu261"))) {
+    const isCancellation = /cancellation|cancelled|canceled|取消/.test(text);
     return {
       ...shared,
-      issueType: "eu261_delay_or_cancellation",
+      issueType: isCancellation ? "airline_cancellation" : "airline_delay",
       providerType: "airline",
       country: country ?? "EU",
       confidence: "high",
@@ -413,47 +414,22 @@ function matchIssue(description: string): MatchResult {
 
   const cancellationSignals = hasAny(text, ["cancellation", "cancelled", "canceled", "取消"]);
   const delaySignals = hasAny(text, ["delay", "delayed", "late", "延误", "晚点"]);
-  const controllableReason = ["crew", "mechanical", "other_controllable"].includes(
-    disruptionReason ?? "unknown"
-  );
   if (
     airlineContextSignals.length > 0 &&
     (cancellationSignals.length > 0 || delaySignals.length > 0)
   ) {
-    if (disruptionReason === "weather") {
-      return {
-        ...shared,
-        issueType: "unknown",
-        providerType: "airline",
-        confidence: "low",
-        signals: [...airlineContextSignals, ...cancellationSignals, ...delaySignals, "weather"]
-      };
-    }
-
-    if (controllableReason) {
-      return {
-        ...shared,
-        issueType:
-          cancellationSignals.length > 0
-            ? "controllable_airline_cancellation"
-            : "controllable_airline_delay",
-        providerType: "airline",
-        confidence: "high",
-        signals: [
-          ...airlineContextSignals,
-          ...cancellationSignals,
-          ...delaySignals,
-          disruptionReason ?? "unknown"
-        ]
-      };
-    }
-
     return {
       ...shared,
-      issueType: "unknown",
+      issueType:
+        cancellationSignals.length > 0 ? "airline_cancellation" : "airline_delay",
       providerType: "airline",
-      confidence: "low",
-      signals: [...airlineContextSignals, ...cancellationSignals, ...delaySignals]
+      confidence: disruptionReason === "unknown" ? "medium" : "high",
+      signals: [
+        ...airlineContextSignals,
+        ...cancellationSignals,
+        ...delaySignals,
+        ...(disruptionReason && disruptionReason !== "unknown" ? [disruptionReason] : [])
+      ]
     };
   }
 

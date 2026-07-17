@@ -19,7 +19,7 @@ describe("deterministic intake fallback", () => {
       { llmClient: null }
     );
 
-    expect(result.facts.issueType).toBe("eu261_delay_or_cancellation");
+    expect(result.facts.issueType).toBe("airline_cancellation");
     expect(result.facts.origin.country).toBe("France");
     expect(result.facts.arrivalDelayMinutes).toBe(240);
     expect(result.status).toBe("needs_info");
@@ -43,7 +43,7 @@ describe("deterministic intake fallback", () => {
     expect(second.facts.disruptionReason).toBe("mechanical");
   });
 
-  it("records a late inbound aircraft without assuming it was controllable", async () => {
+  it("separates a cancellation incident from an unresolved controllability reason", async () => {
     const result = await processIntake(
       "United cancelled my flight because the plane arrived late.",
       emptyClaimFacts(),
@@ -51,7 +51,7 @@ describe("deterministic intake fallback", () => {
     );
 
     expect(result.facts.disruptionReason).toBe("late_inbound_aircraft");
-    expect(result.facts.issueType).toBe("unknown");
+    expect(result.facts.issueType).toBe("airline_cancellation");
   });
 });
 
@@ -91,13 +91,13 @@ describe("LLM intake", () => {
 
     expect(result.extractionMode).toBe("deterministic");
     expect(result.warning).toBe("llm_fallback_used");
-    expect(result.facts.issueType).toBe("controllable_airline_cancellation");
+    expect(result.facts.issueType).toBe("airline_cancellation");
   });
 
   it("does not repeat questions for explicit facts omitted by valid model output", async () => {
     const incompleteModelFacts = {
       ...emptyClaimFacts(),
-      issueType: "controllable_airline_cancellation",
+      issueType: "airline_cancellation",
       providerType: "airline",
       provider: "Air France",
       origin: {
@@ -128,7 +128,7 @@ describe("LLM intake", () => {
     );
 
     expect(first.facts.arrivalDelayMinutes).toBe(240);
-    expect(first.facts.issueType).toBe("eu261_delay_or_cancellation");
+    expect(first.facts.issueType).toBe("airline_cancellation");
     expect(first.missingFields).toEqual(["disruptionReason"]);
     expect(first.question).toBe("What reason did the airline give?");
 

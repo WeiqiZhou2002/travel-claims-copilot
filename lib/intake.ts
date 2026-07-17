@@ -9,7 +9,7 @@ import {
 } from "./claimFacts";
 import { classifyInput } from "./classifier";
 import { isMvpIssueType } from "./issueTaxonomy";
-import { assessEu261Candidate, inferRouteLocations } from "./jurisdiction";
+import { inferRouteLocations } from "./jurisdiction";
 import {
   createStructuredOutputClientFromEnv,
   type StructuredOutputClient
@@ -42,10 +42,11 @@ Rules:
 - Extract facts the user stated. Common geographic inference is allowed, but do not decide legal eligibility.
 - Use unknown or null when the user did not provide enough information. Never invent a provider, route, reason, expense, evidence item, or delay duration.
 - A hotel with no room for a confirmed guest is hotel_walk.
+- Classify the incident as airline_delay or airline_cancellation independently from policy jurisdiction.
 - Airline oversales or bumping is denied_boarding; distinguish voluntary from involuntary when stated.
 - Weather is not a controllable airline reason.
 - A late inbound aircraft is a reported reason, not by itself a finding that the circumstances were within airline control.
-- EU261 is a candidate issue for a disrupted flight departing the EU/EEA/Switzerland, or arriving there on a qualifying operating carrier. Do not promise compensation.
+- Route regions determine which policies may apply; do not encode EU261 or another legal regime as the issue type.
 - Return only the schema-defined structured output.`;
 
 const numberWords: Record<string, number> = {
@@ -122,7 +123,7 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
     ? extracted.issueType
     : current.issueType;
 
-  let merged = normalizeClaimFacts({
+  return normalizeClaimFacts({
     ...current,
     issueType: incomingIssue,
     providerType:
@@ -148,20 +149,6 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
     confidence: extracted.confidence === "high" ? "high" : current.confidence
   });
 
-  if (
-    merged.issueType === "unknown" &&
-    (merged.disruptionType === "delay" || merged.disruptionType === "cancellation") &&
-    assessEu261Candidate(merged).isCandidate
-  ) {
-    merged = normalizeClaimFacts({
-      ...merged,
-      issueType: "eu261_delay_or_cancellation",
-      providerType: "airline",
-      confidence: "medium"
-    });
-  }
-
-  return merged;
 }
 
 function mergeLlmFactsWithDeterministic(

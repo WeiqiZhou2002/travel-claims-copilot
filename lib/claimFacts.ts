@@ -1,4 +1,4 @@
-import { assessEu261Candidate, enrichClaimJurisdiction } from "./jurisdiction";
+import { enrichClaimJurisdiction } from "./jurisdiction";
 import type { MvpIssueType } from "./types";
 
 export type ClaimIssueType = MvpIssueType | "unknown";
@@ -65,10 +65,9 @@ export type ClaimFactsParseResult =
 
 const issueTypes: ClaimIssueType[] = [
   "hotel_walk",
-  "controllable_airline_delay",
-  "controllable_airline_cancellation",
+  "airline_delay",
+  "airline_cancellation",
   "denied_boarding",
-  "eu261_delay_or_cancellation",
   "unknown"
 ];
 const providerTypes: ClaimProviderType[] = ["hotel", "airline", "unknown"];
@@ -294,34 +293,23 @@ export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
   const disruptionType = normalized.disruptionType === "unknown"
     ? normalized.issueType === "hotel_walk"
       ? "hotel_walk"
-      : normalized.issueType === "controllable_airline_delay"
+      : normalized.issueType === "airline_delay"
         ? "delay"
-        : normalized.issueType === "controllable_airline_cancellation"
+        : normalized.issueType === "airline_cancellation"
           ? "cancellation"
           : normalized.issueType === "denied_boarding"
             ? "denied_boarding"
             : "unknown"
     : normalized.disruptionType;
-  const canUseEuAirlineIssue =
-    normalized.issueType === "unknown" ||
-    normalized.issueType === "controllable_airline_delay" ||
-    normalized.issueType === "controllable_airline_cancellation" ||
-    normalized.issueType === "eu261_delay_or_cancellation";
-  const issueType =
-    canUseEuAirlineIssue &&
-    (disruptionType === "delay" || disruptionType === "cancellation") &&
-    assessEu261Candidate({ ...normalized, disruptionType }).isCandidate
-      ? "eu261_delay_or_cancellation"
-      : normalized.issueType;
   const providerType = normalized.providerType === "unknown"
-    ? issueType === "hotel_walk"
+    ? normalized.issueType === "hotel_walk"
       ? "hotel"
-      : issueType !== "unknown"
+      : normalized.issueType !== "unknown"
         ? "airline"
         : "unknown"
     : normalized.providerType;
 
-  return { ...normalized, issueType, providerType, disruptionType };
+  return { ...normalized, providerType, disruptionType };
 }
 
 function hasLocation(location: ClaimLocation): boolean {
@@ -343,9 +331,18 @@ export function getMissingClaimFields(facts: ClaimFacts): ClaimFactField[] {
   }
 
   if (
-    normalized.issueType === "controllable_airline_delay" ||
-    normalized.issueType === "controllable_airline_cancellation"
+    normalized.issueType === "airline_delay" ||
+    normalized.issueType === "airline_cancellation"
   ) {
+    if (!hasLocation(normalized.origin)) {
+      missing.push("origin");
+    }
+    if (!hasLocation(normalized.destination)) {
+      missing.push("destination");
+    }
+    if (normalized.issueType === "airline_delay" && normalized.arrivalDelayMinutes === null) {
+      missing.push("arrivalDelayMinutes");
+    }
     if (normalized.disruptionReason === "unknown") {
       missing.push("disruptionReason");
     }
@@ -353,24 +350,6 @@ export function getMissingClaimFields(facts: ClaimFacts): ClaimFactField[] {
 
   if (normalized.issueType === "denied_boarding" && normalized.deniedBoardingKind === "unknown") {
     missing.push("deniedBoardingKind");
-  }
-
-  if (normalized.issueType === "eu261_delay_or_cancellation") {
-    if (!hasLocation(normalized.origin)) {
-      missing.push("origin");
-    }
-    if (!hasLocation(normalized.destination)) {
-      missing.push("destination");
-    }
-    if (normalized.disruptionType === "unknown") {
-      missing.push("disruptionType");
-    }
-    if (normalized.arrivalDelayMinutes === null) {
-      missing.push("arrivalDelayMinutes");
-    }
-    if (normalized.disruptionReason === "unknown") {
-      missing.push("disruptionReason");
-    }
   }
 
   return missing;

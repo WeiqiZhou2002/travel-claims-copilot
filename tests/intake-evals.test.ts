@@ -41,7 +41,7 @@ describe("conversational intake evaluations", () => {
     ]);
 
     expect(result.status).toBe("ready");
-    expect(result.facts.issueType).toBe("eu261_delay_or_cancellation");
+    expect(result.facts.issueType).toBe("airline_cancellation");
     expect(result.facts.origin.country).toBe("France");
     expect(result.facts.destination.country).toBe("United States");
     expect(result.facts.arrivalDelayMinutes).toBe(240);
@@ -74,8 +74,7 @@ describe("conversational intake evaluations", () => {
     ]);
 
     expect(result.status).toBe("needs_info");
-    expect(result.facts.issueType).toBe("unknown");
+    expect(result.facts.issueType).toBe("airline_cancellation");
     expect(result.facts.disruptionReason).toBe("weather");
   });
 });
-

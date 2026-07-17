@@ -11,7 +11,7 @@
   },
   {
     "script_id": "airline_controllable_delay_hotel_en",
-    "issue_type": "controllable_airline_delay",
+    "issue_type": "airline_delay",
     "provider": "generic_airline",
     "channel": "airport_counter",
     "tone": "polite_firm",
@@ -31,7 +31,7 @@
   },
   {
     "script_id": "airline_controllable_cancellation_email_en",
-    "issue_type": "controllable_airline_cancellation",
+    "issue_type": "airline_cancellation",
     "provider": "generic_airline",
     "channel": "email",
     "tone": "polite_firm",

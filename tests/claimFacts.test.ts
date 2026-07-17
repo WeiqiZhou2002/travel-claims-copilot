@@ -19,17 +19,17 @@ describe("ClaimFacts schema", () => {
   it("normalizes an issue into provider and disruption types", () => {
     const facts = normalizeClaimFacts({
       ...emptyClaimFacts(),
-      issueType: "controllable_airline_cancellation"
+      issueType: "airline_cancellation"
     });
 
     expect(facts.providerType).toBe("airline");
     expect(facts.disruptionType).toBe("cancellation");
   });
 
-  it("computes missing EU261 facts on the server", () => {
+  it("computes missing route facts independently from policy jurisdiction", () => {
     const facts = normalizeClaimFacts({
       ...emptyClaimFacts(),
-      issueType: "eu261_delay_or_cancellation",
+      issueType: "airline_cancellation",
       provider: "Air France",
       origin: { city: "Paris", airport: null, country: null, region: null },
       disruptionType: "cancellation"
@@ -39,7 +39,6 @@ describe("ClaimFacts schema", () => {
     expect(facts.origin.region).toBe("EU_EEA_CH");
     expect(getMissingClaimFields(facts)).toEqual([
       "destination",
-      "arrivalDelayMinutes",
       "disruptionReason"
     ]);
   });
@@ -70,10 +69,10 @@ describe("jurisdiction assessment", () => {
     expect(assessEu261Candidate(facts).needsOperatingCarrierCheck).toBe(true);
   });
 
-  it("gives EU261 jurisdiction priority over a conflicting controllable label", () => {
+  it("keeps the incident type independent from EU261 jurisdiction", () => {
     const facts = normalizeClaimFacts({
       ...emptyClaimFacts(),
-      issueType: "controllable_airline_cancellation",
+      issueType: "airline_cancellation",
       provider: "Air France",
       operatingCarrier: "Air France",
       origin: { city: "Paris", airport: "CDG", country: null, region: null },
@@ -89,7 +88,7 @@ describe("jurisdiction assessment", () => {
       confidence: "medium"
     });
 
-    expect(facts.issueType).toBe("eu261_delay_or_cancellation");
+    expect(facts.issueType).toBe("airline_cancellation");
   });
 });
 
@@ -97,7 +96,7 @@ describe("structured analyze API", () => {
   it("analyzes validated structured facts without reclassifying the description", async () => {
     const facts = normalizeClaimFacts({
       ...emptyClaimFacts(),
-      issueType: "eu261_delay_or_cancellation",
+      issueType: "airline_cancellation",
       provider: "Air France",
       operatingCarrier: "Air France",
       origin: { city: "Paris", airport: "CDG", country: null, region: null },
@@ -126,14 +125,14 @@ describe("structured analyze API", () => {
     const result = await response.json();
 
     expect(response.status).toBe(200);
-    expect(result.issueType).toBe("eu261_delay_or_cancellation");
+    expect(result.issueType).toBe("airline_cancellation");
     expect(result.officialBasis[0]?.policy_id).toBe("eu261_air_passenger_rights");
   });
 
   it("returns both the EU261 guide and regulation for a Paris departure", async () => {
     const facts = {
       ...emptyClaimFacts(),
-      issueType: "controllable_airline_cancellation" as const,
+      issueType: "airline_cancellation" as const,
       providerType: "airline" as const,
       provider: "Air France",
       operatingCarrier: "Air France",
@@ -166,7 +165,7 @@ describe("structured analyze API", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(result.issueType).toBe("eu261_delay_or_cancellation");
+    expect(result.issueType).toBe("airline_cancellation");
     expect(policyIds).toContain("eu261_air_passenger_rights");
     expect(policyIds).toContain("eu261_regulation_261_2004");
   });

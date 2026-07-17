@@ -1,8 +1,7 @@
 export type IssueType =
   | "hotel_walk"
-  | "controllable_airline_cancellation"
-  | "controllable_airline_delay"
-  | "eu261_delay_or_cancellation"
+  | "airline_cancellation"
+  | "airline_delay"
   | "denied_boarding"
   | "baggage_delay"
   | "airline_delay_trip_insurance"
@@ -19,9 +18,8 @@ export type IssueType =
 export type MvpIssueType = Extract<
   IssueType,
   | "hotel_walk"
-  | "controllable_airline_cancellation"
-  | "controllable_airline_delay"
-  | "eu261_delay_or_cancellation"
+  | "airline_cancellation"
+  | "airline_delay"
   | "denied_boarding"
 >;
 
@@ -162,7 +160,7 @@ export type RetrievalLimits = {
 export type RetrievalResult = {
   facts: ExtractedFacts;
   query: RetrievalQuery;
-  issueAliases: IssueType[];
+  issueAliases: string[];
   officialBasis: Policy[];
   similarCases: Case[];
   scripts: Script[];
