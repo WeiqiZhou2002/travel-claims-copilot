@@ -95,9 +95,9 @@ describe("LLM intake", () => {
   });
 
   it("does not repeat questions for explicit facts omitted by valid model output", async () => {
-    const incompleteModelFacts = normalizeClaimFacts({
+    const incompleteModelFacts = {
       ...emptyClaimFacts(),
-      issueType: "eu261_delay_or_cancellation",
+      issueType: "controllable_airline_cancellation",
       providerType: "airline",
       provider: "Air France",
       origin: {
@@ -116,7 +116,7 @@ describe("LLM intake", () => {
       disruptionReason: "unknown",
       arrivalDelayMinutes: null,
       confidence: "medium"
-    });
+    };
     const client: StructuredOutputClient = {
       generate: vi.fn().mockResolvedValue(incompleteModelFacts)
     };
@@ -128,6 +128,7 @@ describe("LLM intake", () => {
     );
 
     expect(first.facts.arrivalDelayMinutes).toBe(240);
+    expect(first.facts.issueType).toBe("eu261_delay_or_cancellation");
     expect(first.missingFields).toEqual(["disruptionReason"]);
     expect(first.question).toBe("What reason did the airline give?");
 

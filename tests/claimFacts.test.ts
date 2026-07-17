@@ -69,6 +69,28 @@ describe("jurisdiction assessment", () => {
 
     expect(assessEu261Candidate(facts).needsOperatingCarrierCheck).toBe(true);
   });
+
+  it("gives EU261 jurisdiction priority over a conflicting controllable label", () => {
+    const facts = normalizeClaimFacts({
+      ...emptyClaimFacts(),
+      issueType: "controllable_airline_cancellation",
+      provider: "Air France",
+      operatingCarrier: "Air France",
+      origin: { city: "Paris", airport: "CDG", country: null, region: null },
+      destination: {
+        city: "New York",
+        airport: "JFK",
+        country: null,
+        region: null
+      },
+      disruptionType: "cancellation",
+      disruptionReason: "late_inbound_aircraft",
+      arrivalDelayMinutes: 240,
+      confidence: "medium"
+    });
+
+    expect(facts.issueType).toBe("eu261_delay_or_cancellation");
+  });
 });
 
 describe("structured analyze API", () => {
@@ -106,6 +128,47 @@ describe("structured analyze API", () => {
     expect(response.status).toBe(200);
     expect(result.issueType).toBe("eu261_delay_or_cancellation");
     expect(result.officialBasis[0]?.policy_id).toBe("eu261_air_passenger_rights");
+  });
+
+  it("returns both the EU261 guide and regulation for a Paris departure", async () => {
+    const facts = {
+      ...emptyClaimFacts(),
+      issueType: "controllable_airline_cancellation" as const,
+      providerType: "airline" as const,
+      provider: "Air France",
+      operatingCarrier: "Air France",
+      origin: { city: "Paris", airport: "CDG", country: null, region: null },
+      destination: {
+        city: "New York",
+        airport: "JFK",
+        country: null,
+        region: null
+      },
+      disruptionType: "cancellation" as const,
+      disruptionReason: "late_inbound_aircraft" as const,
+      arrivalDelayMinutes: 240,
+      confidence: "medium" as const
+    };
+    const request = new Request("http://localhost/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description:
+          "My Air France flight from Paris was cancelled and I arrived four hours late.",
+        facts
+      })
+    });
+
+    const response = await POST(request);
+    const result = await response.json();
+    const policyIds = result.officialBasis.map(
+      (policy: { policy_id: string }) => policy.policy_id
+    );
+
+    expect(response.status).toBe(200);
+    expect(result.issueType).toBe("eu261_delay_or_cancellation");
+    expect(policyIds).toContain("eu261_air_passenger_rights");
+    expect(policyIds).toContain("eu261_regulation_261_2004");
   });
 
   it("rejects incomplete facts with actionable missing fields", async () => {

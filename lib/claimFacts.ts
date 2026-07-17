@@ -1,4 +1,4 @@
-import { enrichClaimJurisdiction } from "./jurisdiction";
+import { assessEu261Candidate, enrichClaimJurisdiction } from "./jurisdiction";
 import type { MvpIssueType } from "./types";
 
 export type ClaimIssueType = MvpIssueType | "unknown";
@@ -291,13 +291,6 @@ export function parseClaimFacts(value: unknown): ClaimFactsParseResult {
 
 export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
   const normalized = enrichClaimJurisdiction(facts);
-  const providerType = normalized.providerType === "unknown"
-    ? normalized.issueType === "hotel_walk"
-      ? "hotel"
-      : normalized.issueType !== "unknown"
-        ? "airline"
-        : "unknown"
-    : normalized.providerType;
   const disruptionType = normalized.disruptionType === "unknown"
     ? normalized.issueType === "hotel_walk"
       ? "hotel_walk"
@@ -309,8 +302,26 @@ export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
             ? "denied_boarding"
             : "unknown"
     : normalized.disruptionType;
+  const canUseEuAirlineIssue =
+    normalized.issueType === "unknown" ||
+    normalized.issueType === "controllable_airline_delay" ||
+    normalized.issueType === "controllable_airline_cancellation" ||
+    normalized.issueType === "eu261_delay_or_cancellation";
+  const issueType =
+    canUseEuAirlineIssue &&
+    (disruptionType === "delay" || disruptionType === "cancellation") &&
+    assessEu261Candidate({ ...normalized, disruptionType }).isCandidate
+      ? "eu261_delay_or_cancellation"
+      : normalized.issueType;
+  const providerType = normalized.providerType === "unknown"
+    ? issueType === "hotel_walk"
+      ? "hotel"
+      : issueType !== "unknown"
+        ? "airline"
+        : "unknown"
+    : normalized.providerType;
 
-  return { ...normalized, providerType, disruptionType };
+  return { ...normalized, issueType, providerType, disruptionType };
 }
 
 function hasLocation(location: ClaimLocation): boolean {
