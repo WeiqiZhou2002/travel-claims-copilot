@@ -6,6 +6,7 @@ import {
   normalizeClaimFacts,
   parseClaimFacts
 } from "../lib/claimFacts";
+import { POST } from "../app/api/analyze/route";
 import { assessEu261Candidate } from "../lib/jurisdiction";
 
 describe("ClaimFacts schema", () => {
@@ -67,5 +68,63 @@ describe("jurisdiction assessment", () => {
     };
 
     expect(assessEu261Candidate(facts).needsOperatingCarrierCheck).toBe(true);
+  });
+});
+
+describe("structured analyze API", () => {
+  it("analyzes validated structured facts without reclassifying the description", async () => {
+    const facts = normalizeClaimFacts({
+      ...emptyClaimFacts(),
+      issueType: "eu261_delay_or_cancellation",
+      provider: "Air France",
+      operatingCarrier: "Air France",
+      origin: { city: "Paris", airport: "CDG", country: null, region: null },
+      destination: {
+        city: "New York",
+        airport: "JFK",
+        country: null,
+        region: null
+      },
+      disruptionType: "cancellation",
+      disruptionReason: "mechanical",
+      arrivalDelayMinutes: 240,
+      confidence: "high"
+    });
+    const request = new Request("http://localhost/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description:
+          "My Air France flight from Paris was cancelled and I arrived four hours late.",
+        facts
+      })
+    });
+
+    const response = await POST(request);
+    const result = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(result.issueType).toBe("eu261_delay_or_cancellation");
+    expect(result.officialBasis[0]?.policy_id).toBe("eu261_air_passenger_rights");
+  });
+
+  it("rejects incomplete facts with actionable missing fields", async () => {
+    const request = new Request("http://localhost/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        facts: {
+          ...emptyClaimFacts(),
+          issueType: "denied_boarding",
+          provider: "Delta"
+        }
+      })
+    });
+
+    const response = await POST(request);
+    const result = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(result.missingFields).toEqual(["deniedBoardingKind"]);
   });
 });

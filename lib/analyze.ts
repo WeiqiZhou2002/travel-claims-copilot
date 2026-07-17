@@ -1,7 +1,15 @@
 import { deterministicFactExtractor } from "./classifier";
 import { generateAnalysis } from "./generator";
 import { retrieveKnowledge } from "./retrieval";
-import type { AnalysisResult, AnalyzeOptions, Case, Policy, Script } from "./types";
+import type { ClaimFacts } from "./claimFacts";
+import type {
+  AnalysisResult,
+  AnalyzeOptions,
+  Case,
+  ExtractedFacts,
+  Policy,
+  Script
+} from "./types";
 import type { FactExtractor } from "./classifier";
 
 export {
@@ -29,6 +37,27 @@ export {
 export { rankCases, rankPolicies, rankScripts } from "./retrievalScoring";
 export { buildScenarioSummaries } from "./scenarios";
 
+export function claimFactsToExtractedFacts(
+  facts: ClaimFacts,
+  description = ""
+): ExtractedFacts {
+  return {
+    description,
+    issueType: facts.issueType,
+    provider: facts.provider ?? facts.operatingCarrier ?? undefined,
+    providerType: facts.providerType === "unknown" ? undefined : facts.providerType,
+    country: facts.origin.country ?? facts.destination.country ?? undefined,
+    bookingChannel: facts.bookingChannel === "unknown" ? undefined : facts.bookingChannel,
+    loyaltyStatus: facts.loyaltyStatus ?? undefined,
+    disruptionReason: facts.disruptionReason,
+    isOvernight: facts.isOvernight ?? undefined,
+    deniedBoardingKind: facts.deniedBoardingKind,
+    confidence: facts.confidence,
+    signals: [],
+    source: "llm"
+  };
+}
+
 export type AnalysisDependencies = {
   factExtractor?: FactExtractor;
 };
@@ -44,6 +73,19 @@ export async function buildAnalysisResult(
   const factExtractor = dependencies.factExtractor ?? deterministicFactExtractor;
   const facts = await factExtractor.extract(description, options);
   const retrieval = retrieveKnowledge(facts, policies, cases, scripts);
+
+  return generateAnalysis(retrieval.facts, retrieval);
+}
+
+export function buildAnalysisFromFacts(
+  facts: ClaimFacts,
+  policies: Policy[],
+  cases: Case[],
+  scripts: Script[],
+  description = ""
+): AnalysisResult {
+  const extractedFacts = claimFactsToExtractedFacts(facts, description);
+  const retrieval = retrieveKnowledge(extractedFacts, policies, cases, scripts);
 
   return generateAnalysis(retrieval.facts, retrieval);
 }
