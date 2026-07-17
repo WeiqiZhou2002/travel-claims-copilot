@@ -25,10 +25,21 @@ The app currently uses:
 - TypeScript
 - Tailwind CSS
 - local JSON seed data
-- deterministic keyword classification
-- deterministic retrieval and response generation
+- deterministic structured fact extraction and classification
+- explainable weighted retrieval with deterministic Top-K results
+- approved-case filtering and deterministic response generation
+- Vitest golden-scenario and quality-guard tests
 
 There is no database, login, payment, scraping, email sending, or real LLM API integration yet.
+
+The current knowledge base contains 4 policies, 55 reviewed case records (35 approved for
+retrieval), and 8 reusable scripts. The first demo only publishes these five issue types:
+
+- `hotel_walk`
+- `controllable_airline_delay`
+- `controllable_airline_cancellation`
+- `denied_boarding`
+- `eu261_delay_or_cancellation`
 
 ## How To Run
 
@@ -56,6 +67,13 @@ Build for production:
 npm run build
 ```
 
+Validate the data and run the retrieval test suite:
+
+```bash
+npm run validate:data
+npm test
+```
+
 ## Demo Test Inputs
 
 Hotel walk:
@@ -70,22 +88,22 @@ Airline controllable cancellation:
 United cancelled my flight because of a crew issue and rebooked me for tomorrow morning. The airport agent said they would not provide a hotel or meal voucher.
 ```
 
-Baggage delay:
+Airline controllable delay:
 
 ```text
-Southwest made me gate-check my bag during a connection through MDW, but the bag did not arrive at SEA. They said it may come tomorrow and only offered delivery.
-```
-
-Hotel room feature mismatch:
-
-```text
-I paid extra to upgrade to a Hyatt suite because the website showed specific amenities, but the room was missing some of them and one advertised feature was broken.
+My American Airlines flight was delayed overnight because of a mechanical problem.
 ```
 
 Denied boarding / voluntary bump:
 
 ```text
-AA oversold my flight and the gate agent asked for volunteers to take a later flight. The next available flight may be tomorrow.
+Delta oversold my flight and the gate agent asked for volunteers to take a flight the next day.
+```
+
+EU261 disruption:
+
+```text
+My Air France flight from Paris was cancelled and I arrived at my final destination four hours late.
 ```
 
 ## Project Structure
@@ -104,33 +122,48 @@ data/
   README.md               Review rules and current quality summary
 
 lib/
-  analyze.ts              Thin orchestration compatibility wrapper
-  classifier.ts           Keyword-based fact extraction and issue classification
-  retrieval.ts            Local JSON policy/case/script retrieval
+  analyze.ts              Async orchestration and replaceable FactExtractor boundary
+  classifier.ts           Structured fact extraction and issue classification
+  retrieval.ts            Top-K local JSON policy/case/script retrieval
+  retrievalScoring.ts     Explainable, deterministic ranking rules
   generator.ts            Deterministic AnalysisResult generation
   scenarios.ts            Scenario summary builder
   issueTaxonomy.ts        Issue labels, aliases, and normalization
   types.ts                Shared TypeScript types
+
+tests/
+  retrieval.test.ts       Five golden scenarios plus classification/retrieval guards
 ```
 
 ## Current Pipeline
 
-The current analysis flow is deterministic:
+The current analysis flow is deterministic and asynchronous at the extraction boundary:
 
 ```text
 user input or selected scenario
-  -> classifyInput()
-  -> retrieveKnowledge()
+  -> FactExtractor.extract()
+  -> structured RetrievalQuery
+  -> explainable policy / case / script scoring
+  -> Top-K retrieval (3 policies / 3 cases / 2 scripts)
   -> generateAnalysis()
   -> AnalysisResult
 ```
 
-The long-term goal is to keep this structure and plug an LLM into selected stages:
+Ranking considers issue type, provider, provider type, country, booking channel, loyalty
+status, disruption reason, denied-boarding kind, text overlap, source authority, and case
+confidence. Equal scores use stable IDs as a deterministic tie-breaker. Only cases with
+`review_status: "approved"` can be returned.
 
-- use LLM for structured fact extraction
-- keep deterministic keyword classification as fallback
-- retrieve policies, cases, and scripts from the knowledge base
-- use LLM to generate a more natural answer from retrieved evidence only
+### LLM API decision
+
+No LLM API key is required for the current milestone. `FactExtractor` is already an async,
+replaceable interface, so a later LLM-backed implementation will not require changing the
+retrieval or generation layers.
+
+The recommended next LLM step is a guarded fallback: call the LLM only when deterministic
+extraction returns `unknown` or low confidence, require structured output, validate it against
+the five-type taxonomy, and fall back safely on timeout or invalid output. A later natural-language
+generation step should use retrieved evidence only.
 
 The LLM should not invent policies, cases, compensation amounts, or sources.
 
@@ -175,7 +208,7 @@ Analyze by selected issue type:
 
 ```json
 {
-  "issueType": "hotel_room_feature_mismatch"
+  "issueType": "denied_boarding"
 }
 ```
 
@@ -262,28 +295,29 @@ The app should clearly separate:
 
 Completed:
 
-- deterministic app flow
-- local JSON seed data
-- split classifier / retrieval / generator / scenarios modules
-- scenario-aware APIs
+- consolidated, reviewed local JSON data
+- deterministic structured extraction for the five demo issue types
+- explainable structured filtering and Top-K ranking
+- approved-only case retrieval
+- replaceable async fact-extraction boundary
+- 20 automated golden-scenario and quality-guard tests
 
 Recommended next work:
 
-- add more official policies
-- add more cases
-- add more scripts
-- add test prompts with expected issue types
-- improve frontend scenario selection UI
+- connect the five supported scenarios to the frontend result experience
+- add a small manual evaluation set using real user phrasing
+- show missing facts and low-confidence clarification prompts
+- add outcome feedback logging before expanding the taxonomy
 
 ### Phase 2: LLM-Assisted Analysis
 
-Add `lib/llm.ts` and use an LLM for:
+Add `lib/llm.ts` only after the deterministic baseline is measured, then use an LLM for:
 
-- structured fact extraction
-- issue classification assistance
+- low-confidence structured fact extraction
+- issue classification assistance within the five-type allowlist
 - natural-language answer generation from retrieved data
 
-Keep deterministic fallback.
+Keep deterministic fallback, schema validation, timeouts, and evidence-only generation.
 
 ### Phase 3: Database
 
@@ -295,11 +329,12 @@ Move local JSON data into a database such as Supabase:
 - outcomes
 - scenario taxonomy
 
-### Phase 4: Retrieval
+### Phase 4: Semantic Retrieval
 
-Add structured filtering and vector search:
+Keep structured filters and add embeddings/vector search only when the reviewed corpus and
+evaluation set show that lexical ranking is the bottleneck:
 
-- filter by issue type, provider, route, location, booking channel, and status
+- preserve issue type, provider, route, location, booking channel, and review-status filters
 - search similar cases by embeddings
 - rank cases by relevance and outcome quality
 
