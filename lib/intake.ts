@@ -108,7 +108,7 @@ function inferDisruptionType(text: string): ClaimFacts["disruptionType"] {
   if (/delayed|delay|late|延误|晚点/.test(normalized)) {
     return "delay";
   }
-  if (/no room|hotel walk|酒店超售|没有房间|到店没房/.test(normalized)) {
+  if (/no room|hotel walk|酒店超售|没有房间|到店没房|到店无房/.test(normalized)) {
     return "hotel_walk";
   }
   return "unknown";
@@ -199,7 +199,11 @@ function mergeLlmFactsWithDeterministic(
   });
 }
 
-function questionForMissingFields(fields: ClaimFactField[], chinese: boolean): string {
+function questionForMissingFields(
+  fields: ClaimFactField[],
+  chinese: boolean,
+  facts: ClaimFacts
+): string {
   const selected = fields.slice(0, 3);
   if (selected.includes("issueType")) {
     return chinese
@@ -224,6 +228,16 @@ function questionForMissingFields(fields: ClaimFactField[], chinese: boolean): s
       : "Where did the flight fly to? A city name or airport code is enough.";
   }
   if (selected.includes("provider")) {
+    if (facts.providerType === "hotel" || facts.issueType === "hotel_walk") {
+      return chinese
+        ? "是哪家酒店或酒店集团？"
+        : "Which hotel or hotel group was involved?";
+    }
+    if (facts.providerType === "airline") {
+      return chinese
+        ? "实际承运这趟航班的是哪家航司？"
+        : "Which airline actually operated the flight?";
+    }
     return chinese
       ? "是哪家酒店或实际承运航司？"
       : "Which hotel or operating airline was involved?";
@@ -306,7 +320,10 @@ export async function processIntake(
     status: missingFields.length === 0 ? "ready" : "needs_info",
     facts,
     missingFields,
-    question: missingFields.length > 0 ? questionForMissingFields(missingFields, isChinese(message)) : null,
+    question:
+      missingFields.length > 0
+        ? questionForMissingFields(missingFields, isChinese(message), facts)
+        : null,
     extractionMode,
     ...(warning ? { warning } : {})
   };
