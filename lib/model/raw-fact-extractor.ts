@@ -83,13 +83,13 @@ function locationPatch(
 
 function hasExplicitConfirmedHotelReservation(message: string): boolean {
   if (
-    /never (?:received|got)(?: a)?(?: booking)? confirmation|no booking confirmation|not (?:a )?confirmed (?:booking|reservation)|(?:booking|reservation) was not confirmed|未收到.*确认|没有收到.*确认|预订未确认/i.test(
+    /never (?:received|got)(?: a)?(?: booking)? confirmation|no booking confirmation|not (?:a )?confirmed (?:booking|reservation)|(?:booking|reservation) was not confirmed|\bunconfirmed (?:booking|reservation)\b|未收到.*确认|没有收到.*确认|预订未确认|未确认(?:的)?预订/i.test(
       message
     )
   ) {
     return false;
   }
-  return /confirmed (?:booking|reservation)|(?:booking|reservation) confirmation|received(?: a)?(?: booking)? confirmation|预订已确认|确认预订|收到.*确认/i.test(
+  return /\bconfirmed (?:booking|reservation)\b|(?:booking|reservation) confirmation|received(?: a)?(?: booking)? confirmation|预订已确认|确认预订|收到.*确认/i.test(
     message
   );
 }

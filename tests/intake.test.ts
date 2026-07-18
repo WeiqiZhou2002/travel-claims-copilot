@@ -4,7 +4,7 @@ import { POST } from "../app/api/intake/route";
 import { emptyClaimFacts, normalizeClaimFacts } from "../lib/claimFacts";
 import { parseAnalyzeClaimRequest } from "../lib/api/analyze-contract";
 import { createIntakePostHandler, processClaimTurn, processIntake } from "../lib/intake";
-import type { RawFactExtractor } from "../lib/model/raw-fact-extractor";
+import { LocalRawFactExtractor, type RawFactExtractor } from "../lib/model/raw-fact-extractor";
 import {
   createStructuredOutputClientFromEnv,
   DeepSeekChatCompletionsClient,
@@ -709,6 +709,22 @@ describe("canonical revision-safe intake", () => {
     );
 
     expect(extract).toHaveBeenCalledWith(expect.objectContaining({ message }));
+  });
+
+  it("does not mark an unconfirmed hotel reservation ready in canonical intake", async () => {
+    const response = await processClaimTurn(
+      {
+        message: "I had an unconfirmed reservation at Marriott, and the hotel had no room.",
+        prior: claimState(),
+        baseRevision: 0,
+        requestedMode: "local"
+      },
+      { localExtractor: new LocalRawFactExtractor() }
+    );
+
+    expect(response.status).toBe("needs_information");
+    expect(response.claimState.facts.incidentType).toBe("hotel_walk");
+    expect(response.claimState.facts.confirmedHotelReservation).not.toBe(true);
   });
 
   it("masks a legacy dual-extractor conflict instead of projecting the old value as ready", async () => {

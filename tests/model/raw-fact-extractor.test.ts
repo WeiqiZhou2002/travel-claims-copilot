@@ -100,7 +100,10 @@ describe("LocalRawFactExtractor", () => {
 
   it.each([
     "I booked a Marriott room but never received confirmation, and the hotel had no room.",
-    "我订了万豪，但一直没有收到确认，到店后没有房间。"
+    "I had an unconfirmed reservation at Marriott, and the hotel had no room.",
+    "我订了万豪，但一直没有收到确认，到店后没有房间。",
+    "我有未确认预订，到了万豪后没有房间。",
+    "我有未确认的预订，到了万豪后没有房间。"
   ])(
     "does not infer a confirmed hotel reservation from an unconfirmed booking: %s",
     async (message) => {
