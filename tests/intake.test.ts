@@ -1,8 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "../app/api/intake/route";
-import { emptyClaimFacts, normalizeClaimFacts } from "../lib/claimFacts";
-import { processIntake } from "../lib/intake";
+import { emptyClaimFacts } from "../lib/claimFacts";
+import { parseAnalyzeClaimRequest } from "../lib/api/analyze-contract";
+import { createIntakePostHandler, processClaimTurn, processIntake } from "../lib/intake";
+import type { RawFactExtractor } from "../lib/model/raw-fact-extractor";
 import {
   createStructuredOutputClientFromEnv,
   DeepSeekChatCompletionsClient,
@@ -10,6 +12,12 @@ import {
   resolveLlmProvider,
   type StructuredOutputClient
 } from "../lib/llm";
+import { claimState } from "./fixtures/raw-claims";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
 
 describe("deterministic intake fallback", () => {
   it("understands a natural Paris cancellation without an explicit EU261 keyword", async () => {
@@ -67,14 +75,15 @@ describe("deterministic intake fallback", () => {
 
 describe("LLM intake", () => {
   it("uses validated structured model output when a client is configured", async () => {
-    const llmFacts = normalizeClaimFacts({
-      ...emptyClaimFacts(),
-      issueType: "hotel_walk",
-      providerType: "hotel",
-      provider: "Marriott",
-      disruptionType: "hotel_walk",
-      confidence: "high"
-    });
+    const llmFacts = {
+      set: {
+        incidentType: "hotel_walk",
+        providerType: "hotel",
+        provider: "Marriott",
+        confirmedHotelReservation: true,
+        wasWalked: true
+      }
+    };
     const client: StructuredOutputClient = {
       generate: vi.fn().mockResolvedValue(llmFacts)
     };
@@ -91,12 +100,13 @@ describe("LLM intake", () => {
   it("normalizes a Chinese Marriott name returned by the model", async () => {
     const client: StructuredOutputClient = {
       generate: vi.fn().mockResolvedValue({
-        ...emptyClaimFacts(),
-        issueType: "hotel_walk",
-        providerType: "hotel",
-        provider: "万豪酒店",
-        disruptionType: "hotel_walk",
-        confidence: "high"
+        set: {
+          incidentType: "hotel_walk",
+          providerType: "hotel",
+          provider: "万豪酒店",
+          confirmedHotelReservation: true,
+          wasWalked: true
+        }
       })
     };
 
@@ -111,7 +121,7 @@ describe("LLM intake", () => {
 
   it("falls back safely when model output is invalid", async () => {
     const client: StructuredOutputClient = {
-      generate: vi.fn().mockResolvedValue({ issueType: "invented_type" })
+      generate: vi.fn().mockResolvedValue({ set: { issueType: "invented_type" } })
     };
 
     const result = await processIntake(
@@ -127,26 +137,15 @@ describe("LLM intake", () => {
 
   it("does not repeat questions for explicit facts omitted by valid model output", async () => {
     const incompleteModelFacts = {
-      ...emptyClaimFacts(),
-      issueType: "airline_cancellation",
-      providerType: "airline",
-      provider: "Air France",
-      origin: {
-        city: "Paris",
-        airport: null,
-        country: "France",
-        region: "EU_EEA_CH"
-      },
-      destination: {
-        city: "New York",
-        airport: null,
-        country: "United States",
-        region: "US"
-      },
-      disruptionType: "cancellation",
-      disruptionReason: "unknown",
-      arrivalDelayMinutes: null,
-      confidence: "medium"
+      set: {
+        incidentType: "airline_cancellation",
+        providerType: "airline",
+        provider: "Air France",
+        "origin.city": "Paris",
+        "origin.country": "France",
+        "destination.city": "New York",
+        "destination.country": "United States"
+      }
     };
     const client: StructuredOutputClient = {
       generate: vi.fn().mockResolvedValue(incompleteModelFacts)
@@ -322,7 +321,8 @@ describe("intake API", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: "My Air France flight from Paris was cancelled and I arrived four hours late."
+        message: "My Air France flight from Paris was cancelled and I arrived four hours late.",
+        facts: null
       })
     });
 
@@ -334,5 +334,248 @@ describe("intake API", () => {
     expect(result.question).toBe(
       "Where did the flight fly to? A city name or airport code is enough."
     );
+  });
+});
+
+describe("canonical revision-safe intake", () => {
+  it.each([
+    ["stale base revision", { message: "new facts", prior: claimState({}, 2), baseRevision: 1 }],
+    [
+      "message plus correction",
+      {
+        message: "new facts",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: { provider: "Delta" }, clear: [] }
+      }
+    ],
+    ["blank message", { message: "", prior: claimState(), baseRevision: 0 }],
+    [
+      "whitespace correction message",
+      {
+        message: "  ",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: { provider: "Delta" }, clear: [] }
+      }
+    ],
+    [
+      "empty correction",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: {}, clear: [] }
+      }
+    ],
+    [
+      "null correction set",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: { provider: null }, clear: [] }
+      }
+    ],
+    [
+      "duplicate clear",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: {}, clear: ["provider", "provider"] }
+      }
+    ],
+    [
+      "unknown clear",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: {}, clear: ["origin.region"] }
+      }
+    ],
+    [
+      "set-clear overlap",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: { provider: "Delta" }, clear: ["provider"] }
+      }
+    ],
+    [
+      "untrusted provenance source",
+      {
+        message: "new facts",
+        prior: {
+          ...claimState(),
+          provenance: { provider: { source: "client_asserted", factsRevision: 0 } }
+        },
+        baseRevision: 0
+      }
+    ],
+    [
+      "untrusted conflict source",
+      {
+        message: "new facts",
+        prior: {
+          ...claimState(),
+          conflicts: [
+            {
+              field: "provider",
+              candidates: [{ value: "Delta", source: "user_correction" }]
+            }
+          ]
+        },
+        baseRevision: 0
+      }
+    ],
+    [
+      "untrusted unresolved path",
+      {
+        message: "new facts",
+        prior: { ...claimState(), unresolvedFields: ["origin.region"] },
+        baseRevision: 0
+      }
+    ]
+  ])("rejects %s", (_label, request) => {
+    expect(parseAnalyzeClaimRequest(request).success).toBe(false);
+  });
+
+  it("rejects malformed state before calling either extractor", async () => {
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    const openaiExtractor: RawFactExtractor = {
+      provider: "openai",
+      model: "gpt-5.6-luna",
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+
+    await expect(
+      processClaimTurn(
+        {
+          message: "new facts",
+          prior: {
+            ...claimState(),
+            provenance: { "origin.region": { source: "user_message", factsRevision: 0 } }
+          },
+          baseRevision: 0
+        },
+        { localExtractor, openaiExtractor }
+      )
+    ).rejects.toThrow("invalid_analyze_claim_request");
+    expect(localExtractor.extract).not.toHaveBeenCalled();
+    expect(openaiExtractor.extract).not.toHaveBeenCalled();
+  });
+
+  it("runs a stateless two-turn correction without replaying narrative or extractors", async () => {
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({
+        set: {
+          incidentType: "denied_boarding",
+          "origin.airport": "JFK",
+          deniedBoardingKind: "voluntary"
+        }
+      })
+    };
+    const openaiExtractor: RawFactExtractor = {
+      provider: "openai",
+      model: "gpt-5.6-luna",
+      extract: vi.fn().mockResolvedValue({
+        set: {
+          incidentType: "denied_boarding",
+          "origin.airport": "JFK",
+          deniedBoardingKind: "voluntary"
+        }
+      })
+    };
+    const handler = createIntakePostHandler({ localExtractor, openaiExtractor });
+
+    const firstResponse = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({
+          message: "My original anonymous denied-boarding narrative.",
+          prior: claimState(),
+          baseRevision: 0,
+          requestedMode: "gpt"
+        })
+      })
+    );
+    const first = await firstResponse.json();
+    const secondResponse = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({
+          message: "",
+          prior: first.claimState,
+          baseRevision: first.claimState.revision,
+          correction: { set: { deniedBoardingKind: "involuntary" }, clear: [] },
+          requestedMode: "gpt"
+        })
+      })
+    );
+    const second = await secondResponse.json();
+
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(200);
+    expect(localExtractor.extract).toHaveBeenCalledTimes(1);
+    expect(openaiExtractor.extract).toHaveBeenCalledTimes(1);
+    expect(first.baseRevision).toBe(0);
+    expect(first.claimState.revision).toBe(1);
+    expect(second.baseRevision).toBe(1);
+    expect(second.claimState.revision).toBe(2);
+    expect(second.claimState.facts.deniedBoardingKind).toBe("involuntary");
+    expect(JSON.stringify(first)).not.toContain("original anonymous denied-boarding narrative");
+    expect(JSON.stringify(second)).not.toContain("original anonymous denied-boarding narrative");
+  });
+
+  it("never selects DeepSeek or any external model in the public handler", async () => {
+    vi.stubEnv("DEEPSEEK_API_KEY", "configured-but-must-not-be-used");
+    vi.stubEnv("LLM_PROVIDER", "deepseek");
+    const fetcher = vi.spyOn(globalThis, "fetch");
+
+    const response = await POST(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({
+          message: "My flight was delayed by 20 minutes.",
+          prior: claimState(),
+          baseRevision: 0,
+          requestedMode: "gpt"
+        })
+      })
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("keeps malformed canonical-shaped requests out of the legacy branch", async () => {
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    const handler = createIntakePostHandler({ localExtractor });
+    const response = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({
+          message: "new facts",
+          prior: claimState(),
+          facts: null
+        })
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect(localExtractor.extract).not.toHaveBeenCalled();
   });
 });

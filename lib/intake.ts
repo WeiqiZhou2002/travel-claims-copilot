@@ -1,17 +1,24 @@
+import type { AnalyzeClaimIntakeResponse, AnalyzeClaimRequest } from "./api/analyze-contract";
+import { parseAnalyzeClaimRequest } from "./api/analyze-contract";
 import {
   emptyClaimFacts,
   getMissingClaimFields,
   normalizeClaimFacts,
   parseClaimFacts,
   type ClaimFactField,
-  type ClaimFacts,
-  type ClaimLocation
+  type ClaimFacts
 } from "./claimFacts";
-import { classifyInput } from "./classifier";
-import { isMvpIssueType } from "./issueTaxonomy";
-import { inferRouteLocations } from "./jurisdiction";
-import { createStructuredOutputClientFromEnv, type StructuredOutputClient } from "./llm";
-import { claimFactsJsonSchema } from "./claimFacts";
+import type { ClaimState, RawClaimFacts } from "./domain/claim-contract";
+import { resolveClaimContext } from "./domain/context-resolver";
+import { mergeRawFacts } from "./domain/fact-merge";
+import { emptyRawClaimFacts } from "./domain/raw-fact-schema";
+import type { StructuredOutputClient } from "./llm";
+import {
+  LocalRawFactExtractor,
+  OpenAIRawFactExtractor,
+  type RawFactExtractionInput,
+  type RawFactExtractor
+} from "./model/raw-fact-extractor";
 
 export type IntakeStatus = "needs_info" | "ready";
 export type IntakeExtractionMode = "llm" | "deterministic";
@@ -25,169 +32,142 @@ export type IntakeResult = {
   warning?: "llm_not_configured" | "llm_fallback_used";
 };
 
+export type ProcessClaimTurnDependencies = {
+  localExtractor: RawFactExtractor;
+  openaiExtractor?: RawFactExtractor;
+};
+
 export type IntakeDependencies = {
   llmClient?: StructuredOutputClient | null;
+  localExtractor?: RawFactExtractor;
+  openaiExtractor?: RawFactExtractor;
 };
 
-const intakeInstructions = `Role: Extract and merge facts for a travel disruption intake.
-
-Goal: Return one complete ClaimFacts object that incorporates the prior facts and the user's latest message.
-
-Rules:
-- Use only the issue types and enum values allowed by the JSON Schema.
-- Preserve prior facts unless the user clearly corrects them.
-- Extract facts the user stated. Common geographic inference is allowed, but do not decide legal eligibility.
-- Use unknown or null when the user did not provide enough information. Never invent a provider, route, reason, expense, evidence item, or delay duration.
-- A hotel with no room for a confirmed guest is hotel_walk.
-- Classify the incident as airline_delay or airline_cancellation independently from policy jurisdiction.
-- Airline oversales or bumping is denied_boarding; distinguish voluntary from involuntary when stated.
-- Weather is not a controllable airline reason.
-- A late inbound aircraft is a reported reason, not by itself a finding that the circumstances were within airline control.
-- Route regions determine which policies may apply; do not encode EU261 or another legal regime as the issue type.
-- Return only the schema-defined structured output.`;
-
-const numberWords: Record<string, number> = {
-  one: 1,
-  two: 2,
-  three: 3,
-  four: 4,
-  five: 5,
-  six: 6,
-  seven: 7,
-  eight: 8,
-  nine: 9,
-  ten: 10
-};
-
-function isChinese(text: string): boolean {
-  return /[\p{Script=Han}]/u.test(text);
-}
-
-function mergeLocation(current: ClaimLocation, incoming?: ClaimLocation): ClaimLocation {
-  if (!incoming) {
-    return current;
-  }
-
+function extractionInput(request: AnalyzeClaimRequest): RawFactExtractionInput {
+  const { facts } = request.prior;
   return {
-    city: incoming.city ?? current.city,
-    airport: incoming.airport ?? current.airport,
-    country: incoming.country ?? current.country,
-    region: incoming.region ?? current.region
+    message: request.message,
+    prior: {
+      incidentType: facts.incidentType,
+      provider: facts.provider,
+      operatingCarrier: facts.operatingCarrier,
+      origin: { ...facts.origin },
+      destination: { ...facts.destination },
+      reasonCategory: facts.reasonCategory,
+      finalArrivalDelayMinutes: facts.finalArrivalDelayMinutes,
+      deniedBoardingKind: facts.deniedBoardingKind
+    },
+    unresolvedFields: [...request.prior.unresolvedFields]
   };
 }
 
-function extractArrivalDelayMinutes(text: string): number | null {
-  const normalized = text.toLowerCase();
-  const digitHours = normalized.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|小时)/);
-  if (digitHours) {
-    return Math.round(Number(digitHours[1]) * 60);
+export async function processClaimTurn(
+  value: unknown,
+  dependencies: ProcessClaimTurnDependencies
+): Promise<AnalyzeClaimIntakeResponse> {
+  const parsed = parseAnalyzeClaimRequest(value);
+  if (!parsed.success) {
+    throw new Error(`invalid_analyze_claim_request: ${parsed.errors.join("; ")}`);
   }
-
-  const wordHours = normalized.match(
-    new RegExp(`\\b(${Object.keys(numberWords).join("|")})\\s+hours?\\b`)
-  );
-  if (wordHours) {
-    return numberWords[wordHours[1]] * 60;
+  const request = parsed.data;
+  let deterministicPatch = { set: {} };
+  let openaiPatch;
+  if (!request.correction) {
+    const input = extractionInput(request);
+    deterministicPatch = await dependencies.localExtractor.extract(input);
+    if (dependencies.openaiExtractor) {
+      openaiPatch = await dependencies.openaiExtractor.extract(input);
+    }
   }
-
-  const minutes = normalized.match(/(\d+)\s*(?:minutes?|mins?|分钟)/);
-  return minutes ? Number(minutes[1]) : null;
+  const merged = mergeRawFacts({
+    prior: request.prior,
+    baseRevision: request.baseRevision,
+    ...(request.correction ? { correction: request.correction } : {}),
+    deterministicPatch,
+    ...(openaiPatch ? { openaiPatch } : {})
+  });
+  const context = resolveClaimContext({ state: merged.state });
+  return {
+    baseRevision: merged.baseRevision,
+    claimState: merged.state,
+    status: context.scenarios.status === "needs_information" ? "needs_information" : "ready"
+  };
 }
 
-function inferDisruptionType(text: string): ClaimFacts["disruptionType"] {
-  const normalized = text.toLowerCase();
-  if (/cancelled|canceled|cancellation|取消/.test(normalized)) {
-    return "cancellation";
-  }
-  if (/denied boarding|bumped|oversold|overbooked|拒载|超售/.test(normalized)) {
-    return "denied_boarding";
-  }
-  if (/delayed|delay|late|延误|晚点/.test(normalized)) {
-    return "delay";
-  }
-  if (/no room|hotel walk|酒店超售|没有房间|到店没房|到店无房/.test(normalized)) {
-    return "hotel_walk";
-  }
-  return "unknown";
+function legacyFactsToState(facts: ClaimFacts): ClaimState {
+  const empty = emptyRawClaimFacts();
+  const raw: RawClaimFacts = {
+    ...empty,
+    incidentType: facts.issueType === "unknown" ? null : facts.issueType,
+    providerType: facts.providerType === "unknown" ? null : facts.providerType,
+    provider: facts.provider,
+    operatingCarrier: facts.operatingCarrier,
+    origin: {
+      city: facts.origin.city,
+      airport: facts.origin.airport,
+      country: facts.origin.country
+    },
+    destination: {
+      city: facts.destination.city,
+      airport: facts.destination.airport,
+      country: facts.destination.country
+    },
+    reasonCategory: facts.disruptionReason === "unknown" ? null : facts.disruptionReason,
+    finalArrivalDelayMinutes: facts.arrivalDelayMinutes,
+    isOvernight: facts.isOvernight,
+    deniedBoardingKind: facts.deniedBoardingKind === "unknown" ? null : facts.deniedBoardingKind,
+    bookingChannel: facts.bookingChannel === "unknown" ? null : facts.bookingChannel,
+    loyaltyStatus: facts.loyaltyStatus,
+    expenses: [...facts.expenses],
+    evidence: [...facts.evidence],
+    userGoal: facts.userGoal
+  };
+  return {
+    facts: raw,
+    provenance: {},
+    revision: 0,
+    conflicts: [],
+    unresolvedFields: []
+  };
 }
 
-function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFacts {
-  const extracted = classifyInput(message);
-  const route = inferRouteLocations(message);
-  const disruptionType = inferDisruptionType(message);
-  const delayMinutes = extractArrivalDelayMinutes(message);
-  const incomingIssue = isMvpIssueType(extracted.issueType)
-    ? extracted.issueType
-    : current.issueType;
-
+function rawFactsToLegacyFacts(facts: RawClaimFacts): ClaimFacts {
+  const disruptionTypeByIncident: Record<
+    NonNullable<RawClaimFacts["incidentType"]>,
+    ClaimFacts["disruptionType"]
+  > = {
+    hotel_walk: "hotel_walk",
+    airline_delay: "delay",
+    airline_cancellation: "cancellation",
+    denied_boarding: "denied_boarding"
+  };
   return normalizeClaimFacts({
-    ...current,
-    issueType: incomingIssue,
-    providerType:
-      extracted.providerType === "hotel" || extracted.providerType === "airline"
-        ? extracted.providerType
-        : current.providerType,
-    provider: extracted.provider ?? current.provider,
-    operatingCarrier: extracted.operatingCarrier ?? current.operatingCarrier,
-    operatingCarrierRegion: extracted.operatingCarrierRegion ?? current.operatingCarrierRegion,
-    origin: mergeLocation(current.origin, route.origin),
-    destination: mergeLocation(current.destination, route.destination),
-    disruptionType: disruptionType === "unknown" ? current.disruptionType : disruptionType,
+    ...emptyClaimFacts(),
+    issueType: facts.incidentType ?? "unknown",
+    providerType: facts.providerType ?? "unknown",
+    provider: facts.provider,
+    operatingCarrier: facts.operatingCarrier,
+    origin: { ...facts.origin, region: null },
+    destination: { ...facts.destination, region: null },
+    disruptionType: facts.incidentType ? disruptionTypeByIncident[facts.incidentType] : "unknown",
     disruptionReason:
-      extracted.disruptionReason && extracted.disruptionReason !== "unknown"
-        ? extracted.disruptionReason
-        : current.disruptionReason,
-    arrivalDelayMinutes: delayMinutes ?? current.arrivalDelayMinutes,
-    isOvernight: extracted.isOvernight ?? current.isOvernight,
-    deniedBoardingKind:
-      extracted.deniedBoardingKind && extracted.deniedBoardingKind !== "unknown"
-        ? extracted.deniedBoardingKind
-        : current.deniedBoardingKind,
-    bookingChannel: extracted.bookingChannel ?? current.bookingChannel,
-    loyaltyStatus: extracted.loyaltyStatus ?? current.loyaltyStatus,
-    confidence: extracted.confidence === "high" ? "high" : current.confidence
+      facts.reasonCategory === "other_uncontrollable"
+        ? "unknown"
+        : (facts.reasonCategory ?? "unknown"),
+    arrivalDelayMinutes: facts.finalArrivalDelayMinutes,
+    isOvernight: facts.isOvernight,
+    deniedBoardingKind: facts.deniedBoardingKind ?? "unknown",
+    bookingChannel: facts.bookingChannel ?? "unknown",
+    loyaltyStatus: facts.loyaltyStatus,
+    expenses: [...facts.expenses],
+    evidence: [...facts.evidence],
+    userGoal: facts.userGoal,
+    confidence: facts.incidentType ? "high" : "low"
   });
 }
 
-function mergeLlmFactsWithDeterministic(
-  llmFacts: ClaimFacts,
-  deterministicFacts: ClaimFacts
-): ClaimFacts {
-  return normalizeClaimFacts({
-    ...deterministicFacts,
-    issueType: llmFacts.issueType === "unknown" ? deterministicFacts.issueType : llmFacts.issueType,
-    providerType:
-      llmFacts.providerType === "unknown" ? deterministicFacts.providerType : llmFacts.providerType,
-    provider: llmFacts.provider ?? deterministicFacts.provider,
-    operatingCarrier: llmFacts.operatingCarrier ?? deterministicFacts.operatingCarrier,
-    operatingCarrierRegion:
-      llmFacts.operatingCarrierRegion ?? deterministicFacts.operatingCarrierRegion,
-    origin: mergeLocation(deterministicFacts.origin, llmFacts.origin),
-    destination: mergeLocation(deterministicFacts.destination, llmFacts.destination),
-    disruptionType:
-      llmFacts.disruptionType === "unknown"
-        ? deterministicFacts.disruptionType
-        : llmFacts.disruptionType,
-    disruptionReason:
-      llmFacts.disruptionReason === "unknown"
-        ? deterministicFacts.disruptionReason
-        : llmFacts.disruptionReason,
-    arrivalDelayMinutes: llmFacts.arrivalDelayMinutes ?? deterministicFacts.arrivalDelayMinutes,
-    isOvernight: llmFacts.isOvernight ?? deterministicFacts.isOvernight,
-    deniedBoardingKind:
-      llmFacts.deniedBoardingKind === "unknown"
-        ? deterministicFacts.deniedBoardingKind
-        : llmFacts.deniedBoardingKind,
-    bookingChannel:
-      llmFacts.bookingChannel === "unknown"
-        ? deterministicFacts.bookingChannel
-        : llmFacts.bookingChannel,
-    loyaltyStatus: llmFacts.loyaltyStatus ?? deterministicFacts.loyaltyStatus,
-    expenses: Array.from(new Set([...deterministicFacts.expenses, ...llmFacts.expenses])),
-    evidence: Array.from(new Set([...deterministicFacts.evidence, ...llmFacts.evidence])),
-    userGoal: llmFacts.userGoal ?? deterministicFacts.userGoal,
-    confidence: llmFacts.confidence
-  });
+function isChinese(text: string): boolean {
+  return /[\p{Script=Han}]/u.test(text);
 }
 
 function questionForMissingFields(
@@ -243,9 +223,8 @@ function questionForMissingFields(
       ? "你最终晚到多久？航司给出的延误或取消原因是什么？"
       : "How late did you reach your destination, and what reason did the airline give?";
   }
-  if (needsArrivalDelay) {
+  if (needsArrivalDelay)
     return chinese ? "你最终晚到多久？" : "How late did you reach your destination?";
-  }
   if (needsDisruptionReason) {
     return chinese ? "航司给出的延误或取消原因是什么？" : "What reason did the airline give?";
   }
@@ -254,29 +233,9 @@ function questionForMissingFields(
       ? "航班是延误、取消，还是拒绝登机？"
       : "Was the flight delayed, cancelled, or denied boarding?";
   }
-
   return chinese
     ? "请再补充一些事情经过。"
     : "Please add a little more detail about what happened.";
-}
-
-async function extractWithLlm(
-  client: StructuredOutputClient,
-  message: string,
-  currentFacts: ClaimFacts
-): Promise<ClaimFacts> {
-  const raw = await client.generate<unknown>({
-    schemaName: "travel_claim_facts",
-    schema: claimFactsJsonSchema as unknown as Record<string, unknown>,
-    instructions: intakeInstructions,
-    input: JSON.stringify({ priorFacts: currentFacts, latestUserMessage: message })
-  });
-  const parsed = parseClaimFacts(raw);
-  if (!parsed.success) {
-    throw new Error(`LLM returned invalid claim facts: ${parsed.errors.join("; ")}`);
-  }
-
-  return parsed.data;
 }
 
 export async function processIntake(
@@ -284,29 +243,33 @@ export async function processIntake(
   currentFacts: ClaimFacts = emptyClaimFacts(),
   dependencies: IntakeDependencies = {}
 ): Promise<IntakeResult> {
-  const configuredClient =
-    dependencies.llmClient === undefined
-      ? createStructuredOutputClientFromEnv()
-      : (dependencies.llmClient ?? undefined);
-  const deterministicFacts = mergeDeterministicFacts(message, currentFacts);
-  let facts: ClaimFacts;
-  let extractionMode: IntakeExtractionMode = "deterministic";
-  let warning: IntakeResult["warning"];
-
-  if (configuredClient) {
-    try {
-      const llmFacts = await extractWithLlm(configuredClient, message, currentFacts);
-      facts = mergeLlmFactsWithDeterministic(llmFacts, deterministicFacts);
-      extractionMode = "llm";
-    } catch {
-      facts = deterministicFacts;
-      warning = "llm_fallback_used";
-    }
-  } else {
-    facts = deterministicFacts;
-    warning = "llm_not_configured";
+  const localExtractor = dependencies.localExtractor ?? new LocalRawFactExtractor();
+  const configuredOpenAIExtractor =
+    dependencies.openaiExtractor ??
+    (dependencies.llmClient ? new OpenAIRawFactExtractor(dependencies.llmClient) : undefined);
+  const request: AnalyzeClaimRequest = {
+    message,
+    prior: legacyFactsToState(currentFacts),
+    baseRevision: 0,
+    requestedMode: configuredOpenAIExtractor ? "gpt" : "local"
+  };
+  let response: AnalyzeClaimIntakeResponse;
+  let extractionMode: IntakeExtractionMode = configuredOpenAIExtractor ? "llm" : "deterministic";
+  let warning: IntakeResult["warning"] = configuredOpenAIExtractor
+    ? undefined
+    : "llm_not_configured";
+  try {
+    response = await processClaimTurn(request, {
+      localExtractor,
+      ...(configuredOpenAIExtractor ? { openaiExtractor: configuredOpenAIExtractor } : {})
+    });
+  } catch (error) {
+    if (!configuredOpenAIExtractor) throw error;
+    response = await processClaimTurn({ ...request, requestedMode: "local" }, { localExtractor });
+    extractionMode = "deterministic";
+    warning = "llm_fallback_used";
   }
-
+  const facts = rawFactsToLegacyFacts(response.claimState.facts);
   const missingFields = getMissingClaimFields(facts);
   return {
     status: missingFields.length === 0 ? "ready" : "needs_info",
@@ -318,5 +281,65 @@ export async function processIntake(
         : null,
     extractionMode,
     ...(warning ? { warning } : {})
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasOwn(value: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function isCanonicalShape(body: Record<string, unknown>): boolean {
+  return ["prior", "baseRevision", "correction", "requestedMode", "privacyAcknowledged"].some(
+    (key) => hasOwn(body, key)
+  );
+}
+
+export function createIntakePostHandler(dependencies: ProcessClaimTurnDependencies) {
+  return async function intakePost(request: Request): Promise<Response> {
+    const body = (await request.json().catch(() => null)) as unknown;
+    if (!isRecord(body)) {
+      return Response.json({ error: "Invalid JSON request." }, { status: 400 });
+    }
+    if (isCanonicalShape(body)) {
+      try {
+        return Response.json(await processClaimTurn(body, dependencies));
+      } catch (error) {
+        return Response.json(
+          {
+            error: "Invalid canonical intake request.",
+            details: error instanceof Error ? error.message : "invalid_analyze_claim_request"
+          },
+          { status: 400 }
+        );
+      }
+    }
+    if (!hasOwn(body, "facts")) {
+      return Response.json({ error: "Invalid intake request shape." }, { status: 400 });
+    }
+    const message = typeof body.message === "string" ? body.message.trim() : "";
+    if (!message) {
+      return Response.json({ error: "Please provide a message." }, { status: 400 });
+    }
+    let currentFacts = emptyClaimFacts();
+    if (body.facts !== null) {
+      const parsed = parseClaimFacts(body.facts);
+      if (!parsed.success) {
+        return Response.json(
+          { error: "Invalid existing claim facts.", details: parsed.errors },
+          { status: 400 }
+        );
+      }
+      currentFacts = parsed.data;
+    }
+    return Response.json(
+      await processIntake(message, currentFacts, {
+        llmClient: null,
+        localExtractor: dependencies.localExtractor
+      })
+    );
   };
 }

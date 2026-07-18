@@ -169,6 +169,31 @@ export type ClaimState = {
   unresolvedFields: RawFactPath[];
 };
 
+export type RawFactPatch = {
+  set: Partial<Record<RawFactPath, RawFactValue | null>>;
+};
+
+export type UserFactEdit = {
+  set: Partial<Record<RawFactPath, RawFactValue>>;
+  clear: RawFactPath[];
+};
+
+export type MergeRawFactsInput = {
+  prior: ClaimState;
+  baseRevision: number;
+  correction?: UserFactEdit;
+  deterministicPatch: RawFactPatch;
+  openaiPatch?: RawFactPatch;
+};
+
+export type MergeRawFactsResult = {
+  state: ClaimState;
+  baseRevision: number;
+  changedFields: RawFactPath[];
+  conflicts: FactConflict[];
+  unresolvedFields: RawFactPath[];
+};
+
 export type ResolvedValue<T> = {
   value: T;
   source:

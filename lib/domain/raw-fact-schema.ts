@@ -4,6 +4,7 @@ import {
   type AssistanceFacts,
   type ClaimState,
   type RawClaimFacts,
+  type RawFactPatch,
   type RawFactPath,
   type RawFactValue,
   type RawLocation
@@ -17,6 +18,7 @@ export {
   type FactProvenance,
   type FactSource,
   type RawClaimFacts,
+  type RawFactPatch,
   type RawFactPath,
   type RawFactValue,
   type RawLocation
@@ -38,6 +40,97 @@ const reasonCategories = [
 ] as const;
 const deniedBoardingKinds = ["voluntary", "involuntary"] as const;
 const bookingChannels = ["direct", "ota", "portal"] as const;
+const rawFactPathSet: ReadonlySet<string> = new Set(RAW_FACT_PATHS);
+
+const enumSchemas: Partial<Record<RawFactPath, readonly string[]>> = {
+  incidentType: CANONICAL_INCIDENTS,
+  providerType: providerTypes,
+  reasonCategory: reasonCategories,
+  deniedBoardingKind: deniedBoardingKinds,
+  bookingChannel: bookingChannels
+};
+
+const integerPaths: ReadonlySet<RawFactPath> = new Set([
+  "finalArrivalDelayMinutes",
+  "cancellationNoticeHours",
+  "replacementArrivalDelayMinutes"
+]);
+
+const arrayPaths: ReadonlySet<RawFactPath> = new Set(["expenses", "evidence"]);
+
+const booleanPaths: ReadonlySet<RawFactPath> = new Set([
+  "userInitiatedChange",
+  "isOvernight",
+  "assistance.refundOffered",
+  "assistance.refundAccepted",
+  "assistance.creditOffered",
+  "assistance.creditAccepted",
+  "assistance.reroutingOffered",
+  "assistance.reroutingAccepted",
+  "assistance.replacementTravelOffered",
+  "assistance.replacementTravelAccepted",
+  "assistance.lodgingOffered",
+  "assistance.lodgingAccepted",
+  "assistance.mealsOffered",
+  "assistance.mealsAccepted",
+  "assistance.groundTransportOffered",
+  "assistance.groundTransportAccepted",
+  "oversalesConfirmed",
+  "confirmedReservation",
+  "checkedInOnTime",
+  "atGateOnTime",
+  "documentsCompliant",
+  "confirmedHotelReservation",
+  "qualifyingHotelReservation",
+  "membershipAttached",
+  "wasWalked",
+  "replacementLodgingProvided"
+]);
+
+function schemaForRawFactPath(path: RawFactPath): Record<string, unknown> {
+  const enumValues = enumSchemas[path];
+  if (enumValues) {
+    return { anyOf: [{ type: "string", enum: enumValues }, { type: "null" }] };
+  }
+  if (integerPaths.has(path)) {
+    return { anyOf: [{ type: "integer", minimum: 0 }, { type: "null" }] };
+  }
+  if (booleanPaths.has(path)) {
+    return { anyOf: [{ type: "boolean" }, { type: "null" }] };
+  }
+  if (arrayPaths.has(path)) {
+    return {
+      anyOf: [
+        {
+          type: "array",
+          maxItems: 20,
+          items: { type: "string", maxLength: 256 }
+        },
+        { type: "null" }
+      ]
+    };
+  }
+  return {
+    anyOf: [{ type: "string", maxLength: path === "userGoal" ? 500 : 256 }, { type: "null" }]
+  };
+}
+
+const rawFactPatchProperties = Object.fromEntries(
+  RAW_FACT_PATHS.map((path) => [path, schemaForRawFactPath(path)])
+) as Record<RawFactPath, Record<string, unknown>>;
+
+export const rawFactPatchJsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    set: {
+      type: "object",
+      additionalProperties: false,
+      properties: rawFactPatchProperties
+    }
+  },
+  required: ["set"]
+} as const;
 
 export function emptyRawClaimFacts(): RawClaimFacts {
   return {
@@ -348,6 +441,58 @@ export function parseRawClaimFacts(value: unknown): RawClaimFactsParseResult {
   };
 
   return errors.length > 0 ? { success: false, errors } : { success: true, data: facts };
+}
+
+export type RawFactPatchParseResult =
+  | { success: true; data: RawFactPatch }
+  | { success: false; errors: string[] };
+
+function parseRawFactPatchValue(
+  path: RawFactPath,
+  value: unknown,
+  errors: string[]
+): RawFactValue | null {
+  const label = `set.${path}`;
+  const enumValues = enumSchemas[path];
+  if (enumValues) return parseNullableEnum(value, enumValues, label, errors);
+  if (integerPaths.has(path)) return parseNullableNonNegativeInteger(value, label, errors);
+  if (booleanPaths.has(path)) return parseNullableBoolean(value, label, errors);
+  if (arrayPaths.has(path)) {
+    if (value === null) return null;
+    return parseStringArray(value, label, errors);
+  }
+  return parseNullableString(value, label, errors, path === "userGoal" ? 500 : 256);
+}
+
+export function parseRawFactPatch(value: unknown): RawFactPatchParseResult {
+  if (!isRecord(value)) {
+    return { success: false, errors: ["patch must be an object"] };
+  }
+
+  const errors: string[] = [];
+  const topLevelKeys = Object.keys(value);
+  topLevelKeys.forEach((key) => {
+    if (key !== "set") errors.push(`${key} is not allowed in a raw fact patch`);
+  });
+  if (!Object.prototype.hasOwnProperty.call(value, "set")) {
+    errors.push("set is required");
+  }
+  if (!isRecord(value.set)) {
+    errors.push("set must be an object");
+    return { success: false, errors };
+  }
+
+  const set: Partial<Record<RawFactPath, RawFactValue | null>> = {};
+  Object.entries(value.set).forEach(([candidatePath, candidateValue]) => {
+    if (!rawFactPathSet.has(candidatePath)) {
+      errors.push(`set.${candidatePath} is not an allowed raw fact path`);
+      return;
+    }
+    const path = candidatePath as RawFactPath;
+    set[path] = parseRawFactPatchValue(path, candidateValue, errors);
+  });
+
+  return errors.length > 0 ? { success: false, errors } : { success: true, data: { set } };
 }
 
 export function writeResolutionPath(
