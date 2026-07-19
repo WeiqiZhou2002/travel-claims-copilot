@@ -1,6 +1,3 @@
-import { createIntakePostHandler } from "../../../lib/intake";
-import { LocalRawFactExtractor } from "../../../lib/model/raw-fact-extractor";
+import { createIntakeRouteHandler } from "../../../lib/api/intake-route-handler";
 
-export const POST = createIntakePostHandler({
-  localExtractor: new LocalRawFactExtractor()
-});
+export const POST = createIntakeRouteHandler();

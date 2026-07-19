@@ -46,7 +46,7 @@ describe("public scenario scope", () => {
   ])("rejects noncanonical analyze input", async (body) => {
     const response = await analyzeRequest(body);
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
     expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
   });
 
@@ -59,7 +59,7 @@ describe("public scenario scope", () => {
   ])("rejects legacy %s input before analysis", async (_label, body) => {
     const response = await analyzeRequest(body);
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
     expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
   });
 
@@ -68,7 +68,7 @@ describe("public scenario scope", () => {
     async (issueType) => {
       const response = await analyzeRequest({ issueType });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(422);
       expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
     }
   );
@@ -87,7 +87,7 @@ describe("public scenario scope", () => {
       [selector]: value
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
     expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
   });
 
@@ -105,7 +105,7 @@ describe("public scenario scope", () => {
   ])("rejects malformed canonical input with %s", async (_label, body) => {
     const response = await analyzeRequest(body);
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
     expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
   });
 

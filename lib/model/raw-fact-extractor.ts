@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file -- frozen extractor implementations share this boundary */
 import { classifyInput } from "../classifier";
+import { INPUT_LIMITS } from "../api/input-limits";
 import { inferRouteLocationsValue, findCanonicalProviderMatch } from "../domain/context-resolver";
 import {
   CANONICAL_INCIDENTS,
@@ -183,7 +184,8 @@ export class OpenAIRawFactExtractor implements RawFactExtractor {
         currentMessage: input.message,
         prior: input.prior,
         unresolvedFields: [...input.unresolvedFields]
-      })
+      }),
+      maxOutputTokens: INPUT_LIMITS.modelOutputTokens
     });
     const parsed = parseRawFactPatch(value);
     if (!parsed.success) {

@@ -1,4 +1,5 @@
 import { DeepSeekChatCompletionsClient } from "./deepseek-chat-completions-client";
+import { INPUT_LIMITS } from "./api/input-limits";
 
 export { DeepSeekChatCompletionsClient } from "./deepseek-chat-completions-client";
 
@@ -7,6 +8,7 @@ export type StructuredOutputRequest = {
   schema: Record<string, unknown>;
   instructions: string;
   input: string;
+  maxOutputTokens: number;
 };
 
 export interface StructuredOutputClient {
@@ -69,6 +71,9 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
   }
 
   async generate<T>(request: StructuredOutputRequest): Promise<T> {
+    if (request.maxOutputTokens !== INPUT_LIMITS.modelOutputTokens) {
+      throw new Error("invalid_model_output_token_limit");
+    }
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
@@ -83,6 +88,7 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
           model: this.model,
           reasoning: { effort: "none" },
           store: false,
+          max_output_tokens: request.maxOutputTokens,
           instructions: request.instructions,
           input: request.input,
           text: {
@@ -105,6 +111,9 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
       const text = extractResponseText(await response.json());
       if (!text) {
         throw new Error("OpenAI Responses API returned no structured output text");
+      }
+      if (new TextEncoder().encode(text).byteLength > INPUT_LIMITS.modelOutputBytes) {
+        throw new Error("model_output_too_large");
       }
 
       return JSON.parse(text) as T;

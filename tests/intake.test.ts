@@ -212,7 +212,8 @@ describe("OpenAI Responses client", () => {
       schemaName: "test_schema",
       schema: { type: "object" },
       instructions: "Extract facts.",
-      input: "Example"
+      input: "Example",
+      maxOutputTokens: 1_200
     });
 
     const request = JSON.parse(fetcher.mock.calls[0][1].body as string);
@@ -256,7 +257,8 @@ describe("DeepSeek Chat Completions client", () => {
       schemaName: "claim_facts",
       schema: { type: "object", required: ["issueType"] },
       instructions: "Extract facts.",
-      input: "Example"
+      input: "Example",
+      maxOutputTokens: 1_200
     });
 
     expect(result).toEqual(emptyClaimFacts());
@@ -298,7 +300,8 @@ describe("DeepSeek Chat Completions client", () => {
         schemaName: "claim_facts",
         schema: { type: "object" },
         instructions: "Extract facts.",
-        input: "Example"
+        input: "Example",
+        maxOutputTokens: 1_200
       })
     ).rejects.toThrow("truncated");
   });
@@ -1000,6 +1003,7 @@ describe("canonical revision-safe intake", () => {
     const response = await POST(
       new Request("http://localhost/api/intake", {
         method: "POST",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({
           message: "My flight was delayed by 20 minutes.",
           prior: claimState(),

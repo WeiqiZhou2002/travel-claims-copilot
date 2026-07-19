@@ -9,6 +9,7 @@ import {
   type RawFactValue,
   type RawLocation
 } from "./claim-contract";
+import { INPUT_LIMITS } from "../api/input-limits";
 
 export {
   RAW_FACT_PATHS,
@@ -103,15 +104,24 @@ function schemaForRawFactPath(path: RawFactPath): Record<string, unknown> {
       anyOf: [
         {
           type: "array",
-          maxItems: 20,
-          items: { type: "string", maxLength: 256 }
+          maxItems: INPUT_LIMITS.collectionItems,
+          items: { type: "string", maxLength: INPUT_LIMITS.collectionItemCodePoints }
         },
         { type: "null" }
       ]
     };
   }
   return {
-    anyOf: [{ type: "string", maxLength: path === "userGoal" ? 500 : 256 }, { type: "null" }]
+    anyOf: [
+      {
+        type: "string",
+        maxLength:
+          path === "userGoal"
+            ? INPUT_LIMITS.userGoalCodePoints
+            : INPUT_LIMITS.ordinaryStringCodePoints
+      },
+      { type: "null" }
+    ]
   };
 }
 
@@ -204,18 +214,18 @@ function parseNullableString(
   value: unknown,
   path: string,
   errors: string[],
-  maximumCodePoints = 256
+  maximumCodePoints: number = INPUT_LIMITS.ordinaryStringCodePoints
 ): string | null {
   if (value === null) return null;
   if (typeof value !== "string") {
     errors.push(`${path} must be a string or null`);
     return null;
   }
-  const trimmed = value.trim();
-  if ([...trimmed].length > maximumCodePoints) {
+  if ([...value].length > maximumCodePoints) {
     errors.push(`${path} must contain at most ${maximumCodePoints} Unicode code points`);
     return null;
   }
+  const trimmed = value.trim();
   return trimmed || null;
 }
 
@@ -254,15 +264,17 @@ function parseStringArray(value: unknown, path: string, errors: string[]): strin
     errors.push(`${path} must be an array of strings`);
     return [];
   }
-  const exceedsMaximumItems = value.length > 20;
+  const exceedsMaximumItems = value.length > INPUT_LIMITS.collectionItems;
   if (exceedsMaximumItems) {
-    errors.push(`${path} must contain at most 20 items`);
+    errors.push(`${path} must contain at most ${INPUT_LIMITS.collectionItems} items`);
   }
   const hasInvalidItem = value.some(
-    (item) => typeof item !== "string" || [...item.trim()].length > 256
+    (item) => typeof item !== "string" || [...item].length > INPUT_LIMITS.collectionItemCodePoints
   );
   if (hasInvalidItem) {
-    errors.push(`${path} items must be strings of at most 256 Unicode code points`);
+    errors.push(
+      `${path} items must be strings of at most ${INPUT_LIMITS.collectionItemCodePoints} Unicode code points`
+    );
   }
   if (exceedsMaximumItems || hasInvalidItem) {
     return [];
@@ -437,7 +449,12 @@ export function parseRawClaimFacts(value: unknown): RawClaimFactsParseResult {
     ),
     expenses: parseStringArray(value.expenses, "expenses", errors),
     evidence: parseStringArray(value.evidence, "evidence", errors),
-    userGoal: parseNullableString(value.userGoal, "userGoal", errors, 500)
+    userGoal: parseNullableString(
+      value.userGoal,
+      "userGoal",
+      errors,
+      INPUT_LIMITS.userGoalCodePoints
+    )
   };
 
   return errors.length > 0 ? { success: false, errors } : { success: true, data: facts };
@@ -461,7 +478,12 @@ function parseRawFactPatchValue(
     if (value === null) return null;
     return parseStringArray(value, label, errors);
   }
-  return parseNullableString(value, label, errors, path === "userGoal" ? 500 : 256);
+  return parseNullableString(
+    value,
+    label,
+    errors,
+    path === "userGoal" ? INPUT_LIMITS.userGoalCodePoints : INPUT_LIMITS.ordinaryStringCodePoints
+  );
 }
 
 export function parseRawFactPatch(value: unknown): RawFactPatchParseResult {
