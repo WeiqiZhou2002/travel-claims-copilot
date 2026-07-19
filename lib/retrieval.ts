@@ -1,5 +1,9 @@
 import { getIssueAliases, normalizeIssueType } from "./issueTaxonomy";
-import { controllabilityFromReason, policyRegionsFromCountry } from "./policyScope";
+import {
+  controllabilityFromReason,
+  evaluatePolicyApplicability,
+  policyRegionsFromCountry
+} from "./policyScope";
 import { rankCases, rankPolicies, rankScripts } from "./retrievalScoring";
 import type {
   Case,
@@ -52,6 +56,7 @@ export function buildRetrievalQuery(facts: ExtractedFacts): RetrievalQuery {
     bookingChannel: facts.bookingChannel,
     loyaltyStatus: facts.loyaltyStatus,
     disruptionReason: facts.disruptionReason,
+    arrivalDelayMinutes: facts.arrivalDelayMinutes,
     isOvernight: facts.isOvernight,
     deniedBoardingKind: facts.deniedBoardingKind,
     operatingCarrier: facts.operatingCarrier ?? facts.provider,
@@ -109,15 +114,19 @@ export function retrieveKnowledge(
     : undefined;
   const resolvedFacts = withSelectedCaseFacts(facts, selectedCase);
   const query = buildRetrievalQuery(resolvedFacts);
+  const officialBasis = searchPolicies(
+    query,
+    policies,
+    limits.policyLimit ?? defaultLimits.policyLimit
+  );
 
   return {
     facts: resolvedFacts,
     query,
     issueAliases: getIssueAliases(resolvedFacts.issueType),
-    officialBasis: searchPolicies(
-      query,
-      policies,
-      limits.policyLimit ?? defaultLimits.policyLimit
+    officialBasis,
+    policyAssessments: officialBasis.map((policy) =>
+      evaluatePolicyApplicability(policy, query)
     ),
     similarCases: searchCases(query, cases, limits.caseLimit ?? defaultLimits.caseLimit),
     scripts: searchScripts(query, scripts, limits.scriptLimit ?? defaultLimits.scriptLimit),

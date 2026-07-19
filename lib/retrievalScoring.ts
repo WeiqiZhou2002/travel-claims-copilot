@@ -1,6 +1,7 @@
 import { getIssueAliases } from "./issueTaxonomy";
 import {
   applicabilityRuleMatches,
+  evaluatePolicyApplicability,
   policyAppliesToRoute,
   policyRegionsFromCountry
 } from "./policyScope";
@@ -332,22 +333,18 @@ export function rankPolicies(
   policies: Policy[]
 ): ScoredRetrievalItem<Policy>[] {
   const candidates = policies.filter((policy) => {
-    const incidentMatches = policy.incident_types.some(
-      (incidentType) => incidentType === query.issueType
-    );
-    const regionMatches = policyAppliesToRoute(policy, query);
-    const providerMatches =
-      policy.applicable_providers.length === 0 ||
-      (query.provider
-        ? policy.applicable_providers.some(
-            (provider) => providersMatch(provider, query.provider)
-          )
-        : false);
-    const controllabilityMatches =
-      policy.required_controllability === "any" ||
-      policy.required_controllability === query.controllability;
+    const assessment = evaluatePolicyApplicability(policy, query);
+    if (assessment.status === "met") {
+      return true;
+    }
+    if (assessment.status === "not_met") {
+      return false;
+    }
 
-    return incidentMatches && regionMatches && providerMatches && controllabilityMatches;
+    return (
+      policy.applicable_regions.includes("global") ||
+      policy.applicable_regions.some((region) => query.policyRegions.includes(region))
+    );
   });
   const scored = candidates.map((policy) => {
     const result: ScoredRetrievalItem<Policy> = { item: policy, score: 0, reasons: [] };

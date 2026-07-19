@@ -55,6 +55,29 @@ export type PolicyApplicabilityRule =
   | "china_flight_regulation";
 export type Controllability = "controllable" | "uncontrollable" | "unknown";
 export type PolicyControllability = Controllability | "any";
+export type ApplicabilityStatus = "met" | "unknown" | "not_met";
+export type PolicyConditionKind = "scope" | "remedy";
+export type PolicyConditionCode =
+  | "incident"
+  | "route"
+  | "provider"
+  | "controllability"
+  | "arrival_delay"
+  | "denied_boarding_kind";
+
+export type PolicyConditionAssessment = {
+  code: PolicyConditionCode;
+  kind: PolicyConditionKind;
+  label: string;
+  status: ApplicabilityStatus;
+  detail: string;
+};
+
+export type PolicyApplicabilityAssessment = {
+  policyId: string;
+  status: ApplicabilityStatus;
+  conditions: PolicyConditionAssessment[];
+};
 
 export type Policy = {
   policy_id: string;
@@ -148,6 +171,7 @@ export type ExtractedFacts = {
     | "late_inbound_aircraft"
     | "other_controllable"
     | "unknown";
+  arrivalDelayMinutes?: number;
   isOvernight?: boolean;
   deniedBoardingKind?: "voluntary" | "involuntary" | "unknown";
   operatingCarrier?: string;
@@ -171,6 +195,7 @@ export type RetrievalQuery = {
   bookingChannel?: Case["booking_channel"];
   loyaltyStatus?: string;
   disruptionReason?: ExtractedFacts["disruptionReason"];
+  arrivalDelayMinutes?: number;
   isOvernight?: boolean;
   deniedBoardingKind?: ExtractedFacts["deniedBoardingKind"];
   operatingCarrier?: string;
@@ -217,6 +242,7 @@ export type RetrievalResult = {
   query: RetrievalQuery;
   issueAliases: string[];
   officialBasis: Policy[];
+  policyAssessments: PolicyApplicabilityAssessment[];
   similarCases: Case[];
   scripts: Script[];
   selectedCase?: Case;
@@ -236,6 +262,7 @@ export type AnalysisResult = {
   strength: "low" | "medium" | "high";
   summary: string;
   officialBasis: Policy[];
+  policyAssessments: PolicyApplicabilityAssessment[];
   similarCases: Case[];
   suggestedAsks: SuggestedAsks;
   evidenceChecklist: string[];

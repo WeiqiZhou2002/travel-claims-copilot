@@ -644,6 +644,7 @@ export function generateAnalysis(
     strength,
     summary: buildSummary(facts, retrieval),
     officialBasis: retrieval.officialBasis,
+    policyAssessments: retrieval.policyAssessments,
     similarCases: retrieval.similarCases,
     suggestedAsks: getSuggestedAsks(facts.issueType, retrieval),
     evidenceChecklist: getEvidence(facts.issueType, retrieval),

@@ -18,6 +18,7 @@ type MatchResult = {
   bookingChannel?: Case["booking_channel"];
   loyaltyStatus?: string;
   disruptionReason?: ExtractedFacts["disruptionReason"];
+  arrivalDelayMinutes?: number;
   isOvernight?: boolean;
   deniedBoardingKind?: ExtractedFacts["deniedBoardingKind"];
   operatingCarrierRegion?: PolicyRouteRegion;
@@ -34,6 +35,19 @@ const loyaltyStatuses = [
   { status: "Diamond", terms: ["diamond", "钻石", "钻卡"] },
   { status: "Gold", terms: ["gold", "金卡"] }
 ] as const;
+
+const hourWords: Record<string, number> = {
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+  nine: 9,
+  ten: 10
+};
 
 function hasTerm(text: string, term: string): boolean {
   if (/^[a-z0-9]+$/i.test(term) && term.length <= 3) {
@@ -134,6 +148,23 @@ function findDisruptionReason(text: string): ExtractedFacts["disruptionReason"] 
   return "unknown";
 }
 
+function findArrivalDelayMinutes(text: string): number | undefined {
+  const digitHours = text.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|小时)/);
+  if (digitHours) {
+    return Math.round(Number(digitHours[1]) * 60);
+  }
+
+  const wordHours = text.match(
+    new RegExp(`\\b(${Object.keys(hourWords).join("|")})\\s+hours?\\b`)
+  );
+  if (wordHours) {
+    return hourWords[wordHours[1]] * 60;
+  }
+
+  const minutes = text.match(/(\d+)\s*(?:minutes?|mins?|分钟)/);
+  return minutes ? Number(minutes[1]) : undefined;
+}
+
 function findDeniedBoardingKind(text: string): ExtractedFacts["deniedBoardingKind"] {
   if (
     hasAny(text, [
@@ -187,6 +218,7 @@ function buildFacts(
     bookingChannel: match.bookingChannel,
     loyaltyStatus: match.loyaltyStatus,
     disruptionReason: match.disruptionReason,
+    arrivalDelayMinutes: match.arrivalDelayMinutes,
     isOvernight: match.isOvernight,
     deniedBoardingKind: match.deniedBoardingKind,
     operatingCarrier: match.providerType === "airline" ? match.provider : undefined,
@@ -207,6 +239,7 @@ function matchIssue(description: string): MatchResult {
   const bookingChannel = findBookingChannel(text);
   const loyaltyStatus = findLoyaltyStatus(text);
   const disruptionReason = findDisruptionReason(text);
+  const arrivalDelayMinutes = findArrivalDelayMinutes(text);
   const deniedBoardingKind = findDeniedBoardingKind(text);
   const isOvernight =
     hasAny(text, ["overnight", "next morning", "next day", "tomorrow", "过夜", "第二天"]).length > 0;
@@ -216,6 +249,7 @@ function matchIssue(description: string): MatchResult {
     bookingChannel,
     loyaltyStatus,
     disruptionReason,
+    arrivalDelayMinutes,
     isOvernight,
     deniedBoardingKind
   };
