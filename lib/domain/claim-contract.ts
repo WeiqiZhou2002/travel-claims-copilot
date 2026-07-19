@@ -250,6 +250,90 @@ export type ResolvedClaimContext = {
   scenarios: ScenarioResolution;
 };
 
+export type RemedyId =
+  | "hotel_relocation"
+  | "hotel_transport"
+  | "hotel_guarantee_compensation"
+  | "us_refund"
+  | "us_rerouting"
+  | "us_meal"
+  | "us_hotel"
+  | "us_ground_transport"
+  | "voluntary_bump_offer"
+  | "denied_boarding_written_rights"
+  | "denied_boarding_compensation"
+  | "eu_uk_care"
+  | "eu_uk_refund_or_rerouting"
+  | "eu_uk_fixed_compensation";
+
+export const CONDITION_IDS = {
+  marriott: [
+    "confirmed_hotel_reservation",
+    "reservation_not_honored",
+    "qualifying_reservation",
+    "membership_attached",
+    "qualifying_booking_channel",
+    "replacement_lodging_missing"
+  ],
+  usDisruption: [
+    "us_route",
+    "delay_or_cancellation",
+    "traveler_did_not_initiate",
+    "refund_alternative_declined",
+    "controllable_disruption",
+    "overnight_disruption",
+    "matching_carrier_commitment"
+  ],
+  usDeniedBoarding: [
+    "us_departure",
+    "oversales",
+    "confirmed_reservation",
+    "timely_check_in",
+    "timely_gate",
+    "documents_compliant",
+    "voluntary_boarding",
+    "involuntary_boarding",
+    "replacement_arrival_delay"
+  ],
+  euUkDisruption: [
+    "qualifying_route_and_carrier",
+    "delay_or_cancellation",
+    "care_delay_threshold",
+    "five_hour_delay",
+    "three_hour_arrival_delay",
+    "cancellation_notice",
+    "alternative_accepted",
+    "extraordinary_circumstances"
+  ]
+} as const;
+
+export type ConditionId = (typeof CONDITION_IDS)[keyof typeof CONDITION_IDS][number];
+
+export type ConditionResult = {
+  id: ConditionId;
+  label: string;
+  status: "matched" | "missing" | "excluded";
+  factFields: RawFactPath[];
+};
+
+export type RemedyConditionEvaluation = {
+  remedyId: RemedyId;
+  material: boolean;
+  matchedConditions: ConditionResult[];
+  missingConditions: ConditionResult[];
+  exclusions: ConditionResult[];
+};
+
+export type ScenarioConditionEvaluation = {
+  scenarioId: ScenarioId;
+  remedies: RemedyConditionEvaluation[];
+};
+
+export interface ScenarioEvaluator {
+  readonly scenarioId: ScenarioId;
+  evaluateConditions(context: ResolvedClaimContext): ScenarioConditionEvaluation;
+}
+
 export type ResolvedContextWithoutScenarios = Omit<ResolvedClaimContext, "scenarios">;
 
 export type PublicScenarioSummary = {

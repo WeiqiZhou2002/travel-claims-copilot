@@ -383,19 +383,22 @@ describe("server-owned context", () => {
   });
 
   it("builds the resolution copy once and never reads stored facts for eligibility", () => {
-    const contextSource = readFileSync(
-      fileURLToPath(new URL("../../lib/domain/context-resolver.ts", import.meta.url)),
-      "utf8"
-    );
-    const scenarioSource = readFileSync(
-      fileURLToPath(new URL("../../lib/domain/scenario-resolver.ts", import.meta.url)),
-      "utf8"
-    );
+    const eligibilitySources = [
+      "../../lib/domain/context-resolver.ts",
+      "../../lib/domain/scenario-resolver.ts",
+      "../../lib/domain/scenario-evaluator.ts",
+      "../../lib/domain/evaluators/marriott-hotel-walk.ts",
+      "../../lib/domain/evaluators/us-airline-disruption.ts",
+      "../../lib/domain/evaluators/us-denied-boarding.ts",
+      "../../lib/domain/evaluators/eu-uk-air-disruption.ts"
+    ].map((path) => readFileSync(fileURLToPath(new URL(path, import.meta.url)), "utf8"));
+    const contextSource = eligibilitySources[0] ?? "";
     const maskCalls = contextSource.match(/buildResolutionFacts\(input\.state\)/g) ?? [];
 
     expect(maskCalls).toHaveLength(1);
-    expect(contextSource).not.toMatch(/(?:input\.state|context\.raw|input\.raw)\.facts/);
-    expect(scenarioSource).not.toMatch(/(?:input\.state|context\.raw|input\.raw)\.facts/);
+    eligibilitySources.forEach((source) => {
+      expect(source).not.toMatch(/(?:input\.state|context\.raw|input\.raw)\.facts/);
+    });
   });
 
   it("keeps canonical registries independent from compatibility facades", () => {
