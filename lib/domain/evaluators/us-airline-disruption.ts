@@ -6,6 +6,7 @@ import type {
   RemedyId,
   ScenarioEvaluator
 } from "../claim-contract";
+import { locationResolutionFactFields } from "../context-resolver";
 
 const conditionIds = [
   "us_route",
@@ -54,10 +55,8 @@ export const usAirlineDisruptionEvaluator: ScenarioEvaluator = {
       if (origin === null || destination === null) status = "missing";
       if (origin === "US" || destination === "US") status = "matched";
       return condition("us_route", status, [
-        "origin.airport",
-        "origin.country",
-        "destination.airport",
-        "destination.country"
+        ...locationResolutionFactFields("origin", facts.origin),
+        ...locationResolutionFactFields("destination", facts.destination)
       ]);
     };
     const disruption = () => {
@@ -74,10 +73,7 @@ export const usAirlineDisruptionEvaluator: ScenarioEvaluator = {
         status = "missing";
       }
       if (facts.incidentType === "airline_cancellation") status = "matched";
-      return condition("delay_or_cancellation", status, [
-        "incidentType",
-        "finalArrivalDelayMinutes"
-      ]);
+      return condition("delay_or_cancellation", status, ["incidentType"]);
     };
     const travelerDidNotInitiate = () => {
       let status: ConditionResult["status"] = "missing";

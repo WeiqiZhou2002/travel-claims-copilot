@@ -625,22 +625,11 @@ export function generateAnalysis(
   facts: ExtractedFacts,
   retrieval: RetrievalResult
 ): AnalysisResult {
-  const hasUnresolvedAirlineControl =
-    (facts.issueType === "airline_delay" || facts.issueType === "airline_cancellation") &&
-    retrieval.query.controllability !== "controllable";
-  let strength: AnalysisResult["strength"] = "medium";
-  if (facts.issueType === "unknown") {
-    strength = "low";
-  } else if (retrieval.officialBasis.length > 0 && !hasUnresolvedAirlineControl) {
-    strength = "high";
-  }
-
   return {
     issueType: facts.issueType,
     policyRegions: retrieval.query.policyRegions,
     legalRegimes: getLegalRegimes(retrieval),
     controllability: retrieval.query.controllability,
-    strength,
     summary: buildSummary(facts, retrieval),
     officialBasis: retrieval.officialBasis,
     similarCases: retrieval.similarCases,

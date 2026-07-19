@@ -6,6 +6,7 @@ import type {
   RemedyId,
   ScenarioEvaluator
 } from "../claim-contract";
+import { locationResolutionFactFields } from "../context-resolver";
 
 const conditionIds = [
   "qualifying_route_and_carrier",
@@ -56,12 +57,21 @@ export const euUkAirDisruptionEvaluator: ScenarioEvaluator = {
       let status: ConditionResult["status"] = "excluded";
       if (applicability.includes("unknown")) status = "missing";
       if (applicability.includes("applies")) status = "matched";
+      const carrierWasConsumed = [context.jurisdiction.eu261, context.jurisdiction.uk261].some(
+        ({ reasons }) =>
+          reasons.some((reason) =>
+            [
+              "eu_eea_ch_arrival_carrier",
+              "uk_arrival_carrier",
+              "operating_carrier_region_unknown",
+              "inbound_carrier_excluded"
+            ].includes(reason)
+          )
+      );
       return condition("qualifying_route_and_carrier", status, [
-        "origin.airport",
-        "origin.country",
-        "destination.airport",
-        "destination.country",
-        "operatingCarrier"
+        ...locationResolutionFactFields("origin", facts.origin),
+        ...locationResolutionFactFields("destination", facts.destination),
+        ...(carrierWasConsumed ? (["operatingCarrier"] as RawFactPath[]) : [])
       ]);
     };
     const disruption = () => {
@@ -74,10 +84,7 @@ export const euUkAirDisruptionEvaluator: ScenarioEvaluator = {
     };
     const careThreshold = () => {
       if (facts.incidentType === "airline_cancellation") {
-        return condition("care_delay_threshold", "matched", [
-          "incidentType",
-          "finalArrivalDelayMinutes"
-        ]);
+        return condition("care_delay_threshold", "matched", ["incidentType"]);
       }
       const minutes = facts.finalArrivalDelayMinutes;
       let status: ConditionResult["status"] = "missing";
@@ -90,10 +97,7 @@ export const euUkAirDisruptionEvaluator: ScenarioEvaluator = {
     };
     const fiveHourThreshold = () => {
       if (facts.incidentType === "airline_cancellation") {
-        return condition("five_hour_delay", "matched", [
-          "incidentType",
-          "finalArrivalDelayMinutes"
-        ]);
+        return condition("five_hour_delay", "matched", ["incidentType"]);
       }
       const minutes = facts.finalArrivalDelayMinutes;
       let status: ConditionResult["status"] = "missing";
@@ -126,13 +130,12 @@ export const euUkAirDisruptionEvaluator: ScenarioEvaluator = {
         "finalArrivalDelayMinutes"
       ]);
     };
-    const cancellationNotice = () =>
-      condition("cancellation_notice", "missing", ["cancellationNoticeHours"]);
+    const cancellationNotice = () => condition("cancellation_notice", "missing", []);
     const cancellationAlternative = () =>
       condition(
         "alternative_accepted",
         facts.assistance.replacementTravelOffered === false ? "matched" : "missing",
-        ["assistance.replacementTravelOffered", "assistance.replacementTravelAccepted"]
+        ["assistance.replacementTravelOffered"]
       );
     const noExtraordinaryCircumstance = () => {
       let status: ConditionResult["status"] = "missing";

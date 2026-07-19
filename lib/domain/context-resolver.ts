@@ -3,6 +3,7 @@ import type {
   ClaimState,
   DerivedApplicability,
   RawClaimFacts,
+  RawFactPath,
   RawLocation,
   ResolvedClaimContext,
   ResolvedJurisdiction,
@@ -496,6 +497,28 @@ function findKnownPlace(value: string): KnownPlace | undefined {
   return knownPlaces.find((place) =>
     place.terms.some((term) => normalized === term || normalized.includes(term))
   );
+}
+
+export function locationResolutionFactFields(
+  parent: "origin" | "destination",
+  location: RawLocation
+): RawFactPath[] {
+  const factFields: RawFactPath[] = [];
+  if (location.airport) {
+    factFields.push(`${parent}.airport`);
+    if (findKnownPlace(location.airport)) return factFields;
+  }
+  if (location.city) {
+    factFields.push(`${parent}.city`);
+    if (findKnownPlace(location.city)) return factFields;
+  }
+  if (location.country) {
+    factFields.push(`${parent}.country`);
+    if (countryRegions.has(normalize(location.country)) || findKnownPlace(location.country)) {
+      return factFields;
+    }
+  }
+  return factFields;
 }
 
 export function resolveLocationRegion(

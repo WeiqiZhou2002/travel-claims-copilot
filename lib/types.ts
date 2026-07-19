@@ -223,7 +223,6 @@ export type AnalysisResult = {
   policyRegions: PolicyRegion[];
   legalRegimes: LegalRegime[];
   controllability: Controllability;
-  strength: "low" | "medium" | "high";
   summary: string;
   officialBasis: Policy[];
   similarCases: Case[];

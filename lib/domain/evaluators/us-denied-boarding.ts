@@ -6,6 +6,7 @@ import type {
   RemedyId,
   ScenarioEvaluator
 } from "../claim-contract";
+import { locationResolutionFactFields } from "../context-resolver";
 
 const conditionIds = [
   "us_departure",
@@ -68,7 +69,11 @@ export const usDeniedBoardingEvaluator: ScenarioEvaluator = {
       let status: ConditionResult["status"] = "excluded";
       if (context.jurisdiction.originRegion.value === null) status = "missing";
       if (context.jurisdiction.originRegion.value === "US") status = "matched";
-      return condition("us_departure", status, ["origin.airport", "origin.country"]);
+      return condition(
+        "us_departure",
+        status,
+        locationResolutionFactFields("origin", facts.origin)
+      );
     };
     const oversales = () =>
       requiredBoolean("oversales", facts.oversalesConfirmed, "oversalesConfirmed");

@@ -849,6 +849,13 @@ describe("canonical revision-safe intake", () => {
     expect(second.baseRevision).toBe(1);
     expect(second.claimState.revision).toBe(2);
     expect(second.claimState.facts.deniedBoardingKind).toBe("involuntary");
+    expect(second.result.extraction).toEqual({
+      performed: false,
+      requestedMode: "gpt",
+      provider: null,
+      model: null,
+      notRunReason: "correction_only"
+    });
     expect(JSON.stringify(first)).not.toContain("original anonymous denied-boarding narrative");
     expect(JSON.stringify(second)).not.toContain("original anonymous denied-boarding narrative");
   });

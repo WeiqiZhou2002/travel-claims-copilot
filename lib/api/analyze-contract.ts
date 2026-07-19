@@ -1,5 +1,6 @@
 import {
   RAW_FACT_PATHS,
+  type AnalyzeClaimDomainResponse,
   type ClaimState,
   type ExtractionMode,
   type FactConflict,
@@ -11,6 +12,8 @@ import {
 } from "../domain/claim-contract";
 import { parseRawClaimFacts, parseRawFactPatch } from "../domain/raw-fact-schema";
 
+export type { AnalyzeClaimDomainResponse } from "../domain/claim-contract";
+
 export type AnalyzeClaimRequest = {
   message: string;
   prior: ClaimState;
@@ -20,9 +23,7 @@ export type AnalyzeClaimRequest = {
   privacyAcknowledged?: boolean;
 };
 
-export type AnalyzeClaimIntakeResponse = {
-  baseRevision: number;
-  claimState: ClaimState;
+export type AnalyzeClaimIntakeResponse = AnalyzeClaimDomainResponse & {
   status: "needs_information" | "ready";
 };
 

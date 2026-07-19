@@ -1,6 +1,10 @@
 import type { AnalyzeClaimIntakeResponse, AnalyzeClaimRequest } from "./api/analyze-contract";
 import { parseAnalyzeClaimRequest } from "./api/analyze-contract";
 import {
+  processClaimTurn as processCanonicalClaimTurn,
+  type ProcessClaimDependencies
+} from "./claim-workflow";
+import {
   emptyClaimFacts,
   getMissingClaimFields,
   normalizeClaimFacts,
@@ -9,14 +13,12 @@ import {
   type ClaimFacts
 } from "./claimFacts";
 import type { ClaimState, RawClaimFacts } from "./domain/claim-contract";
-import { resolveClaimContext } from "./domain/context-resolver";
-import { mergeRawFacts } from "./domain/fact-merge";
 import { buildResolutionFacts, emptyRawClaimFacts } from "./domain/raw-fact-schema";
+import { createKnowledgeRepository } from "./knowledge/knowledge-repository";
 import type { StructuredOutputClient } from "./llm";
 import {
   LocalRawFactExtractor,
   OpenAIRawFactExtractor,
-  type RawFactExtractionInput,
   type RawFactExtractor
 } from "./model/raw-fact-extractor";
 
@@ -35,6 +37,8 @@ export type IntakeResult = {
 export type ProcessClaimTurnDependencies = {
   localExtractor: RawFactExtractor;
   openaiExtractor?: RawFactExtractor;
+  knowledgeRepository?: ProcessClaimDependencies["knowledgeRepository"];
+  now?: ProcessClaimDependencies["now"];
 };
 
 export type IntakeDependencies = {
@@ -42,24 +46,6 @@ export type IntakeDependencies = {
   localExtractor?: RawFactExtractor;
   openaiExtractor?: RawFactExtractor;
 };
-
-function extractionInput(request: AnalyzeClaimRequest): RawFactExtractionInput {
-  const { facts } = request.prior;
-  return {
-    message: request.message,
-    prior: {
-      incidentType: facts.incidentType,
-      provider: facts.provider,
-      operatingCarrier: facts.operatingCarrier,
-      origin: { ...facts.origin },
-      destination: { ...facts.destination },
-      reasonCategory: facts.reasonCategory,
-      finalArrivalDelayMinutes: facts.finalArrivalDelayMinutes,
-      deniedBoardingKind: facts.deniedBoardingKind
-    },
-    unresolvedFields: [...request.prior.unresolvedFields]
-  };
-}
 
 export async function processClaimTurn(
   value: unknown,
@@ -69,33 +55,17 @@ export async function processClaimTurn(
   if (!parsed.success) {
     throw new Error(`invalid_analyze_claim_request: ${parsed.errors.join("; ")}`);
   }
-  const request = parsed.data;
-  let deterministicPatch = { set: {} };
-  let openaiPatch;
-  if (!request.correction) {
-    const input = extractionInput(request);
-    deterministicPatch = await dependencies.localExtractor.extract(input);
-    if (request.requestedMode === "gpt" && dependencies.openaiExtractor) {
-      openaiPatch = await dependencies.openaiExtractor.extract(input);
-    }
-  }
-  const merged = mergeRawFacts({
-    prior: request.prior,
-    baseRevision: request.baseRevision,
-    ...(request.correction ? { correction: request.correction } : {}),
-    deterministicPatch,
-    ...(openaiPatch ? { openaiPatch } : {})
+  const now = dependencies.now ?? (() => new Date().toISOString().slice(0, 10));
+  const response = await processCanonicalClaimTurn(parsed.data, {
+    localExtractor: dependencies.localExtractor,
+    ...(dependencies.openaiExtractor ? { openaiExtractor: dependencies.openaiExtractor } : {}),
+    knowledgeRepository:
+      dependencies.knowledgeRepository ?? createKnowledgeRepository({ asOf: now() }),
+    now
   });
-  const context = resolveClaimContext({ state: merged.state });
   return {
-    baseRevision: merged.baseRevision,
-    claimState: merged.state,
-    status:
-      merged.conflicts.length > 0 ||
-      merged.unresolvedFields.length > 0 ||
-      context.scenarios.status === "needs_information"
-        ? "needs_information"
-        : "ready"
+    ...response,
+    status: response.result.status === "ready" ? "ready" : "needs_information"
   };
 }
 

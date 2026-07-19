@@ -1,4 +1,5 @@
 import { deterministicFactExtractor } from "./classifier";
+import { processClaimTurn } from "./claim-workflow";
 import { generateAnalysis } from "./generator";
 import { controllabilityFromReason } from "./policyScope";
 import { retrieveKnowledge } from "./retrieval";
@@ -22,6 +23,13 @@ export {
 } from "./classifier";
 export type { FactExtractor } from "./classifier";
 export { generateAnalysis } from "./generator";
+export { evaluateActiveScenarios, processClaimTurn } from "./claim-workflow";
+export {
+  assessPolicyApplicability,
+  buildUnrankedRetrievalTrace,
+  regimesFromApplicability
+} from "./domain/policy-applicability";
+export { statusFromConditions, topLevelStatus } from "./domain/remedy-assessment";
 export {
   getIssueAliases,
   isMvpIssueType,
@@ -92,15 +100,4 @@ export async function buildAnalysisResult(
   return generateAnalysis(retrieval.facts, retrieval);
 }
 
-export function buildAnalysisFromFacts(
-  facts: ClaimFacts,
-  policies: Policy[],
-  cases: Case[],
-  scripts: Script[],
-  description = ""
-): AnalysisResult {
-  const extractedFacts = claimFactsToExtractedFacts(facts, description);
-  const retrieval = retrieveKnowledge(extractedFacts, policies, cases, scripts);
-
-  return generateAnalysis(retrieval.facts, retrieval);
-}
+export const buildAnalysisFromFacts = processClaimTurn;

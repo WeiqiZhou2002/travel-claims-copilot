@@ -1,4 +1,11 @@
-import type { PolicyRouteRegion } from "../types";
+import type {
+  Case,
+  LegalRegime,
+  Policy,
+  PolicyRouteRegion,
+  RetrievalMatchReason,
+  Script
+} from "../types";
 
 export const CANONICAL_INCIDENTS = [
   "hotel_walk",
@@ -322,6 +329,130 @@ export type RemedyConditionEvaluation = {
   matchedConditions: ConditionResult[];
   missingConditions: ConditionResult[];
   exclusions: ConditionResult[];
+};
+
+export type ProviderCommitmentEvidence = {
+  commitmentId: string;
+  normalizedCarrier: string;
+  applicableCarrierRole: "operating_carrier";
+  sourceUrl: string;
+  sourceTitle: string;
+  sourceProvider: string;
+  sourceType: "official_dashboard" | "official_policy";
+  legalRegime: "US_AIRLINE_COMMITMENT";
+  authority: "medium";
+  sourceLastChecked: string;
+  conditions: string[];
+  rights: string[];
+};
+
+export type RequestOption = {
+  tone: "conservative" | "standard" | "assertive";
+  remedyId: RemedyId;
+  remedyStatus: RemedyStatus;
+  text: string;
+  sourceIds: string[];
+};
+
+export type RemedyAssessment = {
+  remedyId: RemedyId;
+  scenarioId: ScenarioId;
+  title: string;
+  material: boolean;
+  status: RemedyStatus;
+  factsUsed: RawFactPath[];
+  matchedConditions: ConditionResult[];
+  missingConditions: ConditionResult[];
+  exclusions: ConditionResult[];
+  sourceIds: string[];
+  providerCommitment?: ProviderCommitmentEvidence;
+  evidence: {
+    status: "complete" | "partial" | "missing";
+    held: string[];
+    missing: string[];
+  };
+  requestOptions: RequestOption[];
+  cautions: string[];
+  nextAction: string;
+};
+
+export type RankedDisplayItem<T> = {
+  item: T;
+  reasons: RetrievalMatchReason[];
+  score: number;
+};
+
+export type PolicyApplicability = {
+  policy: Policy;
+  status: "applicable" | "conditional" | "not_applicable";
+  matchedConditions: string[];
+  missingConditions: string[];
+  exclusions: string[];
+  applicableCarrier: string | null;
+};
+
+export type RetrievalTrace = {
+  policyApplicability: PolicyApplicability[];
+  displayedPolicies: RankedDisplayItem<Policy>[];
+  displayedCases: RankedDisplayItem<Case>[];
+  displayedScripts: RankedDisplayItem<Script>[];
+};
+
+export type FactDisplayItem = {
+  path: RawFactPath;
+  label: string;
+  value: RawFactValue | null;
+  provenance: FactProvenance | null;
+};
+
+export type ExtractionMetadata =
+  | {
+      performed: false;
+      requestedMode: ExtractionMode;
+      provider: null;
+      model: null;
+      notRunReason: "preflight_guard" | "correction_only";
+    }
+  | {
+      performed: true;
+      requestedMode: "gpt";
+      provider: "openai";
+      model: "gpt-5.6-luna";
+    }
+  | {
+      performed: true;
+      requestedMode: "local";
+      provider: "local";
+      model: null;
+    }
+  | {
+      performed: true;
+      requestedMode: "gpt";
+      provider: "local";
+      model: null;
+      fallbackReason: string;
+    };
+
+export type AssessmentResult = {
+  status: WorkflowStatus;
+  primaryScenario: ScenarioId | null;
+  scenarioIds: ScenarioId[];
+  factsRevision: number;
+  factsUsed: FactDisplayItem[];
+  missingFacts: RawFactPath[];
+  legalRegimes: LegalRegime[];
+  extraction: ExtractionMetadata;
+  assessments: RemedyAssessment[];
+  retrieval: RetrievalTrace;
+  cautions: string[];
+  nextActions: string[];
+};
+
+export type AnalyzeClaimDomainResponse = {
+  baseRevision: number;
+  claimState: ClaimState;
+  result: AssessmentResult;
+  context: ResolvedClaimContext | null;
 };
 
 export type ScenarioConditionEvaluation = {

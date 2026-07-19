@@ -2,32 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { POST as analyze } from "../../app/api/analyze/route";
 import { GET as getScenarios } from "../../app/api/scenarios/route";
-import { emptyClaimFacts, normalizeClaimFacts } from "../../lib/claimFacts";
-
-const safeOutOfScopeEnvelope = {
-  status: "out_of_scope",
-  primaryScenario: null,
-  scenarioIds: [],
-  missingFacts: [],
-  assessments: [],
-  cautions: ["This competition build supports four frozen travel-disruption journeys."],
-  nextActions: []
-};
-
-function canonicalStructuredFacts() {
-  return normalizeClaimFacts({
-    ...emptyClaimFacts(),
-    issueType: "airline_cancellation",
-    provider: "Delta",
-    operatingCarrier: "Delta",
-    origin: { city: "New York", airport: "JFK", country: null, region: null },
-    destination: { city: "Los Angeles", airport: "LAX", country: null, region: null },
-    disruptionType: "cancellation",
-    disruptionReason: "mechanical",
-    arrivalDelayMinutes: 180,
-    confidence: "high"
-  });
-}
+import { claimState } from "../fixtures/raw-claims";
 
 function analyzeRequest(body: Record<string, unknown>) {
   return analyze(
@@ -39,16 +14,11 @@ function analyzeRequest(body: Record<string, unknown>) {
   );
 }
 
-async function analyzeBody(body: Record<string, unknown>) {
-  const response = await analyzeRequest(body);
-
-  return response.json();
-}
-
 describe("public scenario scope", () => {
   it("publishes exactly the four frozen scenarios", async () => {
     const response = await getScenarios();
     const body = await response.json();
+
     expect(body.scenarios.map(({ id }: { id: string }) => id)).toEqual([
       "marriott_hotel_walk",
       "us_airline_disruption",
@@ -57,39 +27,16 @@ describe("public scenario scope", () => {
     ]);
   });
 
-  it("keeps the EU legacy alias unresolved without incident subtype", async () => {
-    const response = await analyze(
-      new Request("http://local/api/analyze", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ issueType: "eu261_delay_or_cancellation" })
-      })
-    );
-    expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ status: "needs_information" });
-  });
+  it.each([
+    { description: "My flight was cancelled." },
+    { issueType: "airline_cancellation" },
+    { caseId: "uscf_aa127_mechanical_delay_overnight_2026_07" },
+    { facts: {} }
+  ])("rejects noncanonical analyze input", async (body) => {
+    const response = await analyzeRequest(body);
 
-  it("lets an approved canonical case override the ambiguous EU alias", async () => {
-    const body = await analyzeBody({
-      caseId: "uscf_aa127_mechanical_delay_overnight_2026_07",
-      issueType: "eu261_delay_or_cancellation"
-    });
-
-    expect(body).toMatchObject({ issueType: "airline_delay" });
-    expect(body).not.toHaveProperty("status", "needs_information");
-  });
-
-  it("fails closed when an approved dormant case overrides the ambiguous EU alias", async () => {
-    expect(
-      await analyzeBody({
-        caseId: "uscf_delta_baggage_delay_2026_03",
-        issueType: "eu261_delay_or_cancellation"
-      })
-    ).toEqual(safeOutOfScopeEnvelope);
-  });
-
-  it("returns a safe out-of-scope envelope for a dormant incident", async () => {
-    expect(await analyzeBody({ issueType: "baggage_delay" })).toEqual(safeOutOfScopeEnvelope);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
   });
 
   it.each([
@@ -97,70 +44,135 @@ describe("public scenario scope", () => {
     ["insurance", { description: "My Amex travel protection claim was denied." }],
     ["property loss", { description: "I need help with a lost item at my hotel." }],
     ["unrelated hotel", { description: "The hotel charged incorrect billing on my folio." }],
-    ["approved dormant case", { caseId: "uscf_delta_baggage_delay_2026_03" }]
-  ])("fails closed for %s input before legacy analysis", async (_label, body) => {
-    expect(await analyzeBody(body)).toEqual(safeOutOfScopeEnvelope);
-  });
+    ["dormant case", { caseId: "uscf_delta_baggage_delay_2026_03" }]
+  ])("rejects legacy %s input before analysis", async (_label, body) => {
+    const response = await analyzeRequest(body);
 
-  it("keeps ordinary unknown text on the legacy fallback path", async () => {
-    const body = await analyzeBody({ description: "I need help understanding my travel problem." });
-
-    expect(body).toMatchObject({ issueType: "unknown" });
-    expect(body).not.toHaveProperty("status", "out_of_scope");
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
   });
 
   it.each(["constructor", "toString", "__proto__"])(
-    "treats inherited selector key %s as invalid input",
+    "rejects inherited legacy selector %s",
     async (issueType) => {
-      const response = await analyze(
-        new Request("http://local/api/analyze", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ issueType })
-        })
-      );
+      const response = await analyzeRequest({ issueType });
 
       expect(response.status).toBe(400);
-      expect(await response.json()).toEqual({
-        error: "Please provide a travel dispute description, issueType, or caseId."
-      });
+      expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
     }
   );
 
-  it("does not reclassify validated structured facts from the description", async () => {
-    const body = await analyzeBody({
-      description: "My baggage has not arrived.",
-      facts: canonicalStructuredFacts()
+  it.each([
+    ["issueType", "baggage_delay"],
+    ["issueType", "eu261_delay_or_cancellation"],
+    ["selectedIssueType", "baggage_delay"],
+    ["selectedIssueType", "eu261_delay_or_cancellation"]
+  ] as const)("rejects canonical input polluted by %s=%s", async (selector, value) => {
+    const prior = claimState({ incidentType: "airline_cancellation" });
+    const response = await analyzeRequest({
+      message: "No additional facts.",
+      prior,
+      baseRevision: 0,
+      [selector]: value
     });
 
-    expect(body).toMatchObject({ issueType: "airline_cancellation" });
-    expect(body).not.toHaveProperty("status", "out_of_scope");
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
   });
 
   it.each([
-    ["issueType", "baggage_delay"],
-    ["issueType", "eu261_delay_or_cancellation"],
-    ["selectedIssueType", "baggage_delay"],
-    ["selectedIssueType", "eu261_delay_or_cancellation"]
-  ] as const)(
-    "keeps valid structured facts authoritative over outer %s=%s",
-    async (selector, value) => {
-      const body = await analyzeBody({ facts: canonicalStructuredFacts(), [selector]: value });
-
-      expect(body).toMatchObject({ issueType: "airline_cancellation" });
-      expect(body).not.toHaveProperty("status");
-    }
-  );
-
-  it.each([
-    ["issueType", "baggage_delay"],
-    ["issueType", "eu261_delay_or_cancellation"],
-    ["selectedIssueType", "baggage_delay"],
-    ["selectedIssueType", "eu261_delay_or_cancellation"]
-  ] as const)("validates invalid facts before outer %s=%s", async (selector, value) => {
-    const response = await analyzeRequest({ facts: {}, [selector]: value });
+    ["stale revision", { message: "new facts", prior: claimState({}, 2), baseRevision: 1 }],
+    ["blank message", { message: "", prior: claimState(), baseRevision: 0 }],
+    [
+      "untrusted raw path",
+      {
+        message: "new facts",
+        prior: { ...claimState(), unresolvedFields: ["origin.region"] },
+        baseRevision: 0
+      }
+    ]
+  ])("rejects malformed canonical input with %s", async (_label, body) => {
+    const response = await analyzeRequest(body);
 
     expect(response.status).toBe(400);
-    expect(await response.json()).toMatchObject({ error: "Invalid structured claim facts." });
+    expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
+  });
+
+  it("returns active scenarios only from server-resolved canonical state", async () => {
+    const prior = claimState({
+      incidentType: "airline_cancellation",
+      providerType: "airline",
+      operatingCarrier: "United",
+      origin: { airport: "JFK" },
+      destination: { airport: "LAX" },
+      reasonCategory: "crew"
+    });
+    const response = await analyzeRequest({
+      message: "No additional facts.",
+      prior,
+      baseRevision: 0,
+      requestedMode: "local"
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.result.scenarioIds).toEqual(["us_airline_disruption"]);
+    expect(body.result.primaryScenario).toBe("us_airline_disruption");
+    expect(body.context.scenarios.scenarioIds).toEqual(body.result.scenarioIds);
+  });
+
+  it("keeps a needs-information context while preserving its published empty scenario set", async () => {
+    const prior = claimState({
+      incidentType: "airline_delay",
+      operatingCarrier: "United",
+      origin: { airport: "JFK" }
+    });
+    const response = await analyzeRequest({
+      message: "No additional facts.",
+      prior,
+      baseRevision: 0
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.context).not.toBeNull();
+    expect(body.result.status).toBe("needs_information");
+    expect(body.result.scenarioIds).toEqual([]);
+    expect(body.result.primaryScenario).toBeNull();
+    expect(body.result.assessments).toEqual(
+      expect.arrayContaining([expect.objectContaining({ scenarioId: "us_airline_disruption" })])
+    );
+  });
+
+  it("returns a fully empty blocked domain result and no derived context", async () => {
+    const prior = claimState({
+      incidentType: "hotel_walk",
+      providerType: "hotel",
+      provider: "Hyatt",
+      confirmedHotelReservation: true,
+      wasWalked: true
+    });
+    const response = await analyzeRequest({
+      message: "No additional facts.",
+      prior,
+      baseRevision: 0
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.context).toBeNull();
+    expect(body.result).toMatchObject({
+      status: "out_of_scope",
+      primaryScenario: null,
+      scenarioIds: [],
+      legalRegimes: [],
+      assessments: [],
+      retrieval: {
+        policyApplicability: [],
+        displayedPolicies: [],
+        displayedCases: [],
+        displayedScripts: []
+      }
+    });
   });
 });

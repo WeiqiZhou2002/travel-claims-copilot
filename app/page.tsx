@@ -3,6 +3,12 @@
 import { useMemo, useState } from "react";
 
 import type { ClaimFacts } from "../lib/claimFacts";
+import type {
+  AnalyzeClaimDomainResponse,
+  ClaimState,
+  RawClaimFacts
+} from "../lib/domain/claim-contract";
+import { emptyRawClaimFacts } from "../lib/domain/raw-fact-schema";
 import type { IntakeExtractionMode, IntakeResult } from "../lib/intake";
 import type { AnalysisResult, Case, Policy, Script, SuggestedAsks } from "../lib/types";
 
@@ -42,11 +48,64 @@ const issueLabels: Partial<Record<AnalysisResult["issueType"], string>> = {
   unknown: "Needs more detail"
 };
 
-const strengthStyles: Record<AnalysisResult["strength"], string> = {
-  high: "bg-mint text-white",
-  medium: "bg-coral text-white",
-  low: "bg-ink text-white"
-};
+function claimStateFromIntake(facts: ClaimFacts): ClaimState {
+  const empty = emptyRawClaimFacts();
+  const raw: RawClaimFacts = {
+    ...empty,
+    incidentType: facts.issueType === "unknown" ? null : facts.issueType,
+    providerType: facts.providerType === "unknown" ? null : facts.providerType,
+    provider: facts.provider,
+    operatingCarrier: facts.operatingCarrier,
+    origin: {
+      city: facts.origin.city,
+      airport: facts.origin.airport,
+      country: facts.origin.country
+    },
+    destination: {
+      city: facts.destination.city,
+      airport: facts.destination.airport,
+      country: facts.destination.country
+    },
+    reasonCategory: facts.disruptionReason === "unknown" ? null : facts.disruptionReason,
+    finalArrivalDelayMinutes: facts.arrivalDelayMinutes,
+    isOvernight: facts.isOvernight,
+    deniedBoardingKind: facts.deniedBoardingKind === "unknown" ? null : facts.deniedBoardingKind,
+    bookingChannel: facts.bookingChannel === "unknown" ? null : facts.bookingChannel,
+    loyaltyStatus: facts.loyaltyStatus,
+    expenses: [...facts.expenses],
+    evidence: [...facts.evidence],
+    userGoal: facts.userGoal
+  };
+  return { facts: raw, provenance: {}, revision: 0, conflicts: [], unresolvedFields: [] };
+}
+
+function pageResultFromDomain(response: AnalyzeClaimDomainResponse): AnalysisResult {
+  const { assessments } = response.result;
+  const requestOptions = assessments.flatMap(({ requestOptions: options }) => options);
+  const optionsFor = (tone: "conservative" | "standard" | "assertive") =>
+    requestOptions.filter((option) => option.tone === tone).map(({ text }) => text);
+  const originRegion = response.context?.jurisdiction.originRegion.value;
+  const destinationRegion = response.context?.jurisdiction.destinationRegion.value;
+  return {
+    issueType: response.claimState.facts.incidentType ?? "unknown",
+    policyRegions: [
+      ...new Set([originRegion, destinationRegion].filter(Boolean))
+    ] as AnalysisResult["policyRegions"],
+    legalRegimes: response.result.legalRegimes,
+    controllability: response.context?.controllability.value ?? "unknown",
+    summary: `Workflow status: ${response.result.status.replaceAll("_", " ")}.`,
+    officialBasis: response.result.retrieval.displayedPolicies.map(({ item }) => item),
+    similarCases: response.result.retrieval.displayedCases.map(({ item }) => item),
+    suggestedAsks: {
+      conservative: optionsFor("conservative"),
+      standard: optionsFor("standard"),
+      aggressive: optionsFor("assertive")
+    },
+    evidenceChecklist: [...new Set(assessments.flatMap(({ evidence }) => evidence.missing))],
+    scripts: response.result.retrieval.displayedScripts.map(({ item }) => item),
+    cautions: response.result.cautions
+  };
+}
 
 export default function Home() {
   const [draft, setDraft] = useState(exampleText);
@@ -118,15 +177,22 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ description, facts: intake.facts })
+        body: JSON.stringify({
+          message: description,
+          prior: claimStateFromIntake(intake.facts),
+          baseRevision: 0,
+          requestedMode: "local"
+        })
       });
-      const analysis = (await analyzeResponse.json()) as AnalysisResult & { error?: string };
+      const domain = (await analyzeResponse.json()) as AnalyzeClaimDomainResponse & {
+        error?: string;
+      };
 
       if (!analyzeResponse.ok) {
-        throw new Error(analysis.error ?? "Analysis failed.");
+        throw new Error(domain.error ?? "Analysis failed.");
       }
 
-      setResult(analysis);
+      setResult(pageResultFromDomain(domain));
       setMessages([
         ...nextMessages,
         {
@@ -372,14 +438,6 @@ function SummaryPanel({ result }: { result: AnalysisResult | null }) {
             <p className="mt-1 text-xl font-semibold text-ink">
               {issueLabels[result.issueType] ?? result.issueType.replaceAll("_", " ")}
             </p>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-ink/60">Claim strength</span>
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${strengthStyles[result.strength]}`}
-            >
-              {result.strength}
-            </span>
           </div>
           <div className="grid gap-2 border-t border-ink/5 pt-3 text-sm">
             <div className="flex items-start justify-between gap-3">
