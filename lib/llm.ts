@@ -1,5 +1,6 @@
 import { DeepSeekChatCompletionsClient } from "./deepseek-chat-completions-client";
 import { INPUT_LIMITS } from "./api/input-limits";
+import { classifyModelFailure, ModelFailure } from "./model/model-error";
 
 export { DeepSeekChatCompletionsClient } from "./deepseek-chat-completions-client";
 
@@ -51,6 +52,16 @@ function extractResponseText(payload: unknown): string | undefined {
   return isRecord(content) ? (content.text as string) : undefined;
 }
 
+function hasResponseRefusal(payload: unknown): boolean {
+  if (!isRecord(payload) || !Array.isArray(payload.output)) return false;
+  return payload.output.some(
+    (item) =>
+      isRecord(item) &&
+      Array.isArray(item.content) &&
+      item.content.some((content) => isRecord(content) && content.type === "refusal")
+  );
+}
+
 export class OpenAIResponsesClient implements StructuredOutputClient {
   private readonly apiKey: string;
 
@@ -78,45 +89,70 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
-      const response = await this.fetcher(`${this.baseUrl}/responses`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: this.model,
-          reasoning: { effort: "none" },
-          store: false,
-          max_output_tokens: request.maxOutputTokens,
-          instructions: request.instructions,
-          input: request.input,
-          text: {
-            verbosity: "low",
-            format: {
-              type: "json_schema",
-              name: request.schemaName,
-              strict: true,
-              schema: request.schema
+      let response: Response;
+      try {
+        response = await this.fetcher(`${this.baseUrl}/responses`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: this.model,
+            reasoning: { effort: "none" },
+            store: false,
+            max_output_tokens: request.maxOutputTokens,
+            instructions: request.instructions,
+            input: request.input,
+            text: {
+              verbosity: "low",
+              format: {
+                type: "json_schema",
+                name: request.schemaName,
+                strict: true,
+                schema: request.schema
+              }
             }
-          }
-        }),
-        signal: controller.signal
-      });
+          }),
+          signal: controller.signal
+        });
+      } catch (error) {
+        throw classifyModelFailure(error) ?? error;
+      }
 
       if (!response.ok) {
-        throw new Error(`OpenAI Responses API returned HTTP ${response.status}`);
+        throw (
+          classifyModelFailure({ status: response.status }) ?? new Error("openai_request_failed")
+        );
       }
 
-      const text = extractResponseText(await response.json());
+      let payload: unknown;
+      try {
+        payload = (await response.json()) as unknown;
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          throw new ModelFailure("invalid_model_json", true, true);
+        }
+        throw error;
+      }
+      if (hasResponseRefusal(payload)) {
+        throw new ModelFailure("model_refusal", false, false);
+      }
+      const text = extractResponseText(payload);
       if (!text) {
-        throw new Error("OpenAI Responses API returned no structured output text");
+        throw new ModelFailure("invalid_model_schema", true, true);
       }
       if (new TextEncoder().encode(text).byteLength > INPUT_LIMITS.modelOutputBytes) {
-        throw new Error("model_output_too_large");
+        throw new ModelFailure("invalid_model_schema", true, true);
       }
 
-      return JSON.parse(text) as T;
+      try {
+        return JSON.parse(text) as T;
+      } catch {
+        throw new ModelFailure("invalid_model_json", true, true);
+      }
+    } catch (error) {
+      throw classifyModelFailure(error) ?? error;
     } finally {
       clearTimeout(timeout);
     }

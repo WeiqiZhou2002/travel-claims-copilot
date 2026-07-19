@@ -55,7 +55,7 @@ describe("OpenAI structured-output bounds", () => {
         input: "A current bounded message.",
         maxOutputTokens: 1_200
       })
-    ).rejects.toThrow("model_output_too_large");
+    ).rejects.toMatchObject({ code: "invalid_model_schema" });
   });
 
   it("passes the same hard token ceiling from the raw extractor to its client", async () => {
@@ -69,7 +69,7 @@ describe("OpenAI structured-output bounds", () => {
 });
 
 describe("fail-closed model patches", () => {
-  it("rejects a schema-invalid model patch before merge or knowledge access", async () => {
+  it("falls back once from a schema-invalid model patch without merging it", async () => {
     const prior = claimState({ provider: "United" });
     const modelClient: StructuredOutputClient = {
       generate: vi.fn().mockResolvedValue({
@@ -85,26 +85,29 @@ describe("fail-closed model patches", () => {
     const load = vi.fn().mockResolvedValue(knowledgeSnapshotFixture());
     const knowledgeRepository = { load } satisfies KnowledgeRepository;
 
-    await expect(
-      processClaimTurn(
-        {
-          message: "The carrier was Delta.",
-          prior,
-          baseRevision: 0,
-          requestedMode: "gpt"
-        },
-        {
-          localExtractor,
-          openaiExtractor,
-          knowledgeRepository,
-          now: () => "2026-07-19"
-        }
-      )
-    ).rejects.toThrow("invalid_raw_fact_patch");
+    const response = await processClaimTurn(
+      {
+        message: "The carrier was Delta.",
+        prior,
+        baseRevision: 0,
+        requestedMode: "gpt"
+      },
+      {
+        localExtractor,
+        openaiExtractor,
+        knowledgeRepository,
+        now: () => "2026-07-19"
+      }
+    );
 
     expect(prior).toEqual(claimState({ provider: "United" }));
     expect(prior.revision).toBe(0);
-    expect(load).not.toHaveBeenCalled();
+    expect(localExtractor.extract).toHaveBeenCalledOnce();
+    expect(load).toHaveBeenCalledOnce();
+    expect(response.result.extraction).toMatchObject({
+      provider: "local",
+      fallbackReason: "invalid_model_schema"
+    });
   });
 
   it("rejects over-limit model values instead of normalizing or merging them", async () => {
@@ -113,6 +116,8 @@ describe("fail-closed model patches", () => {
     };
     const extractor = new OpenAIRawFactExtractor(client);
 
-    await expect(extractor.extract(extractionInput())).rejects.toThrow("invalid_raw_fact_patch");
+    await expect(extractor.extract(extractionInput())).rejects.toMatchObject({
+      code: "invalid_model_schema"
+    });
   });
 });

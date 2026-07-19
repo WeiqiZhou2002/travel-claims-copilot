@@ -1,5 +1,6 @@
 import type { AnalyzeClaimIntakeResponse, AnalyzeClaimRequest } from "./api/analyze-contract";
 import { parseAnalyzeClaimRequest } from "./api/analyze-contract";
+import { toApiErrorResponse, withRequestId, type RequestIdFactory } from "./api/api-response";
 import {
   processClaimTurn as processCanonicalClaimTurn,
   type ProcessClaimDependencies
@@ -231,19 +232,20 @@ export async function processIntake(
     baseRevision: 0,
     requestedMode: configuredOpenAIExtractor ? "gpt" : "local"
   };
-  let response: AnalyzeClaimIntakeResponse;
   let extractionMode: IntakeExtractionMode = configuredOpenAIExtractor ? "llm" : "deterministic";
   let warning: IntakeResult["warning"] = configuredOpenAIExtractor
     ? undefined
     : "llm_not_configured";
-  try {
-    response = await processClaimTurn(request, {
-      localExtractor,
-      ...(configuredOpenAIExtractor ? { openaiExtractor: configuredOpenAIExtractor } : {})
-    });
-  } catch (error) {
-    if (!configuredOpenAIExtractor) throw error;
-    response = await processClaimTurn({ ...request, requestedMode: "local" }, { localExtractor });
+  const response: AnalyzeClaimIntakeResponse = await processClaimTurn(request, {
+    localExtractor,
+    ...(configuredOpenAIExtractor ? { openaiExtractor: configuredOpenAIExtractor } : {})
+  });
+  if (
+    configuredOpenAIExtractor &&
+    response.result.extraction.performed &&
+    response.result.extraction.requestedMode === "gpt" &&
+    response.result.extraction.provider === "local"
+  ) {
     extractionMode = "deterministic";
     warning = "llm_fallback_used";
   }
@@ -288,35 +290,44 @@ function isCanonicalShape(body: Record<string, unknown>): boolean {
   );
 }
 
-export function createIntakePostHandler(dependencies: ProcessClaimTurnDependencies) {
+type IntakePostHandlerOptions = {
+  requestId?: string;
+  requestIdFactory?: RequestIdFactory;
+};
+
+export function createIntakePostHandler(
+  dependencies: ProcessClaimTurnDependencies,
+  options: IntakePostHandlerOptions = {}
+) {
   return async function intakePost(request: Request): Promise<Response> {
+    const requestId = options.requestId ?? withRequestId(options.requestIdFactory);
     const body = (await request.json().catch(() => null)) as unknown;
     if (!isRecord(body)) {
-      return Response.json({ error: "Invalid JSON request." }, { status: 400 });
+      return toApiErrorResponse("invalid_json", requestId);
     }
     if (isCanonicalShape(body)) {
       const parsed = parseAnalyzeClaimRequest(body);
       if (!parsed.success) {
-        return Response.json({ error: "Invalid canonical intake request." }, { status: 400 });
+        return toApiErrorResponse("unprocessable_request", requestId);
       }
       try {
         return Response.json(await processClaimTurn(parsed.data, dependencies));
-      } catch {
-        return Response.json({ error: "Intake processing failed." }, { status: 500 });
+      } catch (error) {
+        return toApiErrorResponse(error, requestId);
       }
     }
     if (!hasOwn(body, "facts")) {
-      return Response.json({ error: "Invalid intake request shape." }, { status: 400 });
+      return toApiErrorResponse("unprocessable_request", requestId);
     }
     const message = typeof body.message === "string" ? body.message.trim() : "";
     if (!message) {
-      return Response.json({ error: "Please provide a message." }, { status: 400 });
+      return toApiErrorResponse("unprocessable_request", requestId);
     }
     let currentFacts = emptyClaimFacts();
     if (body.facts !== null) {
       const parsed = parseClaimFacts(body.facts);
       if (!parsed.success) {
-        return Response.json({ error: "Invalid existing claim facts." }, { status: 400 });
+        return toApiErrorResponse("unprocessable_request", requestId);
       }
       currentFacts = parsed.data;
     }
@@ -327,8 +338,8 @@ export function createIntakePostHandler(dependencies: ProcessClaimTurnDependenci
           localExtractor: dependencies.localExtractor
         })
       );
-    } catch {
-      return Response.json({ error: "Intake processing failed." }, { status: 500 });
+    } catch (error) {
+      return toApiErrorResponse(error, requestId);
     }
   };
 }

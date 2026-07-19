@@ -25,6 +25,7 @@ import type {
   LocalRawFactExtractorPort,
   OpenAIRawFactExtractorPort
 } from "./model/raw-fact-extractor";
+import { ModelFailure } from "./model/model-error";
 import { buildOutboundExtractionInput } from "./privacy/outbound-payload";
 import {
   createSafeTelemetryEvent,
@@ -118,6 +119,13 @@ function recordTelemetry(
   } catch {
     // Telemetry is best-effort and must never change claim processing.
   }
+}
+
+function modelFailureCategory(error: unknown): "refusal" | "rate_limited" | "upstream_failure" {
+  if (!(error instanceof ModelFailure)) return "upstream_failure";
+  if (error.code === "model_refusal") return "refusal";
+  if (error.code === "upstream_rate_limited") return "rate_limited";
+  return "upstream_failure";
 }
 
 function readFact(facts: RawClaimFacts, path: RawFactPath): RawFactValue | null {
@@ -220,7 +228,10 @@ export function evaluateActiveScenarios(input: {
 async function extractPatches(
   request: AnalyzeClaimRequest,
   dependencies: ProcessClaimDependencies,
-  providerArmFailed: (metadata: ExtractionMetadata) => void
+  providerArmFailed: (
+    metadata: ExtractionMetadata,
+    category: "refusal" | "rate_limited" | "upstream_failure"
+  ) => void
 ): Promise<{
   deterministicPatch: RawFactPatch;
   openaiPatch?: RawFactPatch;
@@ -239,32 +250,37 @@ async function extractPatches(
       }
     };
   }
-  let deterministicPatch: RawFactPatch;
-  try {
-    deterministicPatch = await dependencies.localExtractor.extract(localExtractionInput(request));
-  } catch (error) {
-    if (requestedMode === "local") {
-      providerArmFailed({
-        performed: true,
-        requestedMode: "local",
-        provider: "local",
-        model: null
-      });
-    }
-    throw error;
-  }
   if (requestedMode === "local") {
-    return {
-      deterministicPatch,
-      extraction: {
-        performed: true,
-        requestedMode: "local",
-        provider: "local",
-        model: null
-      }
-    };
+    try {
+      const deterministicPatch = await dependencies.localExtractor.extract(
+        localExtractionInput(request)
+      );
+      return {
+        deterministicPatch,
+        extraction: {
+          performed: true,
+          requestedMode: "local",
+          provider: "local",
+          model: null
+        }
+      };
+    } catch (error) {
+      providerArmFailed(
+        {
+          performed: true,
+          requestedMode: "local",
+          provider: "local",
+          model: null
+        },
+        "upstream_failure"
+      );
+      throw error;
+    }
   }
   if (!dependencies.openaiExtractor) {
+    const deterministicPatch = await dependencies.localExtractor.extract(
+      localExtractionInput(request)
+    );
     return {
       deterministicPatch,
       extraction: {
@@ -284,14 +300,41 @@ async function extractPatches(
   try {
     openaiPatch = await dependencies.openaiExtractor.extract(outbound);
   } catch (error) {
-    providerArmFailed({
+    const metadata: ExtractionMetadata = {
       performed: true,
       requestedMode: "gpt",
       provider: "openai",
       model: "gpt-5.6-luna"
-    });
+    };
+    if (error instanceof ModelFailure && error.safeFallbackEligible) {
+      try {
+        const deterministicPatch = await dependencies.localExtractor.extract(
+          localExtractionInput(request)
+        );
+        return {
+          deterministicPatch,
+          extraction: {
+            performed: true,
+            requestedMode: "gpt",
+            provider: "local",
+            model: null,
+            fallbackReason: error.code
+          }
+        };
+      } catch {
+        providerArmFailed(
+          metadata,
+          error.code === "upstream_rate_limited" ? "rate_limited" : "upstream_failure"
+        );
+        throw error;
+      }
+    }
+    providerArmFailed(metadata, modelFailureCategory(error));
     throw error;
   }
+  const deterministicPatch = await dependencies.localExtractor.extract(
+    localExtractionInput(request)
+  );
   return {
     deterministicPatch,
     openaiPatch,
@@ -307,7 +350,10 @@ async function extractPatches(
 async function processParsedClaimTurn(
   request: AnalyzeClaimRequest,
   dependencies: ProcessClaimDependencies,
-  providerArmFailed: (metadata: ExtractionMetadata) => void
+  providerArmFailed: (
+    metadata: ExtractionMetadata,
+    category: "refusal" | "rate_limited" | "upstream_failure"
+  ) => void
 ): Promise<AnalyzeClaimDomainResponse> {
   const preflight = preflightGuard(request.message);
   if (preflight.status !== "pass") {
@@ -412,9 +458,13 @@ export async function processClaimTurn(
   if (!parsed.success) {
     throw new Error(`invalid_analyze_claim_request: ${parsed.errors.join("; ")}`);
   }
-  const response = await processParsedClaimTurn(parsed.data, dependencies, (extraction) => {
-    recordTelemetry(dependencies, telemetryStartedAt, extraction, "upstream_failure");
-  });
+  const response = await processParsedClaimTurn(
+    parsed.data,
+    dependencies,
+    (extraction, category) => {
+      recordTelemetry(dependencies, telemetryStartedAt, extraction, category);
+    }
+  );
   const { extraction } = response.result;
   const isFallback =
     extraction.performed && extraction.requestedMode === "gpt" && extraction.provider === "local";

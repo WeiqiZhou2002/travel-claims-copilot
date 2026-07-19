@@ -12,12 +12,13 @@ import {
   parseExtractionMetadata,
   type ParsedAnalyzeRequest
 } from "./analyze-contract";
-import { isApiFault } from "./api-error";
+import { toApiErrorResponse, withRequestId, type RequestIdFactory } from "./api-response";
 import { INPUT_LIMITS } from "./input-limits";
 import { isClaimStateReplayable, readJsonBody } from "./request-body";
 
 export type IntakeRouteDependencies = Partial<ProcessClaimTurnDependencies> & {
   processRequest?: typeof processClaimTurn;
+  requestIdFactory?: RequestIdFactory;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -74,19 +75,6 @@ function legacyRequestExceedsLimits(body: Record<string, unknown>): boolean {
   );
 }
 
-function safeReaderFailure(error: unknown): Response {
-  if (!isApiFault(error)) {
-    return Response.json({ error: "Intake processing failed." }, { status: 500 });
-  }
-  const messageByCode = {
-    unsupported_media_type: "Request content type must be application/json.",
-    invalid_json: "Invalid JSON request.",
-    request_too_large: "Request body is too large.",
-    unprocessable_request: "Invalid canonical intake request."
-  } as const;
-  return Response.json({ error: messageByCode[error.code] }, { status: error.status });
-}
-
 function hasValidExtractionMetadata(value: unknown, request: ParsedAnalyzeRequest): boolean {
   if (!isRecord(value) || !isRecord(value.result)) return false;
   const parsed = parseExtractionMetadata(value.result.extraction);
@@ -138,34 +126,35 @@ function canonicalIntakeResponse(response: Awaited<ReturnType<typeof processClai
 
 export function createIntakeRouteHandler(overrides: IntakeRouteDependencies = {}) {
   return async function intakePost(request: Request): Promise<Response> {
+    const requestId = withRequestId(overrides.requestIdFactory);
     let body: unknown;
     try {
       body = await readJsonBody(request);
     } catch (error) {
-      return safeReaderFailure(error);
+      return toApiErrorResponse(error, requestId);
     }
 
     if (!isRecord(body) || !isCanonicalShape(body)) {
       let replayedRequest: Request;
       try {
         if (isRecord(body) && legacyRequestExceedsLimits(body)) {
-          return Response.json({ error: "Invalid legacy intake request." }, { status: 422 });
+          return toApiErrorResponse("unprocessable_request", requestId);
         }
         replayedRequest = replayJsonRequest(request, body);
       } catch {
-        return Response.json({ error: "Invalid legacy intake request." }, { status: 422 });
+        return toApiErrorResponse("unprocessable_request", requestId);
       }
       const dependencies = claimDependencies(overrides);
-      return createIntakePostHandler(dependencies)(replayedRequest);
+      return createIntakePostHandler(dependencies, { requestId })(replayedRequest);
     }
 
     const parsed = parseAnalyzeRequest(body);
     if (!parsed.success) {
-      return Response.json({ error: "Invalid canonical intake request." }, { status: 422 });
+      return toApiErrorResponse("unprocessable_request", requestId);
     }
     const compatibleRequest = parseAnalyzeClaimRequest(body);
     if (!compatibleRequest.success) {
-      return Response.json({ error: "Invalid canonical intake request." }, { status: 422 });
+      return toApiErrorResponse("unprocessable_request", requestId);
     }
 
     const dependencies = claimDependencies(overrides);
@@ -177,17 +166,17 @@ export function createIntakeRouteHandler(overrides: IntakeRouteDependencies = {}
         !hasExactCanonicalResponseKeys(response) ||
         !hasValidExtractionMetadata(response, parsed.data)
       ) {
-        return Response.json({ error: "Intake processing failed." }, { status: 500 });
+        return toApiErrorResponse("upstream_failure", requestId);
       }
       if (!isClaimStateReplayable(response.claimState)) {
-        return Response.json(
-          { error: "Intake processing failed." },
-          { status: parsed.data.intent === "correction_only" ? 422 : 500 }
+        return toApiErrorResponse(
+          parsed.data.intent === "correction_only" ? "unprocessable_request" : "upstream_failure",
+          requestId
         );
       }
       return Response.json(response);
-    } catch {
-      return Response.json({ error: "Intake processing failed." }, { status: 500 });
+    } catch (error) {
+      return toApiErrorResponse(error, requestId);
     }
   };
 }

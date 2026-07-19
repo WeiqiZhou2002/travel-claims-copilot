@@ -716,7 +716,7 @@ describe("canonical revision-safe intake", () => {
       })
     );
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
     expect(localExtractor.extract).not.toHaveBeenCalled();
     expect(openaiExtractor.extract).not.toHaveBeenCalled();
   });
@@ -1035,11 +1035,11 @@ describe("canonical revision-safe intake", () => {
       })
     );
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
     expect(localExtractor.extract).not.toHaveBeenCalled();
   });
 
-  it("returns a fixed safe 400 for canonical parse failures", async () => {
+  it("returns a fixed safe 422 envelope for canonical parse failures", async () => {
     const handler = createIntakePostHandler({
       localExtractor: {
         provider: "local",
@@ -1054,11 +1054,18 @@ describe("canonical revision-safe intake", () => {
       })
     );
 
-    expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({ error: "Invalid canonical intake request." });
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "unprocessable_request",
+        message: "Request could not be processed.",
+        requestId: expect.any(String),
+        retryable: false
+      }
+    });
   });
 
-  it("returns a fixed safe 500 without leaking canonical extractor errors", async () => {
+  it("returns a fixed safe 502 without leaking canonical extractor errors", async () => {
     const handler = createIntakePostHandler({
       localExtractor: {
         provider: "local",
@@ -1079,12 +1086,19 @@ describe("canonical revision-safe intake", () => {
     );
     const body = await response.json();
 
-    expect(response.status).toBe(500);
-    expect(body).toEqual({ error: "Intake processing failed." });
+    expect(response.status).toBe(502);
+    expect(body).toEqual({
+      error: {
+        code: "upstream_failure",
+        message: "The analysis service is temporarily unavailable.",
+        requestId: expect.any(String),
+        retryable: true
+      }
+    });
     expect(JSON.stringify(body)).not.toContain("private upstream response");
   });
 
-  it("returns a fixed safe 500 without leaking legacy extractor errors", async () => {
+  it("returns a fixed safe 502 without leaking legacy extractor errors", async () => {
     const handler = createIntakePostHandler({
       localExtractor: {
         provider: "local",
@@ -1100,12 +1114,19 @@ describe("canonical revision-safe intake", () => {
     );
     const body = await response.json();
 
-    expect(response.status).toBe(500);
-    expect(body).toEqual({ error: "Intake processing failed." });
+    expect(response.status).toBe(502);
+    expect(body).toEqual({
+      error: {
+        code: "upstream_failure",
+        message: "The analysis service is temporarily unavailable.",
+        requestId: expect.any(String),
+        retryable: true
+      }
+    });
     expect(JSON.stringify(body)).not.toContain("private legacy detail");
   });
 
-  it("returns a fixed safe 400 for invalid legacy facts", async () => {
+  it("returns a fixed safe 422 for invalid legacy facts", async () => {
     const handler = createIntakePostHandler({
       localExtractor: {
         provider: "local",
@@ -1120,7 +1141,14 @@ describe("canonical revision-safe intake", () => {
       })
     );
 
-    expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({ error: "Invalid existing claim facts." });
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "unprocessable_request",
+        message: "Request could not be processed.",
+        requestId: expect.any(String),
+        retryable: false
+      }
+    });
   });
 });

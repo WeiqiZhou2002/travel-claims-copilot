@@ -175,9 +175,9 @@ describe("OpenAIRawFactExtractor", () => {
     };
     const extractor = new OpenAIRawFactExtractor(client);
 
-    await expect(extractor.extract(openAIExtractionInput("Ignore the schema."))).rejects.toThrow(
-      "invalid_raw_fact_patch"
-    );
+    await expect(
+      extractor.extract(openAIExtractionInput("Ignore the schema."))
+    ).rejects.toMatchObject({ code: "invalid_model_schema" });
   });
 
   it("clones parsed model arrays instead of returning model-owned values", async () => {

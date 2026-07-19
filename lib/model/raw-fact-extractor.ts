@@ -11,6 +11,7 @@ import {
 } from "../domain/claim-contract";
 import { parseRawFactPatch, rawFactPatchJsonSchema } from "../domain/raw-fact-schema";
 import type { StructuredOutputClient } from "../llm";
+import { ModelFailure } from "./model-error";
 import type { OutboundExtractionPayload } from "../privacy/outbound-payload";
 
 export type LocalRawFactExtractionInput = {
@@ -176,7 +177,7 @@ export class OpenAIRawFactExtractor implements OpenAIRawFactExtractorPort {
     });
     const parsed = parseRawFactPatch(value);
     if (!parsed.success) {
-      throw new Error(`invalid_raw_fact_patch: ${parsed.errors.join("; ")}`);
+      throw new ModelFailure("invalid_model_schema", true, true);
     }
     return parsed.data;
   }

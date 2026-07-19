@@ -25,6 +25,18 @@ function intakeRequest(body: Record<string, unknown>) {
   );
 }
 
+async function expectUnprocessable(response: Response) {
+  expect(response.status).toBe(422);
+  expect(await response.json()).toEqual({
+    error: {
+      code: "unprocessable_request",
+      message: "Request could not be processed.",
+      requestId: expect.any(String),
+      retryable: false
+    }
+  });
+}
+
 describe("public scenario scope", () => {
   it("publishes exactly the four frozen scenarios", async () => {
     const response = await getScenarios();
@@ -46,8 +58,7 @@ describe("public scenario scope", () => {
   ])("rejects noncanonical analyze input", async (body) => {
     const response = await analyzeRequest(body);
 
-    expect(response.status).toBe(422);
-    expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
+    await expectUnprocessable(response);
   });
 
   it.each([
@@ -59,8 +70,7 @@ describe("public scenario scope", () => {
   ])("rejects legacy %s input before analysis", async (_label, body) => {
     const response = await analyzeRequest(body);
 
-    expect(response.status).toBe(422);
-    expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
+    await expectUnprocessable(response);
   });
 
   it.each(["constructor", "toString", "__proto__"])(
@@ -68,8 +78,7 @@ describe("public scenario scope", () => {
     async (issueType) => {
       const response = await analyzeRequest({ issueType });
 
-      expect(response.status).toBe(422);
-      expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
+      await expectUnprocessable(response);
     }
   );
 
@@ -87,8 +96,7 @@ describe("public scenario scope", () => {
       [selector]: value
     });
 
-    expect(response.status).toBe(422);
-    expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
+    await expectUnprocessable(response);
   });
 
   it.each([
@@ -105,8 +113,7 @@ describe("public scenario scope", () => {
   ])("rejects malformed canonical input with %s", async (_label, body) => {
     const response = await analyzeRequest(body);
 
-    expect(response.status).toBe(422);
-    expect(await response.json()).toEqual({ error: "Invalid canonical analyze request." });
+    await expectUnprocessable(response);
   });
 
   it("returns active scenarios only from server-resolved canonical state", async () => {

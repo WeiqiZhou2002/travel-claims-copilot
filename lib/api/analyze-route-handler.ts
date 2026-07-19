@@ -9,11 +9,12 @@ import {
   parseExtractionMetadata,
   type ParsedAnalyzeRequest
 } from "./analyze-contract";
-import { isApiFault } from "./api-error";
+import { toApiErrorResponse, withRequestId, type RequestIdFactory } from "./api-response";
 import { isClaimStateReplayable, readJsonBody } from "./request-body";
 
 export type AnalyzeRouteDependencies = Partial<ProcessClaimDependencies> & {
   processRequest?: typeof processClaimTurn;
+  requestIdFactory?: RequestIdFactory;
 };
 
 function currentUtcDate(): string {
@@ -22,19 +23,6 @@ function currentUtcDate(): string {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function safeReaderFailure(error: unknown): Response {
-  if (!isApiFault(error)) {
-    return Response.json({ error: "Analyze processing failed." }, { status: 500 });
-  }
-  const messageByCode = {
-    unsupported_media_type: "Request content type must be application/json.",
-    invalid_json: "Invalid JSON request.",
-    request_too_large: "Request body is too large.",
-    unprocessable_request: "Invalid canonical analyze request."
-  } as const;
-  return Response.json({ error: messageByCode[error.code] }, { status: error.status });
 }
 
 function hasValidExtractionMetadata(value: unknown, request: ParsedAnalyzeRequest): boolean {
@@ -54,20 +42,21 @@ function hasValidExtractionMetadata(value: unknown, request: ParsedAnalyzeReques
 
 export function createAnalyzeRouteHandler(overrides: AnalyzeRouteDependencies = {}) {
   return async function analyzePost(request: Request): Promise<Response> {
+    const requestId = withRequestId(overrides.requestIdFactory);
     let body: unknown;
     try {
       body = await readJsonBody(request);
     } catch (error) {
-      return safeReaderFailure(error);
+      return toApiErrorResponse(error, requestId);
     }
 
     const parsed = parseAnalyzeRequest(body);
     if (!parsed.success) {
-      return Response.json({ error: "Invalid canonical analyze request." }, { status: 422 });
+      return toApiErrorResponse("unprocessable_request", requestId);
     }
     const compatibleRequest = parseAnalyzeClaimRequest(body);
     if (!compatibleRequest.success) {
-      return Response.json({ error: "Invalid canonical analyze request." }, { status: 422 });
+      return toApiErrorResponse("unprocessable_request", requestId);
     }
 
     const asOf = overrides.now?.() ?? currentUtcDate();
@@ -85,17 +74,17 @@ export function createAnalyzeRouteHandler(overrides: AnalyzeRouteDependencies = 
         !hasExactCanonicalResponseKeys(response) ||
         !hasValidExtractionMetadata(response, parsed.data)
       ) {
-        return Response.json({ error: "Analyze processing failed." }, { status: 500 });
+        return toApiErrorResponse("upstream_failure", requestId);
       }
       if (!isClaimStateReplayable(response.claimState)) {
-        return Response.json(
-          { error: "Analyze processing failed." },
-          { status: parsed.data.intent === "correction_only" ? 422 : 500 }
+        return toApiErrorResponse(
+          parsed.data.intent === "correction_only" ? "unprocessable_request" : "upstream_failure",
+          requestId
         );
       }
       return Response.json(response);
-    } catch {
-      return Response.json({ error: "Analyze processing failed." }, { status: 500 });
+    } catch (error) {
+      return toApiErrorResponse(error, requestId);
     }
   };
 }

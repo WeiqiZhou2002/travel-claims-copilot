@@ -533,7 +533,7 @@ describe.each(["analyze", "intake"] as const)("bounded %s route", (route) => {
         provider: "local",
         model: null
       },
-      500
+      502
     ],
     [
       "correction-only",
@@ -602,7 +602,7 @@ describe.each(["analyze", "intake"] as const)("bounded %s route", (route) => {
       const body = await response.json();
 
       expect(processRequest).toHaveBeenCalledOnce();
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(502);
       expect(body).not.toHaveProperty("claimState");
       expect(JSON.stringify(body)).not.toContain(privateMarker);
       expect(JSON.stringify(body)).not.toContain("private_internal_error");
@@ -641,7 +641,7 @@ describe.each(["analyze", "intake"] as const)("bounded %s route", (route) => {
       const body = await response.json();
 
       expect(processRequest).toHaveBeenCalledOnce();
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(502);
       expect(body).not.toHaveProperty("claimState");
       expect(JSON.stringify(body)).not.toContain(privateMarker);
       expect(harness.localExtract).not.toHaveBeenCalled();
@@ -747,7 +747,7 @@ describe.each(["analyze", "intake"] as const)("bounded %s route", (route) => {
     const body = await response.json();
 
     expect(processRequest).toHaveBeenCalledOnce();
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(502);
     expect(JSON.stringify(body)).not.toContain("private upstream detail");
     expect(harness.localExtract).not.toHaveBeenCalled();
     expect(harness.openaiExtract).not.toHaveBeenCalled();
@@ -826,7 +826,7 @@ describe.each(["analyze", "intake"] as const)("bounded %s route", (route) => {
     const response = await harness.handler(jsonRequest(route, requestBody));
 
     expect(processRequest).toHaveBeenCalledOnce();
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(502);
     expect(harness.localExtract).not.toHaveBeenCalled();
     expect(harness.openaiExtract).not.toHaveBeenCalled();
     expect(harness.load).not.toHaveBeenCalled();
@@ -887,7 +887,7 @@ describe.each(["analyze", "intake"] as const)("bounded %s route", (route) => {
     const body = await response.json();
 
     expect(processRequest).toHaveBeenCalledOnce();
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(502);
     expect(JSON.stringify(body)).not.toContain(privateMarker);
     expect(harness.localExtract).not.toHaveBeenCalled();
     expect(harness.openaiExtract).not.toHaveBeenCalled();
@@ -925,7 +925,7 @@ describe.each(["analyze", "intake"] as const)("bounded %s route", (route) => {
       const body = await response.json();
 
       expect(processRequest).toHaveBeenCalledOnce();
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(502);
       expect(JSON.stringify(body)).not.toContain(privateMarker);
       expect(harness.localExtract).not.toHaveBeenCalled();
       expect(harness.openaiExtract).not.toHaveBeenCalled();
@@ -1396,19 +1396,14 @@ describe("legacy public intake compatibility", () => {
     [
       "a deeply nested record",
       () => deeplyNestedLegacyJson("record"),
-      400,
-      "Invalid existing claim facts."
-    ],
-    [
-      "a deeply nested array",
-      () => deeplyNestedLegacyJson("array"),
       422,
-      "Invalid legacy intake request."
+      "unprocessable_request"
     ],
-    ["a non-finite numeric token", nonFiniteLegacyJson, 422, "Invalid legacy intake request."]
+    ["a deeply nested array", () => deeplyNestedLegacyJson("array"), 422, "unprocessable_request"],
+    ["a non-finite numeric token", nonFiniteLegacyJson, 422, "unprocessable_request"]
   ])(
     "returns a fixed safe 4xx for legacy %s without rejecting",
-    async (_label, requestJson, expectedStatus, expectedError) => {
+    async (_label, requestJson, expectedStatus, expectedCode) => {
       const harness = routeHarness("intake");
       const responsePromise = harness.handler(rawJsonRequest("intake", requestJson()));
 
@@ -1416,7 +1411,14 @@ describe("legacy public intake compatibility", () => {
       const response = await responsePromise;
 
       expect(response.status).toBe(expectedStatus);
-      expect(await response.json()).toEqual({ error: expectedError });
+      expect(await response.json()).toEqual({
+        error: {
+          code: expectedCode,
+          message: "Request could not be processed.",
+          requestId: expect.any(String),
+          retryable: false
+        }
+      });
       expect(harness.localExtract).not.toHaveBeenCalled();
       expect(harness.openaiExtract).not.toHaveBeenCalled();
       expect(harness.load).not.toHaveBeenCalled();
