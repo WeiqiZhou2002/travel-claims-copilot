@@ -3,11 +3,8 @@ import { join } from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
-import type { AnalyzeClaimResponse } from "../lib/api/analyze-contract";
-import { analyzeResponseFixture } from "./fixtures/analyze-transport";
-
-describe("temporary page compatibility", () => {
-  it("compiles the render entry against the public analyze transport fixture", () => {
+describe("home page composition", () => {
+  it("uses the source-aware workspace without retaining the temporary projection", () => {
     const pagePath = join(process.cwd(), "app/page.tsx");
     const pageSource = readFileSync(pagePath, "utf8");
     const compiled = ts.transpileModule(pageSource, {
@@ -22,20 +19,13 @@ describe("temporary page compatibility", () => {
     const errors = (compiled.diagnostics ?? [])
       .filter(({ category }) => category === ts.DiagnosticCategory.Error)
       .map(({ messageText }) => ts.flattenDiagnosticMessageText(messageText, "\n"));
-    const response = analyzeResponseFixture() satisfies AnalyzeClaimResponse;
 
     expect(errors).toEqual([]);
-    expect(compiled.outputText).toContain("pageResultFromResponse");
-    expect(pageSource).toContain("import type { AnalyzeClaimResponse }");
-    expect(pageSource).not.toContain("AnalyzeClaimDomainResponse");
-    expect(Object.keys(response).sort()).toEqual(["baseRevision", "claimState", "result"]);
-    expect(response.result).toEqual(
-      expect.objectContaining({
-        officialSources: expect.any(Array),
-        providerCommitments: expect.any(Array),
-        similarCases: expect.any(Array),
-        scripts: expect.any(Array)
-      })
+    expect(compiled.outputText).toContain("ClaimWorkspace");
+    expect(pageSource).toContain(
+      'import { ClaimWorkspace } from "../src/components/claim-workspace"'
     );
+    expect(pageSource).not.toContain("pageResultFromResponse");
+    expect(pageSource).not.toContain("AnalyzeClaimResponse");
   });
 });
