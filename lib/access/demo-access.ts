@@ -5,8 +5,12 @@ export function verifyDemoAccess(input: {
   suppliedCode: string | null | undefined;
   configuredCode: string | null | undefined;
 }): boolean {
-  if (!input.consent || !input.suppliedCode || !input.configuredCode) return false;
-  const supplied = createHash("sha256").update(input.suppliedCode, "utf8").digest();
-  const configured = createHash("sha256").update(input.configuredCode, "utf8").digest();
-  return timingSafeEqual(supplied, configured);
+  if (!input.consent) return false;
+  const supplied = input.suppliedCode ?? "";
+  const configured = input.configuredCode ?? "";
+  const suppliedDigest = createHash("sha256").update(supplied, "utf8").digest();
+  const configuredDigest = createHash("sha256").update(configured, "utf8").digest();
+  return Boolean(
+    input.suppliedCode && input.configuredCode && timingSafeEqual(suppliedDigest, configuredDigest)
+  );
 }

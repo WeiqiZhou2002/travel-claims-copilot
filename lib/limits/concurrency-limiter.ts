@@ -9,6 +9,9 @@ export class MemoryConcurrencyLimiter implements ConcurrencyLimiter {
   private readonly counts = new Map<string, number>();
 
   async acquire(key: string, limit = 2): Promise<ConcurrencyLease | null> {
+    if (!Number.isFinite(limit) || !Number.isInteger(limit) || limit <= 0) {
+      throw new RangeError("invalid_concurrency_limit_configuration");
+    }
     const current = this.counts.get(key) ?? 0;
     if (current >= limit) return null;
     this.counts.set(key, current + 1);

@@ -16,5 +16,12 @@ describe("demo access", () => {
     expect(
       verifyDemoAccess({ consent: true, suppliedCode: "demo", configuredCode: undefined })
     ).toBe(false);
+    expect(
+      verifyDemoAccess({ consent: true, suppliedCode: "Ｄｅｍｏ", configuredCode: "Demo" })
+    ).toBe(false);
+    expect(verifyDemoAccess({ consent: true, suppliedCode: "demo", configuredCode: "Demo" })).toBe(
+      false
+    );
+    expect(verifyDemoAccess({ consent: true, suppliedCode: "", configuredCode: "" })).toBe(false);
   });
 });

@@ -20,6 +20,15 @@ export class MemoryRateLimiter implements RateLimiter {
     limit: number;
     windowMs: number;
   }): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+    if (
+      !Number.isFinite(input.limit) ||
+      !Number.isInteger(input.limit) ||
+      input.limit <= 0 ||
+      !Number.isFinite(input.windowMs) ||
+      input.windowMs <= 0
+    ) {
+      throw new RangeError("invalid_rate_limit_configuration");
+    }
     const bucketKey = `${input.scope}:${input.key}`;
     const now = this.now();
     const active = (this.entries.get(bucketKey) ?? []).filter((at) => now - at < input.windowMs);

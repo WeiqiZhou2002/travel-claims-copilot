@@ -103,4 +103,11 @@ describe("GPT request guard", () => {
     now = 60_000;
     expect(await limiter.consume(input)).toMatchObject({ allowed: true });
   });
+
+  it("rejects invalid memory limiter configuration", async () => {
+    await expect(
+      new MemoryRateLimiter().consume({ key: "x", scope: "gpt_minute", limit: 0, windowMs: 1 })
+    ).rejects.toThrow(RangeError);
+    await expect(new MemoryConcurrencyLimiter().acquire("x", 0)).rejects.toThrow(RangeError);
+  });
 });

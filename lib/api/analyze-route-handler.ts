@@ -111,26 +111,30 @@ export function createAnalyzeRouteHandler(overrides: AnalyzeRouteDependencies = 
           return toApiErrorResponse("gpt_access_denied", requestId);
         }
         const controls = overrides.gptControls ?? runtimeGptControls;
+        const accessGranted = verifyDemoAccess({
+          consent: true,
+          suppliedCode: request.headers.get("x-demo-access-code"),
+          configuredCode: overrides.demoAccessCode ?? process.env.DEMO_ACCESS_CODE
+        });
         let identity;
         try {
           identity = controls.identityResolver.resolve(request);
         } catch {
           return toApiErrorResponse("budget_restricted", requestId);
         }
-        const guard = await (overrides.gptControls?.guard ?? overrides.gptGuard ?? guardGptRequest)(
-          {
+        let guard;
+        try {
+          guard = await (overrides.gptControls?.guard ?? overrides.gptGuard ?? guardGptRequest)({
             consent: true,
-            accessGranted: verifyDemoAccess({
-              consent: true,
-              suppliedCode: request.headers.get("x-demo-access-code"),
-              configuredCode: overrides.demoAccessCode ?? process.env.DEMO_ACCESS_CODE
-            }),
+            accessGranted,
             identity,
             rateLimiter: controls.rateLimiter,
             concurrencyLimiter: controls.concurrencyLimiter,
             budget: controls.budget
-          }
-        );
+          });
+        } catch {
+          return toApiErrorResponse("budget_restricted", requestId);
+        }
         if (!guard.allowed) return toApiErrorResponse(guard.code, requestId);
         lease = guard.lease;
         guardedOpenAIExtractor ??=

@@ -8,7 +8,8 @@ const modelEnvKeys = [
   "DEEPSEEK_API_KEY",
   "DEEPSEEK_BASE_URL",
   "DEEPSEEK_INTAKE_MODEL",
-  "LLM_PROVIDER"
+  "LLM_PROVIDER",
+  "DEMO_ACCESS_CODE"
 ] as const;
 
 export function assertOfflineUrl(input: string | URL | Request): void {
