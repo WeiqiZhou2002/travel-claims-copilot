@@ -460,7 +460,8 @@ describe("route error contract", () => {
         message: "A bounded claim message.",
         prior,
         baseRevision: 0,
-        requestedMode: "gpt" as const
+        requestedMode: "gpt" as const,
+        privacyAcknowledged: true
       };
       const directResponse = await processClaimTurn(workflowInput, {
         localExtractor: {
@@ -507,12 +508,13 @@ describe("route error contract", () => {
             }
           : {}),
         knowledgeRepository: { load: async () => knowledgeSnapshotFixture() },
-        now: () => "2026-07-20"
+        now: () => "2026-07-20",
+        demoAccessCode: "test-access"
       } as never);
       const response = await handler(
         new Request(`http://localhost/api/${route}`, {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", "x-demo-access-code": "test-access" },
           body: serializedBody
         })
       );

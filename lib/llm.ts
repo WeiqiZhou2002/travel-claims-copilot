@@ -174,6 +174,14 @@ export function createOpenAIClientFromEnv(
   });
 }
 
+/** Public routes use only this pinned official OpenAI factory. */
+export function createPublicOpenAIClientFromEnv(
+  env: LlmEnvironment = process.env
+): OpenAIResponsesClient | undefined {
+  const apiKey = env.OPENAI_API_KEY?.trim();
+  return apiKey ? new OpenAIResponsesClient({ apiKey, model: "gpt-5.6-luna" }) : undefined;
+}
+
 export function createDeepSeekClientFromEnv(
   env: LlmEnvironment = process.env
 ): DeepSeekChatCompletionsClient | undefined {

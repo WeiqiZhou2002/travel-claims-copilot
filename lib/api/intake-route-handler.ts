@@ -4,7 +4,17 @@ import {
   type ProcessClaimTurnDependencies
 } from "../intake";
 import { preflightGuard } from "../domain/safety-guard";
-import { LocalRawFactExtractor } from "../model/raw-fact-extractor";
+import { LocalRawFactExtractor, OpenAIRawFactExtractor } from "../model/raw-fact-extractor";
+import { createPublicOpenAIClientFromEnv } from "../llm";
+import { verifyDemoAccess } from "../access/demo-access";
+import {
+  guardGptRequest,
+  type BudgetGate,
+  type TrustedClientIdentityResolver
+} from "../limits/gpt-request-guard";
+import type { ConcurrencyLimiter } from "../limits/concurrency-limiter";
+import type { RateLimiter } from "../limits/rate-limiter";
+import { runtimeGptControls } from "./gpt-runtime";
 import {
   hasExactCanonicalResponseKeys,
   parseAnalyzeClaimRequest,
@@ -30,10 +40,30 @@ export type IntakeRouteDependencies = Omit<Partial<ProcessClaimTurnDependencies>
   processRequest?: typeof processClaimTurn;
   requestIdFactory?: RequestIdFactory;
   telemetry?: RouteTelemetryDependencies;
+  gptGuard?: typeof guardGptRequest;
+  createOpenAIExtractor?: () => ProcessClaimTurnDependencies["openaiExtractor"] | undefined;
+  demoAccessCode?: string;
+  gptControls?: {
+    identityResolver: TrustedClientIdentityResolver;
+    rateLimiter: RateLimiter;
+    concurrencyLimiter: ConcurrencyLimiter;
+    budget: BudgetGate;
+    guard?: typeof guardGptRequest;
+  };
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function lazyLocalExtractor(): ProcessClaimTurnDependencies["localExtractor"] {
+  return {
+    provider: "local",
+    model: null,
+    async extract(input) {
+      return new LocalRawFactExtractor().extract(input);
+    }
+  };
 }
 
 function hasOwn(value: Record<string, unknown>, key: string): boolean {
@@ -120,7 +150,7 @@ function claimDependencies(
   requestId: string
 ): ProcessClaimTurnDependencies {
   return {
-    localExtractor: overrides.localExtractor ?? new LocalRawFactExtractor(),
+    localExtractor: overrides.localExtractor ?? lazyLocalExtractor(),
     ...(overrides.openaiExtractor ? { openaiExtractor: overrides.openaiExtractor } : {}),
     ...(overrides.knowledgeRepository
       ? { knowledgeRepository: overrides.knowledgeRepository }
@@ -159,7 +189,10 @@ export function createIntakeRouteHandler(overrides: IntakeRouteDependencies = {}
       } catch {
         return toApiErrorResponse("unprocessable_request", requestId);
       }
-      const dependencies = claimDependencies(overrides, requestId);
+      const dependencies = claimDependencies(
+        { ...overrides, openaiExtractor: undefined },
+        requestId
+      );
       return createIntakePostHandler(dependencies, { requestId })(replayedRequest);
     }
 
@@ -172,8 +205,50 @@ export function createIntakeRouteHandler(overrides: IntakeRouteDependencies = {}
       return toApiErrorResponse("unprocessable_request", requestId);
     }
 
-    const dependencies = claimDependencies(overrides, requestId);
+    const isBypass =
+      parsed.data.intent === "correction_only" ||
+      preflightGuard(parsed.data.message).status !== "pass";
+    let lease: { release(): Promise<void> } | undefined;
     try {
+      let guardedOpenAIExtractor = overrides.openaiExtractor;
+      if (!isBypass && parsed.data.requestedMode === "gpt") {
+        if (parsed.data.privacyAcknowledged !== true) {
+          return toApiErrorResponse("gpt_access_denied", requestId);
+        }
+        const controls = overrides.gptControls ?? runtimeGptControls;
+        let identity;
+        try {
+          identity = controls.identityResolver.resolve(request);
+        } catch {
+          return toApiErrorResponse("budget_restricted", requestId);
+        }
+        const guard = await (overrides.gptControls?.guard ?? overrides.gptGuard ?? guardGptRequest)(
+          {
+            consent: true,
+            accessGranted: verifyDemoAccess({
+              consent: true,
+              suppliedCode: request.headers.get("x-demo-access-code"),
+              configuredCode: overrides.demoAccessCode ?? process.env.DEMO_ACCESS_CODE
+            }),
+            identity,
+            rateLimiter: controls.rateLimiter,
+            concurrencyLimiter: controls.concurrencyLimiter,
+            budget: controls.budget
+          }
+        );
+        if (!guard.allowed) return toApiErrorResponse(guard.code, requestId);
+        lease = guard.lease;
+        guardedOpenAIExtractor ??=
+          overrides.createOpenAIExtractor?.() ??
+          (() => {
+            const client = createPublicOpenAIClientFromEnv();
+            return client ? new OpenAIRawFactExtractor(client) : undefined;
+          })();
+      }
+      const dependencies = claimDependencies(
+        { ...overrides, openaiExtractor: guardedOpenAIExtractor },
+        requestId
+      );
       const response = overrides.processRequest
         ? await overrides.processRequest(compatibleRequest.data, dependencies)
         : canonicalIntakeResponse(await processClaimTurn(compatibleRequest.data, dependencies));
@@ -192,6 +267,12 @@ export function createIntakeRouteHandler(overrides: IntakeRouteDependencies = {}
       return Response.json(response);
     } catch (error) {
       return toCaughtApiErrorResponse(error, requestId);
+    } finally {
+      try {
+        await lease?.release();
+      } catch {
+        /* safe response wins */
+      }
     }
   };
 }

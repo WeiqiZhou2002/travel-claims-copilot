@@ -995,7 +995,7 @@ describe("canonical revision-safe intake", () => {
     expect(JSON.stringify(second)).not.toContain("original anonymous denied-boarding narrative");
   });
 
-  it("never selects DeepSeek or any external model in the public handler", async () => {
+  it("does not select DeepSeek or create an external model without GPT access", async () => {
     vi.stubEnv("DEEPSEEK_API_KEY", "configured-but-must-not-be-used");
     vi.stubEnv("LLM_PROVIDER", "deepseek");
     const fetcher = vi.spyOn(globalThis, "fetch");
@@ -1013,7 +1013,7 @@ describe("canonical revision-safe intake", () => {
       })
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(401);
     expect(fetcher).not.toHaveBeenCalled();
   });
 

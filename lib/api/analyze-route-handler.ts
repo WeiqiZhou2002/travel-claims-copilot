@@ -1,6 +1,16 @@
 import { processClaimTurn, type ProcessClaimDependencies } from "../claim-workflow";
 import { createKnowledgeRepository } from "../knowledge/knowledge-repository";
-import { LocalRawFactExtractor } from "../model/raw-fact-extractor";
+import { LocalRawFactExtractor, OpenAIRawFactExtractor } from "../model/raw-fact-extractor";
+import { createPublicOpenAIClientFromEnv } from "../llm";
+import { verifyDemoAccess } from "../access/demo-access";
+import {
+  guardGptRequest,
+  type BudgetGate,
+  type TrustedClientIdentityResolver
+} from "../limits/gpt-request-guard";
+import type { ConcurrencyLimiter } from "../limits/concurrency-limiter";
+import type { RateLimiter } from "../limits/rate-limiter";
+import { runtimeGptControls } from "./gpt-runtime";
 import { preflightGuard } from "../domain/safety-guard";
 import {
   hasExactCanonicalResponseKeys,
@@ -26,10 +36,30 @@ export type AnalyzeRouteDependencies = Omit<Partial<ProcessClaimDependencies>, "
   processRequest?: typeof processClaimTurn;
   requestIdFactory?: RequestIdFactory;
   telemetry?: RouteTelemetryDependencies;
+  gptGuard?: typeof guardGptRequest;
+  createOpenAIExtractor?: () => ProcessClaimDependencies["openaiExtractor"] | undefined;
+  demoAccessCode?: string;
+  gptControls?: {
+    identityResolver: TrustedClientIdentityResolver;
+    rateLimiter: RateLimiter;
+    concurrencyLimiter: ConcurrencyLimiter;
+    budget: BudgetGate;
+    guard?: typeof guardGptRequest;
+  };
 };
 
 function currentUtcDate(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function lazyLocalExtractor(): ProcessClaimDependencies["localExtractor"] {
+  return {
+    provider: "local",
+    model: null,
+    async extract(input) {
+      return new LocalRawFactExtractor().extract(input);
+    }
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -70,16 +100,55 @@ export function createAnalyzeRouteHandler(overrides: AnalyzeRouteDependencies = 
       return toApiErrorResponse("unprocessable_request", requestId);
     }
 
-    const asOf = overrides.now?.() ?? currentUtcDate();
-    const dependencies: ProcessClaimDependencies = {
-      localExtractor: overrides.localExtractor ?? new LocalRawFactExtractor(),
-      ...(overrides.openaiExtractor ? { openaiExtractor: overrides.openaiExtractor } : {}),
-      knowledgeRepository: overrides.knowledgeRepository ?? createKnowledgeRepository({ asOf }),
-      now: () => asOf,
-      ...(overrides.retrievalLimits ? { retrievalLimits: overrides.retrievalLimits } : {}),
-      ...(overrides.telemetry ? { telemetry: { ...overrides.telemetry, requestId } } : {})
-    };
+    const isBypass =
+      parsed.data.intent === "correction_only" ||
+      preflightGuard(parsed.data.message).status !== "pass";
+    let lease: { release(): Promise<void> } | undefined;
     try {
+      let guardedOpenAIExtractor = overrides.openaiExtractor;
+      if (!isBypass && parsed.data.requestedMode === "gpt") {
+        if (parsed.data.privacyAcknowledged !== true) {
+          return toApiErrorResponse("gpt_access_denied", requestId);
+        }
+        const controls = overrides.gptControls ?? runtimeGptControls;
+        let identity;
+        try {
+          identity = controls.identityResolver.resolve(request);
+        } catch {
+          return toApiErrorResponse("budget_restricted", requestId);
+        }
+        const guard = await (overrides.gptControls?.guard ?? overrides.gptGuard ?? guardGptRequest)(
+          {
+            consent: true,
+            accessGranted: verifyDemoAccess({
+              consent: true,
+              suppliedCode: request.headers.get("x-demo-access-code"),
+              configuredCode: overrides.demoAccessCode ?? process.env.DEMO_ACCESS_CODE
+            }),
+            identity,
+            rateLimiter: controls.rateLimiter,
+            concurrencyLimiter: controls.concurrencyLimiter,
+            budget: controls.budget
+          }
+        );
+        if (!guard.allowed) return toApiErrorResponse(guard.code, requestId);
+        lease = guard.lease;
+        guardedOpenAIExtractor ??=
+          overrides.createOpenAIExtractor?.() ??
+          (() => {
+            const client = createPublicOpenAIClientFromEnv();
+            return client ? new OpenAIRawFactExtractor(client) : undefined;
+          })();
+      }
+      const asOf = overrides.now?.() ?? currentUtcDate();
+      const dependencies: ProcessClaimDependencies = {
+        localExtractor: overrides.localExtractor ?? lazyLocalExtractor(),
+        ...(guardedOpenAIExtractor ? { openaiExtractor: guardedOpenAIExtractor } : {}),
+        knowledgeRepository: overrides.knowledgeRepository ?? createKnowledgeRepository({ asOf }),
+        now: () => asOf,
+        ...(overrides.retrievalLimits ? { retrievalLimits: overrides.retrievalLimits } : {}),
+        ...(overrides.telemetry ? { telemetry: { ...overrides.telemetry, requestId } } : {})
+      };
       const processRequest = overrides.processRequest ?? processClaimTurn;
       const response = await processRequest(compatibleRequest.data, dependencies);
       if (
@@ -97,6 +166,12 @@ export function createAnalyzeRouteHandler(overrides: AnalyzeRouteDependencies = 
       return Response.json(response);
     } catch (error) {
       return toCaughtApiErrorResponse(error, requestId);
+    } finally {
+      try {
+        await lease?.release();
+      } catch {
+        /* safe response wins */
+      }
     }
   };
 }

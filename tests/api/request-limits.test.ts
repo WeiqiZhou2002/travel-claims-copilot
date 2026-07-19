@@ -6,6 +6,9 @@ import * as requestBodyContract from "../../lib/api/request-body";
 import { ApiFault } from "../../lib/api/api-error";
 import { createAnalyzeRouteHandler } from "../../lib/api/analyze-route-handler";
 import { createIntakeRouteHandler } from "../../lib/api/intake-route-handler";
+import { MemoryConcurrencyLimiter } from "../../lib/limits/concurrency-limiter";
+import { createLocalTrustedIdentityResolver } from "../../lib/limits/gpt-request-guard";
+import { MemoryRateLimiter } from "../../lib/limits/rate-limiter";
 import { emptyClaimFacts } from "../../lib/claimFacts";
 import {
   RAW_FACT_PATHS,
@@ -25,6 +28,8 @@ type RouteDependencies = {
   openaiExtractor?: RawFactExtractor;
   knowledgeRepository: KnowledgeRepository;
   now: () => string;
+  demoAccessCode?: string;
+  gptControls?: object;
   processRequest?: (value: unknown, dependencies: unknown) => Promise<unknown>;
 };
 
@@ -60,6 +65,17 @@ function routeHarness(
     openaiExtractor,
     knowledgeRepository: { load },
     now: () => "2026-07-19",
+    demoAccessCode: "test-access",
+    gptControls: {
+      identityResolver: createLocalTrustedIdentityResolver("harness"),
+      rateLimiter: new MemoryRateLimiter(),
+      concurrencyLimiter: new MemoryConcurrencyLimiter(),
+      budget: {
+        async check() {
+          return { allowed: true };
+        }
+      }
+    },
     ...(processRequest ? { processRequest } : {})
   } satisfies RouteDependencies;
 
@@ -70,10 +86,14 @@ function routeHarness(
 }
 
 function jsonRequest(path: string, body: unknown, contentType = "application/json"): Request {
+  const withConsent =
+    body && typeof body === "object" && (body as Record<string, unknown>).requestedMode === "gpt"
+      ? { ...(body as Record<string, unknown>), privacyAcknowledged: true }
+      : body;
   return new Request(`http://localhost/api/${path}`, {
     method: "POST",
-    headers: { "content-type": contentType },
-    body: JSON.stringify(body)
+    headers: { "content-type": contentType, "x-demo-access-code": "test-access" },
+    body: JSON.stringify(withConsent)
   });
 }
 
