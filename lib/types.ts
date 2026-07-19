@@ -79,6 +79,15 @@ export type PolicyApplicabilityAssessment = {
   conditions: PolicyConditionAssessment[];
 };
 
+export type EvidenceCoverage = {
+  officialBasisStatus: "scope_confirmed" | "conditional" | "not_found";
+  officialSourceCount: number;
+  reportedCaseCount: number;
+  syntheticCaseCount: number;
+  unresolvedConditionCount: number;
+  unmetRemedyConditionCount: number;
+};
+
 export type Policy = {
   policy_id: string;
   provider_type: ProviderType;
@@ -259,7 +268,7 @@ export type AnalysisResult = {
   policyRegions: PolicyRegion[];
   legalRegimes: LegalRegime[];
   controllability: Controllability;
-  strength: "low" | "medium" | "high";
+  evidenceCoverage: EvidenceCoverage;
   summary: string;
   officialBasis: Policy[];
   policyAssessments: PolicyApplicabilityAssessment[];

@@ -49,10 +49,13 @@ const issueLabels: Partial<Record<AnalysisResult["issueType"], string>> = {
   unknown: "Needs more detail"
 };
 
-const strengthStyles: Record<AnalysisResult["strength"], string> = {
-  high: "bg-mint text-white",
-  medium: "bg-coral text-white",
-  low: "bg-ink text-white"
+const evidenceCoverageStyles: Record<
+  AnalysisResult["evidenceCoverage"]["officialBasisStatus"],
+  string
+> = {
+  scope_confirmed: "bg-mint text-white",
+  conditional: "bg-coral text-white",
+  not_found: "bg-ink text-white"
 };
 
 export default function Home() {
@@ -379,14 +382,49 @@ function SummaryPanel({ result }: { result: AnalysisResult | null }) {
             </p>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-ink/60">Claim strength</span>
+            <span className="text-sm text-ink/60">Evidence coverage</span>
             <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${strengthStyles[result.strength]}`}
+              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${evidenceCoverageStyles[result.evidenceCoverage.officialBasisStatus]}`}
             >
-              {result.strength}
+              {result.evidenceCoverage.officialBasisStatus.replaceAll("_", " ")}
             </span>
           </div>
+          <p className="text-xs leading-5 text-ink/55">
+            This describes source coverage and unresolved checks—not the likelihood of a payout.
+          </p>
           <div className="grid gap-2 border-t border-ink/5 pt-3 text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-ink/60">Official sources</span>
+              <span className="font-medium text-ink">
+                {result.evidenceCoverage.officialSourceCount}
+              </span>
+            </div>
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-ink/60">Reported cases</span>
+              <span className="font-medium text-ink">
+                {result.evidenceCoverage.reportedCaseCount}
+              </span>
+            </div>
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-ink/60">Synthetic examples</span>
+              <span className="font-medium text-ink">
+                {result.evidenceCoverage.syntheticCaseCount}
+              </span>
+            </div>
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-ink/60">Unresolved checks</span>
+              <span className="font-medium text-ink">
+                {result.evidenceCoverage.unresolvedConditionCount}
+              </span>
+            </div>
+            {result.evidenceCoverage.unmetRemedyConditionCount > 0 ? (
+              <div className="flex items-start justify-between gap-3">
+                <span className="text-ink/60">Unmet remedy checks</span>
+                <span className="font-medium text-ink">
+                  {result.evidenceCoverage.unmetRemedyConditionCount}
+                </span>
+              </div>
+            ) : null}
             <div className="flex items-start justify-between gap-3">
               <span className="text-ink/60">Route regions</span>
               <span className="text-right font-medium text-ink">

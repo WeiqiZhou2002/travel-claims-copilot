@@ -5,7 +5,7 @@ Travel Claims Copilot is a demo web app for exploring travel disruption claims a
 The user describes a hotel or airline issue, and the app returns:
 
 - issue type
-- claim strength
+- evidence coverage and unresolved applicability checks
 - relevant official policies or regulations
 - similar community datapoints
 - conservative / standard / aggressive asks
@@ -311,9 +311,17 @@ Returns:
     | "CN_FLIGHT_REGULATION"
   >;
   controllability: "controllable" | "uncontrollable" | "unknown";
-  strength: "low" | "medium" | "high";
+  evidenceCoverage: {
+    officialBasisStatus: "scope_confirmed" | "conditional" | "not_found";
+    officialSourceCount: number;
+    reportedCaseCount: number;
+    syntheticCaseCount: number;
+    unresolvedConditionCount: number;
+    unmetRemedyConditionCount: number;
+  };
   summary: string;
   officialBasis: Policy[];
+  policyAssessments: PolicyApplicabilityAssessment[];
   similarCases: Case[];
   suggestedAsks: {
     conservative: string[];

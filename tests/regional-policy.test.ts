@@ -31,13 +31,15 @@ function analyzeRoute({
   provider,
   origin,
   destination,
-  reason = "unknown"
+  reason = "unknown",
+  arrivalDelayMinutes = 240
 }: {
   issueType?: Extract<IssueType, "airline_delay" | "airline_cancellation" | "denied_boarding">;
   provider: string;
   origin: ClaimLocation;
   destination: ClaimLocation;
   reason?: ClaimDisruptionReason;
+  arrivalDelayMinutes?: number;
 }) {
   const facts = normalizeClaimFacts({
     ...emptyClaimFacts(),
@@ -54,7 +56,7 @@ function analyzeRoute({
           ? "denied_boarding"
           : "cancellation",
     disruptionReason: reason,
-    arrivalDelayMinutes: issueType === "airline_delay" ? 240 : null,
+    arrivalDelayMinutes: issueType === "airline_delay" ? arrivalDelayMinutes : null,
     deniedBoardingKind: issueType === "denied_boarding" ? "involuntary" : "unknown",
     confidence: "high"
   });
@@ -147,6 +149,20 @@ describe("regional policy applicability", () => {
         })
       ])
     );
+  });
+
+  it("reports a failed remedy threshold without downgrading confirmed route scope", () => {
+    const result = analyzeRoute({
+      issueType: "airline_delay",
+      provider: "Air France",
+      origin: location("Paris", "France"),
+      destination: location("New York", "United States"),
+      reason: "mechanical",
+      arrivalDelayMinutes: 120
+    });
+
+    expect(result.evidenceCoverage.officialBasisStatus).toBe("scope_confirmed");
+    expect(result.evidenceCoverage.unmetRemedyConditionCount).toBe(1);
   });
 
   it("keeps inbound EU261 coverage conditional when the operating carrier is unknown", () => {

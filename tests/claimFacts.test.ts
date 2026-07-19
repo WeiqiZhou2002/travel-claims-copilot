@@ -175,7 +175,14 @@ describe("structured analyze API", () => {
     expect(result.policyRegions).toEqual(["EU_EEA_CH", "US"]);
     expect(result.legalRegimes).toEqual(["EU261", "US_DOT_REFUND"]);
     expect(result.controllability).toBe("unknown");
-    expect(result.strength).toBe("medium");
+    expect(result.evidenceCoverage).toEqual(
+      expect.objectContaining({
+        officialBasisStatus: "scope_confirmed",
+        officialSourceCount: 3,
+        reportedCaseCount: expect.any(Number),
+        unresolvedConditionCount: 0
+      })
+    );
     expect(policyIds).toContain("eu261_air_passenger_rights");
     expect(policyIds).toContain("eu261_regulation_261_2004");
     expect(result.scripts.map((script: { script_id: string }) => script.script_id)).toEqual([
