@@ -9,7 +9,12 @@ import {
   parseExtractionMetadata,
   type ParsedAnalyzeRequest
 } from "./analyze-contract";
-import { toApiErrorResponse, withRequestId, type RequestIdFactory } from "./api-response";
+import {
+  toApiErrorResponse,
+  toCaughtApiErrorResponse,
+  withRequestId,
+  type RequestIdFactory
+} from "./api-response";
 import { isClaimStateReplayable, readJsonBody } from "./request-body";
 
 type RouteTelemetryDependencies = Omit<
@@ -53,7 +58,7 @@ export function createAnalyzeRouteHandler(overrides: AnalyzeRouteDependencies = 
     try {
       body = await readJsonBody(request);
     } catch (error) {
-      return toApiErrorResponse(error, requestId);
+      return toCaughtApiErrorResponse(error, requestId);
     }
 
     const parsed = parseAnalyzeRequest(body);
@@ -91,7 +96,7 @@ export function createAnalyzeRouteHandler(overrides: AnalyzeRouteDependencies = 
       }
       return Response.json(response);
     } catch (error) {
-      return toApiErrorResponse(error, requestId);
+      return toCaughtApiErrorResponse(error, requestId);
     }
   };
 }

@@ -12,7 +12,12 @@ import {
   parseExtractionMetadata,
   type ParsedAnalyzeRequest
 } from "./analyze-contract";
-import { toApiErrorResponse, withRequestId, type RequestIdFactory } from "./api-response";
+import {
+  toApiErrorResponse,
+  toCaughtApiErrorResponse,
+  withRequestId,
+  type RequestIdFactory
+} from "./api-response";
 import { INPUT_LIMITS } from "./input-limits";
 import { isClaimStateReplayable, readJsonBody } from "./request-body";
 
@@ -141,7 +146,7 @@ export function createIntakeRouteHandler(overrides: IntakeRouteDependencies = {}
     try {
       body = await readJsonBody(request);
     } catch (error) {
-      return toApiErrorResponse(error, requestId);
+      return toCaughtApiErrorResponse(error, requestId);
     }
 
     if (!isRecord(body) || !isCanonicalShape(body)) {
@@ -186,7 +191,7 @@ export function createIntakeRouteHandler(overrides: IntakeRouteDependencies = {}
       }
       return Response.json(response);
     } catch (error) {
-      return toApiErrorResponse(error, requestId);
+      return toCaughtApiErrorResponse(error, requestId);
     }
   };
 }

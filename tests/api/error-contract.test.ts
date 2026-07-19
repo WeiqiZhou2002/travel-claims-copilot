@@ -5,10 +5,20 @@ import { ApiFault } from "../../lib/api/api-error";
 import { createIntakeRouteHandler } from "../../lib/api/intake-route-handler";
 import {
   toApiErrorResponse,
+  toCaughtApiErrorResponse,
   withRequestId,
   type ApiErrorCode,
   type ApiErrorEnvelope
 } from "../../lib/api/api-response";
+import { INPUT_LIMITS } from "../../lib/api/input-limits";
+import { isClaimStateReplayable } from "../../lib/api/request-body";
+import { processClaimTurn } from "../../lib/claim-workflow";
+import type {
+  ClaimState,
+  RawFactPatch,
+  RawFactPath,
+  RawFactValue
+} from "../../lib/domain/claim-contract";
 import { ModelFailure } from "../../lib/model/model-error";
 import type { SafeTelemetryEvent } from "../../lib/privacy/safe-telemetry";
 import { knowledgeSnapshotFixture } from "../fixtures/knowledge";
@@ -51,6 +61,150 @@ function expectExactEnvelope(
     "requestId",
     "retryable"
   ]);
+}
+
+const oversizedConflictStringPaths = [
+  "provider",
+  "brandOrProperty",
+  "operatingCarrier",
+  "origin.city",
+  "origin.airport",
+  "origin.country",
+  "destination.city",
+  "destination.airport",
+  "destination.country",
+  "statedReason",
+  "scheduledFinalArrival",
+  "actualFinalArrival",
+  "loyaltyStatus"
+] as const satisfies readonly RawFactPath[];
+
+const growthBooleanPaths = [
+  "userInitiatedChange",
+  "isOvernight",
+  "assistance.refundOffered",
+  "assistance.refundAccepted",
+  "assistance.creditOffered",
+  "assistance.creditAccepted",
+  "assistance.reroutingOffered",
+  "assistance.reroutingAccepted",
+  "assistance.replacementTravelOffered",
+  "assistance.replacementTravelAccepted",
+  "assistance.lodgingOffered",
+  "assistance.lodgingAccepted",
+  "assistance.mealsOffered",
+  "assistance.mealsAccepted",
+  "assistance.groundTransportOffered",
+  "assistance.groundTransportAccepted",
+  "oversalesConfirmed",
+  "confirmedReservation",
+  "checkedInOnTime",
+  "atGateOnTime",
+  "documentsCompliant",
+  "confirmedHotelReservation",
+  "qualifyingHotelReservation",
+  "membershipAttached",
+  "wasWalked",
+  "replacementLodgingProvided"
+] as const satisfies readonly RawFactPath[];
+
+function boundedText(marker: string, maximum: number): string {
+  return `${marker}-${"x".repeat(maximum)}`.slice(0, maximum);
+}
+
+function boundedItems(marker: string): string[] {
+  return Array.from({ length: 20 }, (_value, index) => boundedText(`${marker}-${index}`, 256));
+}
+
+function conflict(field: RawFactPath, deterministicValue: RawFactValue, openaiValue: RawFactValue) {
+  return {
+    field,
+    candidates: [
+      { value: deterministicValue, source: "deterministic_extraction" as const },
+      { value: openaiValue, source: "openai_extraction" as const }
+    ]
+  };
+}
+
+function oversizedSuccessPatches(): {
+  local: RawFactPatch;
+  openai: RawFactPatch;
+} {
+  const localStrings = Object.fromEntries(
+    oversizedConflictStringPaths.map((path) => [path, boundedText(`local-${path}`, 256)])
+  );
+  const openaiStrings = Object.fromEntries(
+    oversizedConflictStringPaths.map((path) => [path, boundedText(`openai-${path}`, 256)])
+  );
+  const localBooleans = Object.fromEntries(growthBooleanPaths.map((path) => [path, true]));
+  const openaiBooleans = Object.fromEntries(growthBooleanPaths.map((path) => [path, false]));
+  return {
+    local: {
+      set: {
+        ...localStrings,
+        ...localBooleans,
+        incidentType: "airline_cancellation",
+        providerType: "airline",
+        reasonCategory: "crew",
+        finalArrivalDelayMinutes: 1,
+        cancellationNoticeHours: 1,
+        deniedBoardingKind: "voluntary",
+        replacementArrivalDelayMinutes: 1,
+        bookingChannel: "direct",
+        expenses: boundedItems("local-expense"),
+        evidence: boundedItems("local-evidence"),
+        userGoal: boundedText("local-goal", 500)
+      }
+    },
+    openai: {
+      set: {
+        ...openaiStrings,
+        ...openaiBooleans,
+        incidentType: "airline_delay",
+        providerType: "hotel",
+        reasonCategory: "weather",
+        finalArrivalDelayMinutes: 2,
+        cancellationNoticeHours: 2,
+        deniedBoardingKind: "involuntary",
+        replacementArrivalDelayMinutes: 2,
+        bookingChannel: "ota",
+        expenses: boundedItems("openai-expense"),
+        evidence: boundedItems("openai-evidence"),
+        userGoal: boundedText("openai-goal", 500)
+      }
+    }
+  };
+}
+
+function nearLimitReplayablePrior(): ClaimState {
+  const conflicts = [
+    conflict("expenses", boundedItems("prior-a-expense"), boundedItems("prior-b-expense")),
+    conflict("evidence", boundedItems("prior-a-evidence"), boundedItems("prior-b-evidence")),
+    ...oversizedConflictStringPaths.map((path) =>
+      conflict(path, boundedText(`prior-a-${path}`, 256), boundedText(`prior-b-${path}`, 256))
+    ),
+    conflict("userGoal", boundedText("prior-a-goal", 500), boundedText("prior-b-goal", 500))
+  ];
+  return claimState({}, 0, {
+    conflicts,
+    unresolvedFields: conflicts.map(({ field }) => field)
+  });
+}
+
+function fallbackGrowthPatch(): RawFactPatch {
+  return {
+    set: {
+      ...Object.fromEntries(growthBooleanPaths.map((path) => [path, true])),
+      incidentType: "airline_cancellation",
+      providerType: "airline",
+      reasonCategory: "crew",
+      finalArrivalDelayMinutes: 1,
+      cancellationNoticeHours: 1,
+      deniedBoardingKind: "voluntary",
+      replacementArrivalDelayMinutes: 1,
+      bookingChannel: "direct"
+    }
+  };
 }
 
 export function compileTimeRouteTelemetryFixtures() {
@@ -110,11 +264,11 @@ describe("unified API error serializer", () => {
       response: { body: privateMarker }
     });
 
-    const knownResponse = toApiErrorResponse(
+    const knownResponse = toCaughtApiErrorResponse(
       new ApiFault("unsupported_media_type", 415),
       "req-known"
     );
-    const unknownResponse = toApiErrorResponse(unknown, "req-unknown");
+    const unknownResponse = toCaughtApiErrorResponse(unknown, "req-unknown");
     const knownBody = await knownResponse.json();
     const unknownBody = await unknownResponse.json();
 
@@ -145,6 +299,70 @@ describe("unified API error serializer", () => {
 });
 
 describe("route error contract", () => {
+  it.each([
+    ["model_refusal", "analyze", createAnalyzeRouteHandler],
+    ["model_timeout", "analyze", createAnalyzeRouteHandler],
+    ["model_refusal", "intake", createIntakeRouteHandler],
+    ["model_timeout", "intake", createIntakeRouteHandler]
+  ] as const)(
+    "treats an untyped rejected %s string as an unknown upstream failure in %s",
+    async (rejectedCode, route, createHandler) => {
+      const requestId = `req-untyped-${route}-001`;
+      const handler = createHandler({
+        requestIdFactory: () => requestId,
+        processRequest: vi.fn().mockRejectedValue(rejectedCode)
+      } as never);
+      const response = await handler(
+        new Request(`http://localhost/api/${route}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            message: "A bounded claim message.",
+            prior: claimState(),
+            baseRevision: 0
+          })
+        })
+      );
+      const body = await response.json();
+
+      expect(response.status).toBe(502);
+      expectExactEnvelope(body, {
+        code: "upstream_failure",
+        requestId,
+        retryable: true
+      });
+    }
+  );
+
+  it.each(["model_refusal", "model_timeout"] as const)(
+    "treats an untyped rejected %s string from legacy intake as an unknown upstream failure",
+    async (rejectedCode) => {
+      const handler = createIntakeRouteHandler({
+        requestIdFactory: () => "req-untyped-legacy-001",
+        localExtractor: {
+          provider: "local",
+          model: null,
+          extract: vi.fn().mockRejectedValue(rejectedCode)
+        }
+      });
+      const response = await handler(
+        new Request("http://localhost/api/intake", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ message: "A bounded legacy claim message.", facts: null })
+        })
+      );
+      const body = await response.json();
+
+      expect(response.status).toBe(502);
+      expectExactEnvelope(body, {
+        code: "upstream_failure",
+        requestId: "req-untyped-legacy-001",
+        retryable: true
+      });
+    }
+  );
+
   it.each([
     ["analyze", createAnalyzeRouteHandler],
     ["intake", createIntakeRouteHandler]
@@ -222,6 +440,97 @@ describe("route error contract", () => {
         })
       );
       expect(JSON.stringify(record.mock.calls)).not.toContain("attacker-controlled-request-id");
+    }
+  );
+
+  it.each([
+    ["success", "analyze", createAnalyzeRouteHandler],
+    ["success", "intake", createIntakeRouteHandler],
+    ["fallback", "analyze", createAnalyzeRouteHandler],
+    ["fallback", "intake", createIntakeRouteHandler]
+  ] as const)(
+    "records no terminal %s telemetry when the real %s route workflow produces an unreplayable state",
+    async (terminalCategory, route, createHandler) => {
+      const record = vi.fn<(event: SafeTelemetryEvent) => void>();
+      const successPatches = oversizedSuccessPatches();
+      const localPatch =
+        terminalCategory === "success" ? successPatches.local : fallbackGrowthPatch();
+      const prior = terminalCategory === "success" ? claimState() : nearLimitReplayablePrior();
+      const workflowInput = {
+        message: "A bounded claim message.",
+        prior,
+        baseRevision: 0,
+        requestedMode: "gpt" as const
+      };
+      const directResponse = await processClaimTurn(workflowInput, {
+        localExtractor: {
+          provider: "local",
+          model: null,
+          extract: async () => localPatch
+        },
+        ...(terminalCategory === "success"
+          ? {
+              openaiExtractor: {
+                provider: "openai" as const,
+                model: "gpt-5.6-luna" as const,
+                extract: async () => successPatches.openai
+              }
+            }
+          : {}),
+        knowledgeRepository: { load: async () => knowledgeSnapshotFixture() },
+        now: () => "2026-07-20"
+      });
+      const serializedBody = JSON.stringify(workflowInput);
+
+      expect(new TextEncoder().encode(serializedBody).byteLength).toBeLessThanOrEqual(
+        INPUT_LIMITS.bodyBytes
+      );
+      expect(isClaimStateReplayable(directResponse.claimState)).toBe(false);
+
+      const localExtract = vi.fn().mockResolvedValue(localPatch);
+      const openaiExtract = vi.fn().mockResolvedValue(successPatches.openai);
+      const handler = createHandler({
+        requestIdFactory: () => `req-unreplayable-${route}-${terminalCategory}`,
+        telemetry: { sink: { record }, nowMs: vi.fn(() => 100) },
+        localExtractor: {
+          provider: "local",
+          model: null,
+          extract: localExtract
+        },
+        ...(terminalCategory === "success"
+          ? {
+              openaiExtractor: {
+                provider: "openai",
+                model: "gpt-5.6-luna",
+                extract: openaiExtract
+              }
+            }
+          : {}),
+        knowledgeRepository: { load: async () => knowledgeSnapshotFixture() },
+        now: () => "2026-07-20"
+      } as never);
+      const response = await handler(
+        new Request(`http://localhost/api/${route}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: serializedBody
+        })
+      );
+      const body = await response.json();
+
+      expect(response.status).toBe(502);
+      expectExactEnvelope(body, {
+        code: "upstream_failure",
+        requestId: `req-unreplayable-${route}-${terminalCategory}`,
+        retryable: true
+      });
+      expect(localExtract).toHaveBeenCalledOnce();
+      if (terminalCategory === "success") {
+        expect(openaiExtract).toHaveBeenCalledOnce();
+      } else {
+        expect(openaiExtract).not.toHaveBeenCalled();
+      }
+      expect(record).not.toHaveBeenCalled();
     }
   );
 

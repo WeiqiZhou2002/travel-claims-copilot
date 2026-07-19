@@ -1065,66 +1065,76 @@ describe("canonical revision-safe intake", () => {
     });
   });
 
-  it("returns a fixed safe 502 without leaking canonical extractor errors", async () => {
-    const handler = createIntakePostHandler({
-      localExtractor: {
-        provider: "local",
-        model: null,
-        extract: vi.fn().mockRejectedValue(new Error("private upstream response"))
-      }
-    });
-    const response = await handler(
-      new Request("http://localhost/api/intake", {
-        method: "POST",
-        body: JSON.stringify({
-          message: "new facts",
-          prior: claimState(),
-          baseRevision: 0,
-          requestedMode: "local"
+  it.each([new Error("private upstream response"), "model_refusal", "model_timeout"] as const)(
+    "returns a fixed safe 502 for an untrusted canonical rejection",
+    async (rejection) => {
+      const handler = createIntakePostHandler({
+        localExtractor: {
+          provider: "local",
+          model: null,
+          extract: vi.fn().mockRejectedValue(rejection)
+        }
+      });
+      const response = await handler(
+        new Request("http://localhost/api/intake", {
+          method: "POST",
+          body: JSON.stringify({
+            message: "new facts",
+            prior: claimState(),
+            baseRevision: 0,
+            requestedMode: "local"
+          })
         })
-      })
-    );
-    const body = await response.json();
+      );
+      const body = await response.json();
 
-    expect(response.status).toBe(502);
-    expect(body).toEqual({
-      error: {
-        code: "upstream_failure",
-        message: "The analysis service is temporarily unavailable.",
-        requestId: expect.any(String),
-        retryable: true
-      }
-    });
-    expect(JSON.stringify(body)).not.toContain("private upstream response");
-  });
+      expect(response.status).toBe(502);
+      expect(body).toEqual({
+        error: {
+          code: "upstream_failure",
+          message: "The analysis service is temporarily unavailable.",
+          requestId: expect.any(String),
+          retryable: true
+        }
+      });
+      expect(JSON.stringify(body)).not.toContain(
+        rejection instanceof Error ? rejection.message : rejection
+      );
+    }
+  );
 
-  it("returns a fixed safe 502 without leaking legacy extractor errors", async () => {
-    const handler = createIntakePostHandler({
-      localExtractor: {
-        provider: "local",
-        model: null,
-        extract: vi.fn().mockRejectedValue(new Error("private legacy detail"))
-      }
-    });
-    const response = await handler(
-      new Request("http://localhost/api/intake", {
-        method: "POST",
-        body: JSON.stringify({ message: "new facts", facts: null })
-      })
-    );
-    const body = await response.json();
+  it.each([new Error("private legacy detail"), "model_refusal", "model_timeout"] as const)(
+    "returns a fixed safe 502 for an untrusted legacy rejection",
+    async (rejection) => {
+      const handler = createIntakePostHandler({
+        localExtractor: {
+          provider: "local",
+          model: null,
+          extract: vi.fn().mockRejectedValue(rejection)
+        }
+      });
+      const response = await handler(
+        new Request("http://localhost/api/intake", {
+          method: "POST",
+          body: JSON.stringify({ message: "new facts", facts: null })
+        })
+      );
+      const body = await response.json();
 
-    expect(response.status).toBe(502);
-    expect(body).toEqual({
-      error: {
-        code: "upstream_failure",
-        message: "The analysis service is temporarily unavailable.",
-        requestId: expect.any(String),
-        retryable: true
-      }
-    });
-    expect(JSON.stringify(body)).not.toContain("private legacy detail");
-  });
+      expect(response.status).toBe(502);
+      expect(body).toEqual({
+        error: {
+          code: "upstream_failure",
+          message: "The analysis service is temporarily unavailable.",
+          requestId: expect.any(String),
+          retryable: true
+        }
+      });
+      expect(JSON.stringify(body)).not.toContain(
+        rejection instanceof Error ? rejection.message : rejection
+      );
+    }
+  );
 
   it("returns a fixed safe 422 for invalid legacy facts", async () => {
     const handler = createIntakePostHandler({

@@ -1,6 +1,11 @@
 import type { AnalyzeClaimIntakeResponse, AnalyzeClaimRequest } from "./api/analyze-contract";
 import { parseAnalyzeClaimRequest } from "./api/analyze-contract";
-import { toApiErrorResponse, withRequestId, type RequestIdFactory } from "./api/api-response";
+import {
+  toApiErrorResponse,
+  toCaughtApiErrorResponse,
+  withRequestId,
+  type RequestIdFactory
+} from "./api/api-response";
 import {
   processClaimTurn as processCanonicalClaimTurn,
   type ProcessClaimDependencies
@@ -317,7 +322,7 @@ export function createIntakePostHandler(
       try {
         return Response.json(await processClaimTurn(parsed.data, dependencies));
       } catch (error) {
-        return toApiErrorResponse(error, requestId);
+        return toCaughtApiErrorResponse(error, requestId);
       }
     }
     if (!hasOwn(body, "facts")) {
@@ -344,7 +349,7 @@ export function createIntakePostHandler(
         })
       );
     } catch (error) {
-      return toApiErrorResponse(error, requestId);
+      return toCaughtApiErrorResponse(error, requestId);
     }
   };
 }

@@ -101,12 +101,7 @@ const errorSpecs: Record<ApiErrorCode, ApiErrorSpec> = {
   }
 };
 
-function isApiErrorCode(value: unknown): value is ApiErrorCode {
-  return typeof value === "string" && Object.prototype.hasOwnProperty.call(errorSpecs, value);
-}
-
-function errorCodeFor(error: unknown): ApiErrorCode {
-  if (isApiErrorCode(error)) return error;
+function caughtErrorCodeFor(error: unknown): ApiErrorCode {
   if (isApiFault(error)) return error.code;
   if (error instanceof ModelFailure) return error.code;
   return "upstream_failure";
@@ -116,8 +111,7 @@ export function withRequestId(factory: RequestIdFactory = () => crypto.randomUUI
   return factory();
 }
 
-export function toApiErrorResponse(error: unknown, requestId: string): Response {
-  const code = errorCodeFor(error);
+export function toApiErrorResponse(code: ApiErrorCode, requestId: string): Response {
   const spec = errorSpecs[code];
   const envelope: ApiErrorEnvelope = {
     error: {
@@ -128,4 +122,8 @@ export function toApiErrorResponse(error: unknown, requestId: string): Response 
     }
   };
   return Response.json(envelope, { status: spec.status });
+}
+
+export function toCaughtApiErrorResponse(error: unknown, requestId: string): Response {
+  return toApiErrorResponse(caughtErrorCodeFor(error), requestId);
 }

@@ -1,4 +1,5 @@
 import { parseAnalyzeClaimRequest, type AnalyzeClaimRequest } from "./api/analyze-contract";
+import { isClaimStateReplayable } from "./api/request-body";
 import type {
   AnalyzeClaimDomainResponse,
   AssessmentResult,
@@ -468,12 +469,14 @@ export async function processClaimTurn(
   const { extraction } = response.result;
   const isFallback =
     extraction.performed && extraction.requestedMode === "gpt" && extraction.provider === "local";
-  recordTelemetry(
-    dependencies,
-    telemetryStartedAt,
-    extraction,
-    isFallback ? "fallback" : "success",
-    response.result.status
-  );
+  if (isClaimStateReplayable(response.claimState)) {
+    recordTelemetry(
+      dependencies,
+      telemetryStartedAt,
+      extraction,
+      isFallback ? "fallback" : "success",
+      response.result.status
+    );
+  }
   return response;
 }
