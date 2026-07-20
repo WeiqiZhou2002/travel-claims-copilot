@@ -123,7 +123,13 @@ export type Case = {
   brand_or_airline: string;
   issue_type: string;
   location_country: string;
-  booking_channel: "direct" | "ota" | "portal" | "unknown";
+  booking_channel:
+    | "direct"
+    | "ota"
+    | "portal"
+    | "travel_agent"
+    | "corporate_travel"
+    | "unknown";
   loyalty_status: string;
   reservation_type: "paid" | "points" | "award" | "unknown";
   facts: string;

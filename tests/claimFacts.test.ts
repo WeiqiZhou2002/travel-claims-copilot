@@ -26,6 +26,79 @@ describe("ClaimFacts schema", () => {
     expect(facts.disruptionType).toBe("cancellation");
   });
 
+  it("parses and normalizes operational-intent facts", () => {
+    const result = parseClaimFacts({
+      ...emptyClaimFacts(),
+      validatingCarrier: "法航",
+      marketingCarrier: "Air France",
+      operatingCarrier: "Air France",
+      disruptingCarrier: "Air France",
+      bookingChannel: "travel_agent",
+      journeyStage: "pre_trip",
+      disruptionTiming: "planned_schedule_change",
+      ticketType: "award",
+      awardProgram: "Flying Blue",
+      autoRebooked: true,
+      autoRebookedItinerary: "AF009 one day later",
+      recoveryPriorities: ["same_date", "nonstop", "same_date"],
+      preferredAlternatives: ["AF007"],
+      hasConnectionsOrReturnSegments: true
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+    expect(result.data.validatingCarrier).toBe("Air France");
+    expect(result.data.bookingChannel).toBe("travel_agent");
+    expect(result.data.ticketType).toBe("award");
+    expect(result.data.recoveryPriorities).toEqual(["same_date", "nonstop"]);
+  });
+
+  it("defaults newly added operational fields for legacy ClaimFacts payloads", () => {
+    const legacyFacts = { ...emptyClaimFacts() } as Record<string, unknown>;
+    for (const field of [
+      "validatingCarrier",
+      "marketingCarrier",
+      "disruptingCarrier",
+      "journeyStage",
+      "disruptionTiming",
+      "ticketType",
+      "awardProgram",
+      "autoRebooked",
+      "autoRebookedItinerary",
+      "recoveryPriorities",
+      "preferredAlternatives",
+      "hasConnectionsOrReturnSegments"
+    ]) {
+      delete legacyFacts[field];
+    }
+
+    const result = parseClaimFacts(legacyFacts);
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+    expect(result.data).toMatchObject({
+      journeyStage: "unknown",
+      disruptionTiming: "unknown",
+      ticketType: "unknown",
+      autoRebooked: null,
+      recoveryPriorities: [],
+      preferredAlternatives: []
+    });
+  });
+
+  it("rejects unsupported recovery priorities", () => {
+    const result = parseClaimFacts({
+      ...emptyClaimFacts(),
+      recoveryPriorities: ["free_upgrade"]
+    });
+
+    expect(result.success).toBe(false);
+  });
+
   it("computes missing route facts independently from policy jurisdiction", () => {
     const facts = normalizeClaimFacts({
       ...emptyClaimFacts(),
