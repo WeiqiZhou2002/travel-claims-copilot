@@ -405,6 +405,56 @@ describe("LLM intake", () => {
     expect(result.facts.preferredAlternatives).toEqual(["JL002"]);
     expect(result.facts.recoveryPriorities).toEqual(["same_cabin", "same_date"]);
   });
+
+  it("rejects a model-invented Madrid airport on an established Chicago-China segment", async () => {
+    const prior = normalizeClaimFacts({
+      ...emptyClaimFacts(),
+      issueType: "airline_cancellation",
+      providerType: "airline",
+      provider: "United",
+      operatingCarrier: "United",
+      operatingCarrierRegion: "US",
+      origin: {
+        city: "Chicago",
+        airport: null,
+        country: "United States",
+        region: "US"
+      },
+      destination: {
+        city: null,
+        airport: null,
+        country: "China",
+        region: "CN"
+      },
+      disruptionType: "cancellation",
+      disruptionReasonStatus: "unavailable",
+      confidence: "high"
+    });
+    const client: StructuredOutputClient = {
+      generate: vi.fn().mockResolvedValue({
+        ...prior,
+        origin: {
+          city: "Chicago",
+          airport: "MAD",
+          country: "Spain",
+          region: "EU_EEA_CH"
+        },
+        journeyStage: "at_airport",
+        disruptionTiming: "close_in_irrops"
+      })
+    };
+
+    const result = await processIntake(
+      "I'm at airport. I have checked in and I have flew from Madison to ORD",
+      prior,
+      { llmClient: client }
+    );
+
+    expect(result.status).toBe("ready");
+    expect(result.facts.origin).toEqual(prior.origin);
+    expect(result.facts.destination).toEqual(prior.destination);
+    expect(result.facts.origin.region).toBe("US");
+  });
 });
 
 describe("OpenAI Responses client", () => {

@@ -148,4 +148,26 @@ describe("conversational intake evaluations", () => {
     expect(result.facts.disruptionTiming).toBe("close_in_irrops");
     expect(result.facts.bookingChannel).toBe("unknown");
   });
+
+  it("keeps the disrupted Chicago-China segment when a completed feeder leg is mentioned", async () => {
+    const result = await runConversation([
+      "My flight back to China was cancelled",
+      "from Chicago",
+      "United Airline",
+      "No reason given",
+      "I'm at airport. I have checked in and I have flew from Madison to ORD"
+    ]);
+
+    expect(result.status).toBe("ready");
+    expect(result.facts.origin).toMatchObject({
+      city: "chicago",
+      country: "United States",
+      region: "US"
+    });
+    expect(result.facts.origin.airport).not.toBe("MAD");
+    expect(result.facts.destination).toMatchObject({
+      country: "China",
+      region: "CN"
+    });
+  });
 });

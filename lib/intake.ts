@@ -44,6 +44,7 @@ Rules:
 - Preserve prior facts unless the user clearly corrects them.
 - Extract facts the user stated. Common geographic inference is allowed, but do not decide legal eligibility.
 - Use unknown or null when the user did not provide enough information. Never invent a provider, route, reason, expense, evidence item, or delay duration.
+- Never derive an airport code from the first letters of a city name. Preserve the already established disrupted segment when the user later mentions a feeder, connection, or return segment, unless the user explicitly corrects the route.
 - Set disruptionReasonStatus to unavailable when the user says they do not know the reason or the provider did not disclose one. This is an answered question and must not be asked again.
 - Set disruptionReasonStatus to reported whenever disruptionReason is a specific value other than unknown.
 - journeyStage describes the user's current trip state: pre_trip, at_airport, en_route, or completed. An account that says the user reached the final destination is completed.
@@ -88,6 +89,58 @@ function mergeLocation(current: ClaimLocation, incoming?: ClaimLocation): ClaimL
     country: incoming.country ?? current.country,
     region: incoming.region ?? current.region
   };
+}
+
+function hasClaimLocation(location: ClaimLocation): boolean {
+  return Boolean(location.city || location.airport || location.country);
+}
+
+function reportsRouteCorrection(text: string): boolean {
+  const normalized = text.toLowerCase();
+  return (
+    /\b(?:actually|correction|correcting|sorry)\b.{0,50}\b(?:from|to|depart|departure|destination|airport)\b/.test(
+      normalized
+    ) ||
+    /(?:更正|说错了|不是).{0,30}(?:出发|飞往|目的地|机场)/.test(normalized)
+  );
+}
+
+function mergeDeterministicRouteLocation(
+  current: ClaimLocation,
+  incoming: ClaimLocation | undefined,
+  allowReplacement: boolean
+): ClaimLocation {
+  if (!incoming) {
+    return current;
+  }
+  if (!hasClaimLocation(current) || allowReplacement) {
+    return incoming;
+  }
+  return current;
+}
+
+function locationsEqual(left: ClaimLocation, right: ClaimLocation): boolean {
+  return (
+    left.city === right.city &&
+    left.airport === right.airport &&
+    left.country === right.country &&
+    left.region === right.region
+  );
+}
+
+function selectGroundedRouteLocation(
+  llm: ClaimLocation,
+  deterministic: ClaimLocation,
+  current: ClaimLocation,
+  allowReplacement: boolean
+): ClaimLocation {
+  if (allowReplacement && locationsEqual(deterministic, current)) {
+    return llm;
+  }
+  if (hasClaimLocation(current) || hasClaimLocation(deterministic)) {
+    return deterministic;
+  }
+  return llm;
 }
 
 function extractArrivalDelayMinutes(text: string): number | null {
@@ -407,6 +460,7 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
   const bookingProvider =
     detectedBookingProvider ??
     (bookingChannel === "direct" ? provider : current.bookingProvider);
+  const allowRouteReplacement = reportsRouteCorrection(message);
 
   return normalizeClaimFacts({
     ...current,
@@ -417,8 +471,16 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
     operatingCarrier: extracted.operatingCarrier ?? current.operatingCarrier,
     operatingCarrierRegion:
       extracted.operatingCarrierRegion ?? current.operatingCarrierRegion,
-    origin: mergeLocation(current.origin, route.origin),
-    destination: mergeLocation(current.destination, route.destination),
+    origin: mergeDeterministicRouteLocation(
+      current.origin,
+      route.origin,
+      allowRouteReplacement
+    ),
+    destination: mergeDeterministicRouteLocation(
+      current.destination,
+      route.destination,
+      allowRouteReplacement
+    ),
     disruptionType: disruptionType === "unknown" ? current.disruptionType : disruptionType,
     disruptionReason:
       reasonUnavailable
@@ -464,7 +526,8 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
 function mergeLlmFactsWithDeterministic(
   llmFacts: ClaimFacts,
   deterministicFacts: ClaimFacts,
-  currentFacts: ClaimFacts
+  currentFacts: ClaimFacts,
+  allowRouteReplacement: boolean
 ): ClaimFacts {
   const deterministicIssueIsExplicit =
     deterministicFacts.confidence === "high" &&
@@ -493,8 +556,18 @@ function mergeLlmFactsWithDeterministic(
       llmFacts.disruptingCarrier ?? deterministicFacts.disruptingCarrier,
     operatingCarrierRegion:
       deterministicFacts.operatingCarrierRegion ?? llmFacts.operatingCarrierRegion,
-    origin: mergeLocation(llmFacts.origin, deterministicFacts.origin),
-    destination: mergeLocation(llmFacts.destination, deterministicFacts.destination),
+    origin: selectGroundedRouteLocation(
+      llmFacts.origin,
+      deterministicFacts.origin,
+      currentFacts.origin,
+      allowRouteReplacement
+    ),
+    destination: selectGroundedRouteLocation(
+      llmFacts.destination,
+      deterministicFacts.destination,
+      currentFacts.destination,
+      allowRouteReplacement
+    ),
     disruptionType:
       (deterministicIssueIsExplicit && deterministicFacts.disruptionType !== "unknown") ||
       llmFacts.disruptionType === "unknown"
@@ -737,7 +810,12 @@ export async function processIntake(
   if (configuredClient) {
     try {
       const llmFacts = await extractWithLlm(configuredClient, message, currentFacts);
-      facts = mergeLlmFactsWithDeterministic(llmFacts, deterministicFacts, currentFacts);
+      facts = mergeLlmFactsWithDeterministic(
+        llmFacts,
+        deterministicFacts,
+        currentFacts,
+        reportsRouteCorrection(message)
+      );
       extractionMode = "llm";
     } catch {
       facts = deterministicFacts;

@@ -17,7 +17,7 @@ const knownPlaces: KnownPlace[] = [
   { country: "Iceland", region: "EU_EEA_CH", terms: ["iceland", "reykjavik", "kef", "冰岛", "雷克雅未克"] },
   { country: "Switzerland", region: "EU_EEA_CH", terms: ["switzerland", "zurich", "zrh", "geneva", "gva", "瑞士", "苏黎世", "日内瓦"] },
   { country: "United Kingdom", region: "UK", terms: ["united kingdom", "uk", "london", "lhr", "lgw", "英国", "伦敦"] },
-  { country: "United States", region: "US", terms: ["united states", "usa", "new york", "jfk", "ewr", "los angeles", "lax", "美国", "纽约", "洛杉矶"] },
+  { country: "United States", region: "US", terms: ["united states", "usa", "new york", "jfk", "ewr", "los angeles", "lax", "chicago", "ord", "madison", "msn", "美国", "纽约", "洛杉矶", "芝加哥", "麦迪逊"] },
   { country: "Canada", region: "CA", terms: ["canada", "toronto", "yyz", "vancouver", "yvr", "montreal", "yul", "加拿大", "多伦多", "温哥华", "蒙特利尔"] },
   { country: "Australia", region: "AU", terms: ["australia", "sydney", "syd", "melbourne", "mel", "brisbane", "bne", "澳大利亚", "澳洲", "悉尼", "墨尔本", "布里斯班"] },
   { country: "China", region: "CN", terms: ["china", "beijing", "pek", "pkx", "shanghai", "pvg", "sha", "guangzhou", "can", "shenzhen", "szx", "中国", "北京", "上海", "广州", "深圳"] }
@@ -74,6 +74,20 @@ function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
 
+function knownTermMatches(value: string, term: string): boolean {
+  if (value === term) {
+    return true;
+  }
+  if (/^[a-z0-9]+$/i.test(term) && term.length <= 3) {
+    return false;
+  }
+  if (/^[\x00-\x7F]+$/.test(term)) {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, "i").test(value);
+  }
+  return value.includes(term);
+}
+
 export function isEuOperatingCarrier(carrier: string | null | undefined): boolean {
   return euOperatingCarriers.has(normalize(carrier ?? ""));
 }
@@ -93,8 +107,28 @@ function findKnownPlace(location: ClaimLocation): KnownPlace | undefined {
     .map(normalize);
 
   return knownPlaces.find((place) =>
-    place.terms.some((term) => values.some((value) => value === term || value.includes(term)))
+    place.terms.some((term) => values.some((value) => knownTermMatches(value, term)))
   );
+}
+
+function findMarkedTermIndex(text: string, marker: string, term: string): number {
+  const needle = `${marker}${normalize(term)}`;
+  let searchFrom = 0;
+
+  while (searchFrom < text.length) {
+    const index = text.indexOf(needle, searchFrom);
+    if (index < 0) {
+      return -1;
+    }
+
+    const nextCharacter = text[index + needle.length];
+    if (!nextCharacter || !/[a-z0-9]/i.test(nextCharacter)) {
+      return index;
+    }
+    searchFrom = index + 1;
+  }
+
+  return -1;
 }
 
 function findPlaceAfterMarker(text: string, markers: string[]): ClaimLocation | undefined {
@@ -104,7 +138,7 @@ function findPlaceAfterMarker(text: string, markers: string[]): ClaimLocation | 
       markers.map((marker) => ({
         place,
         term,
-        index: normalizedText.indexOf(`${marker}${normalize(term)}`)
+        index: findMarkedTermIndex(normalizedText, marker, term)
       }))
     )
   );

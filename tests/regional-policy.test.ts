@@ -126,6 +126,20 @@ describe("regional policy applicability", () => {
     expect(nonEuCarrierResult.legalRegimes).not.toContain("EU261");
   });
 
+  it("does not apply EU261 to a United flight from Chicago to China", () => {
+    const result = analyzeRoute({
+      provider: "United",
+      origin: location("Chicago", "United States"),
+      destination: location("Beijing", "China")
+    });
+
+    expect(result.policyRegions).toEqual(["US", "CN"]);
+    expect(result.legalRegimes).not.toContain("EU261");
+    expect(result.officialBasis.map((policy) => policy.legal_regime)).not.toContain(
+      "EU261"
+    );
+  });
+
   it("reports condition-level EU261 applicability without conflating scope and remedy", () => {
     const result = analyzeRoute({
       issueType: "airline_delay",
