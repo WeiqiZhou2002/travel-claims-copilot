@@ -620,3 +620,46 @@ export function getMissingClaimFields(facts: ClaimFacts): ClaimFactField[] {
 
   return missing;
 }
+
+export function getMissingIntakeFields(facts: ClaimFacts): ClaimFactField[] {
+  const requiredForAnalysis = getMissingClaimFields(facts);
+  if (requiredForAnalysis.length > 0) {
+    return requiredForAnalysis;
+  }
+
+  const normalized = normalizeClaimFacts(facts);
+  if (normalized.providerType !== "airline") {
+    return [];
+  }
+
+  if (normalized.journeyStage === "unknown") {
+    return ["journeyStage"];
+  }
+
+  if (normalized.journeyStage !== "pre_trip") {
+    return [];
+  }
+
+  const missing: ClaimFactField[] = [];
+  if (normalized.disruptionTiming === "unknown") {
+    missing.push("disruptionTiming");
+  }
+  if (normalized.bookingChannel === "unknown") {
+    missing.push("bookingChannel");
+  }
+  if (normalized.ticketType === "unknown") {
+    missing.push("ticketType");
+  }
+  if (
+    normalized.ticketType === "award" &&
+    !normalized.awardProgram &&
+    !normalized.validatingCarrier
+  ) {
+    missing.push("validatingCarrier");
+  }
+  if (normalized.autoRebooked === null) {
+    missing.push("autoRebooked");
+  }
+
+  return missing;
+}
