@@ -31,13 +31,15 @@ function analyzeRoute({
   provider,
   origin,
   destination,
-  reason = "unknown"
+  reason = "unknown",
+  arrivalDelayMinutes = 240
 }: {
   issueType?: Extract<IssueType, "airline_delay" | "airline_cancellation" | "denied_boarding">;
   provider: string;
   origin: ClaimLocation;
   destination: ClaimLocation;
   reason?: ClaimDisruptionReason;
+  arrivalDelayMinutes?: number;
 }) {
   const facts = normalizeClaimFacts({
     ...emptyClaimFacts(),
@@ -54,7 +56,7 @@ function analyzeRoute({
           ? "denied_boarding"
           : "cancellation",
     disruptionReason: reason,
-    arrivalDelayMinutes: issueType === "airline_delay" ? 240 : null,
+    arrivalDelayMinutes: issueType === "airline_delay" ? arrivalDelayMinutes : null,
     deniedBoardingKind: issueType === "denied_boarding" ? "involuntary" : "unknown",
     confidence: "high"
   });
@@ -122,6 +124,85 @@ describe("regional policy applicability", () => {
 
     expect(euCarrierResult.legalRegimes).toContain("EU261");
     expect(nonEuCarrierResult.legalRegimes).not.toContain("EU261");
+  });
+
+  it("reports condition-level EU261 applicability without conflating scope and remedy", () => {
+    const result = analyzeRoute({
+      issueType: "airline_delay",
+      provider: "Air France",
+      origin: location("Paris", "France"),
+      destination: location("New York", "United States"),
+      reason: "late_inbound_aircraft"
+    });
+    const assessment = result.policyAssessments.find(
+      (item) => item.policyId === "eu261_regulation_261_2004"
+    );
+
+    expect(assessment?.status).toBe("met");
+    expect(assessment?.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "route", status: "met", kind: "scope" }),
+        expect.objectContaining({
+          code: "arrival_delay",
+          status: "met",
+          kind: "remedy"
+        })
+      ])
+    );
+  });
+
+  it("reports a failed remedy threshold without downgrading confirmed route scope", () => {
+    const result = analyzeRoute({
+      issueType: "airline_delay",
+      provider: "Air France",
+      origin: location("Paris", "France"),
+      destination: location("New York", "United States"),
+      reason: "mechanical",
+      arrivalDelayMinutes: 120
+    });
+
+    expect(result.evidenceCoverage.officialBasisStatus).toBe("scope_confirmed");
+    expect(result.evidenceCoverage.unmetRemedyConditionCount).toBe(1);
+  });
+
+  it("keeps inbound EU261 coverage conditional when the operating carrier is unknown", () => {
+    const retrieval = retrieveKnowledge(
+      classifyInput("My flight from New York to Paris arrived four hours late."),
+      policies,
+      cases,
+      scripts
+    );
+    const euPolicyId = retrieval.officialBasis.find(
+      (policy) => policy.legal_regime === "EU261"
+    )?.policy_id;
+    const assessment = retrieval.policyAssessments.find(
+      (item) => item.policyId === euPolicyId
+    );
+
+    expect(retrieval.officialBasis.map((policy) => policy.legal_regime)).toContain(
+      "EU261"
+    );
+    expect(assessment?.status).toBe("unknown");
+    expect(assessment?.conditions).toContainEqual(
+      expect.objectContaining({ code: "route", status: "unknown" })
+    );
+  });
+
+  it("keeps a controllable airline commitment conditional when the cause is unknown", () => {
+    const retrieval = retrieveKnowledge(
+      classifyInput("United cancelled my flight without giving a reason."),
+      policies,
+      cases,
+      scripts
+    );
+    const assessment = retrieval.policyAssessments.find(
+      (item) => item.policyId === "dot_airline_cancellation_delay_dashboard"
+    );
+
+    expect(assessment?.status).toBe("unknown");
+    expect(assessment?.conditions).toContainEqual(
+      expect.objectContaining({ code: "controllability", status: "unknown" })
+    );
   });
 
   it("retrieves Canadian APPR for a flight departing Canada", () => {

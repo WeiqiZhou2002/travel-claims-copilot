@@ -42,6 +42,21 @@ describe("ClaimFacts schema", () => {
       "disruptionReason"
     ]);
   });
+
+  it("does not treat an explicitly unavailable disruption reason as unanswered", () => {
+    const facts = normalizeClaimFacts({
+      ...emptyClaimFacts(),
+      issueType: "airline_cancellation",
+      provider: "Air France",
+      origin: { city: "Paris", airport: null, country: null, region: null },
+      destination: { city: "New York", airport: null, country: null, region: null },
+      disruptionType: "cancellation",
+      disruptionReason: "unknown",
+      disruptionReasonStatus: "unavailable"
+    });
+
+    expect(getMissingClaimFields(facts)).toEqual([]);
+  });
 });
 
 describe("jurisdiction assessment", () => {
@@ -129,13 +144,13 @@ describe("structured analyze API", () => {
     expect(result.policyRegions).toEqual(["EU_EEA_CH", "US"]);
     expect(result.legalRegimes).toEqual(["EU261", "US_DOT_REFUND"]);
     expect(result.controllability).toBe("controllable");
-    expect(result.officialBasis[0]?.policy_id).toBe("eu261_air_passenger_rights");
+    expect(result.officialBasis[0]?.policy_id).toBe("eu261_regulation_261_2004");
     expect(result.suggestedAsks.aggressive).toContain(
       "Fixed EU261 compensation if eligibility is met"
     );
   });
 
-  it("returns both the EU261 guide and regulation for a Paris departure", async () => {
+  it("returns the primary EU261 regulation for a Paris departure", async () => {
     const facts = {
       ...emptyClaimFacts(),
       issueType: "airline_cancellation" as const,
@@ -175,8 +190,14 @@ describe("structured analyze API", () => {
     expect(result.policyRegions).toEqual(["EU_EEA_CH", "US"]);
     expect(result.legalRegimes).toEqual(["EU261", "US_DOT_REFUND"]);
     expect(result.controllability).toBe("unknown");
-    expect(result.strength).toBe("medium");
-    expect(policyIds).toContain("eu261_air_passenger_rights");
+    expect(result.evidenceCoverage).toEqual(
+      expect.objectContaining({
+        officialBasisStatus: "scope_confirmed",
+        officialSourceCount: 2,
+        reportedCaseCount: expect.any(Number),
+        unresolvedConditionCount: 0
+      })
+    );
     expect(policyIds).toContain("eu261_regulation_261_2004");
     expect(result.scripts.map((script: { script_id: string }) => script.script_id)).toEqual([
       "eu261_claim_email_en",

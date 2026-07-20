@@ -5,7 +5,7 @@ Travel Claims Copilot is a demo web app for exploring travel disruption claims a
 The user describes a hotel or airline issue, and the app returns:
 
 - issue type
-- claim strength
+- evidence coverage and unresolved applicability checks
 - relevant official policies or regulations
 - similar community datapoints
 - conservative / standard / aggressive asks
@@ -30,12 +30,14 @@ The app currently uses:
 - deterministic local extraction when no API key is configured or a model call fails
 - explainable weighted retrieval with deterministic Top-K results
 - approved-case filtering and deterministic response generation
+- pre-LLM safety routing for unsupported high-risk claims
+- bounded intake and analysis inputs
 - Vitest golden-scenario and quality-guard tests
 
 There is no database, login, payment, scraping, email sending, or claim submission. Conversation
 state currently stays in the browser and is not persisted.
 
-The current knowledge base contains 11 policies, 55 reviewed case records (35 approved for
+The current knowledge base contains 10 policies, 55 reviewed case records (35 approved for
 retrieval), and 14 reusable scripts. The first demo publishes four incident types:
 
 - `hotel_walk`
@@ -207,6 +209,10 @@ It receives prior structured facts plus the latest user message and must return 
 four-incident `ClaimFacts` schema. The server recomputes missing fields, geographic regions,
 policy scope, and controllability.
 
+`disruptionReasonStatus` distinguishes a reason that has not been requested yet from a reason
+the user explicitly cannot obtain. An `unavailable` reason does not trigger another question;
+cause-dependent policies remain conditional instead.
+
 The OpenAI adapter requests strict JSON Schema output with `store: false`. The DeepSeek adapter
 uses Chat Completions JSON Output and includes the same schema in its system prompt. Both use a
 bounded timeout, runtime `ClaimFacts` validation, and a deterministic fallback. `/api/analyze`
@@ -228,7 +234,9 @@ Start or continue a fact-gathering conversation:
 ```
 
 The response is either `needs_info` with the accumulated `facts`, `missingFields`, and one
-targeted `question`, or `ready` with validated facts that can be sent to `/api/analyze`.
+targeted `question`; `ready` with validated facts that can be sent to `/api/analyze`; or
+`unsupported` with a professional-help safety notice. High-risk screening happens before an
+LLM call. Intake messages are limited to 4,000 characters.
 
 ### `GET /api/scenarios`
 
@@ -267,7 +275,9 @@ The preferred request uses the validated `facts` returned by `/api/intake`:
 ```
 
 The complete object must match `ClaimFacts`; incomplete valid facts receive HTTP `422` with
-`missingFields`. The following legacy inputs remain supported for compatibility.
+`missingFields`. Descriptions are limited to 12,000 characters. High-risk descriptions receive
+HTTP `422` with a safety category and do not enter classification or retrieval. The following
+legacy inputs remain supported for compatibility.
 
 Analyze by free-text description:
 
@@ -311,9 +321,17 @@ Returns:
     | "CN_FLIGHT_REGULATION"
   >;
   controllability: "controllable" | "uncontrollable" | "unknown";
-  strength: "low" | "medium" | "high";
+  evidenceCoverage: {
+    officialBasisStatus: "scope_confirmed" | "conditional" | "not_found";
+    officialSourceCount: number;
+    reportedCaseCount: number;
+    syntheticCaseCount: number;
+    unresolvedConditionCount: number;
+    unmetRemedyConditionCount: number;
+  };
   summary: string;
   officialBasis: Policy[];
+  policyAssessments: PolicyApplicabilityAssessment[];
   similarCases: Case[];
   suggestedAsks: {
     conservative: string[];

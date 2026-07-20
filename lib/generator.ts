@@ -1,12 +1,46 @@
 import { issueLabels } from "./issueTaxonomy";
 import type {
   AnalysisResult,
+  EvidenceCoverage,
   ExtractedFacts,
   IssueType,
   LegalRegime,
   RetrievalResult,
   SuggestedAsks
 } from "./types";
+
+function buildEvidenceCoverage(retrieval: RetrievalResult): EvidenceCoverage {
+  const confirmedPolicies = retrieval.policyAssessments.filter(
+    (assessment) => assessment.status === "met"
+  ).length;
+  const conditions = retrieval.policyAssessments.flatMap(
+    (assessment) => assessment.conditions
+  );
+
+  return {
+    officialBasisStatus:
+      confirmedPolicies > 0
+        ? "scope_confirmed"
+        : retrieval.officialBasis.length > 0
+          ? "conditional"
+          : "not_found",
+    officialSourceCount: retrieval.officialBasis.length,
+    reportedCaseCount: retrieval.similarCases.filter(
+      (item) => item.source_type !== "synthetic_example"
+    ).length,
+    syntheticCaseCount: retrieval.similarCases.filter(
+      (item) => item.source_type === "synthetic_example"
+    ).length,
+    unresolvedConditionCount: new Set(
+      conditions.filter((item) => item.status === "unknown").map((item) => item.code)
+    ).size,
+    unmetRemedyConditionCount: new Set(
+      conditions
+        .filter((item) => item.kind === "remedy" && item.status === "not_met")
+        .map((item) => item.code)
+    ).size
+  };
+}
 
 const fallbackSuggestedAsks: SuggestedAsks = {
   conservative: ["Ask the provider to explain the applicable policy in writing"],
@@ -626,24 +660,15 @@ export function generateAnalysis(
   facts: ExtractedFacts,
   retrieval: RetrievalResult
 ): AnalysisResult {
-  const hasUnresolvedAirlineControl =
-    (facts.issueType === "airline_delay" || facts.issueType === "airline_cancellation") &&
-    retrieval.query.controllability !== "controllable";
-  const strength =
-    facts.issueType === "unknown"
-      ? "low"
-      : retrieval.officialBasis.length > 0 && !hasUnresolvedAirlineControl
-        ? "high"
-        : "medium";
-
   return {
     issueType: facts.issueType,
     policyRegions: retrieval.query.policyRegions,
     legalRegimes: getLegalRegimes(retrieval),
     controllability: retrieval.query.controllability,
-    strength,
+    evidenceCoverage: buildEvidenceCoverage(retrieval),
     summary: buildSummary(facts, retrieval),
     officialBasis: retrieval.officialBasis,
+    policyAssessments: retrieval.policyAssessments,
     similarCases: retrieval.similarCases,
     suggestedAsks: getSuggestedAsks(facts.issueType, retrieval),
     evidenceChecklist: getEvidence(facts.issueType, retrieval),

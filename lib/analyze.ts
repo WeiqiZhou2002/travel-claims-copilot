@@ -62,6 +62,7 @@ export function claimFactsToExtractedFacts(
     bookingChannel: facts.bookingChannel === "unknown" ? undefined : facts.bookingChannel,
     loyaltyStatus: facts.loyaltyStatus ?? undefined,
     disruptionReason: facts.disruptionReason,
+    arrivalDelayMinutes: facts.arrivalDelayMinutes ?? undefined,
     isOvernight: facts.isOvernight ?? undefined,
     deniedBoardingKind: facts.deniedBoardingKind,
     operatingCarrier: facts.operatingCarrier ?? facts.provider ?? undefined,
