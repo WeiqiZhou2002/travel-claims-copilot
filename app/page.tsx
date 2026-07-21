@@ -116,8 +116,7 @@ export default function Home() {
             id: `assistant-${Date.now()}`,
             role: "assistant",
             content:
-              intake.safety?.message ??
-              "This request is outside the supported scope of the demo."
+              intake.safety?.message ?? "This request is outside the supported scope of the demo."
           }
         ]);
         return;
@@ -224,12 +223,12 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="max-h-96 space-y-4 overflow-y-auto px-5 py-5 md:px-7" aria-live="polite">
+            <div
+              className="max-h-96 space-y-4 overflow-y-auto px-5 py-5 md:px-7"
+              aria-live="polite"
+            >
               {messages.map((item, index) => (
-                <article
-                  className="grid gap-2 md:grid-cols-[92px_1fr]"
-                  key={item.id}
-                >
+                <article className="grid gap-2 md:grid-cols-[92px_1fr]" key={item.id}>
                   <p className="pt-1 text-xs font-semibold uppercase tracking-[0.12em] text-ink/45">
                     {index + 1}. {item.role === "assistant" ? "Copilot" : "You"}
                   </p>
@@ -291,13 +290,9 @@ export default function Home() {
 
       <section className="mx-auto grid w-full max-w-6xl gap-5 px-5 py-6 md:px-8 lg:grid-cols-[320px_1fr]">
         <aside className="flex flex-col gap-4">
-          <ClaimSnapshot
-            facts={facts}
-            extractionMode={extractionMode}
-            warning={intakeWarning}
-          />
+          <ClaimSnapshot facts={facts} extractionMode={extractionMode} warning={intakeWarning} />
           <SummaryPanel result={result} />
-          {result ? <SuggestedAsks asks={result.suggestedAsks} /> : null}
+          {result ? <SuggestedAsksPanel asks={result.suggestedAsks} /> : null}
         </aside>
 
         <div className="flex flex-col gap-5">
@@ -352,9 +347,7 @@ function ClaimSnapshot({
   return (
     <div className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-ink/60">
-          Case file
-        </h2>
+        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-ink/60">Case file</h2>
         {extractionMode ? (
           <span className="rounded-full bg-paper px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-ink/55">
             {extractionMode === "llm" ? "LLM" : "Local"}
@@ -367,10 +360,7 @@ function ClaimSnapshot({
           <FactRow label="Issue" value={issueLabels[facts.issueType] ?? "Needs more detail"} />
           <FactRow label="Provider" value={facts.provider ?? facts.operatingCarrier ?? "Unknown"} />
           <FactRow label="Route" value={route || "Unknown"} />
-          <FactRow
-            label="Event"
-            value={facts.disruptionType.replaceAll("_", " ")}
-          />
+          <FactRow label="Event" value={facts.disruptionType.replaceAll("_", " ")} />
           {facts.providerType === "airline" ? (
             <FactRow label="Reason" value={formatDisruptionReason(facts)} />
           ) : null}
@@ -378,10 +368,7 @@ function ClaimSnapshot({
             <FactRow label="Stage" value={facts.journeyStage.replaceAll("_", " ")} />
           ) : null}
           {facts.providerType === "airline" && facts.disruptionTiming !== "unknown" ? (
-            <FactRow
-              label="Timing"
-              value={facts.disruptionTiming.replaceAll("_", " ")}
-            />
+            <FactRow label="Timing" value={facts.disruptionTiming.replaceAll("_", " ")} />
           ) : null}
           {facts.providerType === "airline" && facts.ticketType !== "unknown" ? (
             <FactRow label="Ticket" value={formatTicket(facts)} />
@@ -505,9 +492,7 @@ function SummaryPanel({ result }: { result: AnalysisResult | null }) {
             </div>
             <div className="flex items-start justify-between gap-3">
               <span className="text-ink/60">Controllability</span>
-              <span className="font-medium capitalize text-ink">
-                {result.controllability}
-              </span>
+              <span className="font-medium capitalize text-ink">{result.controllability}</span>
             </div>
           </div>
         </div>
@@ -520,7 +505,7 @@ function SummaryPanel({ result }: { result: AnalysisResult | null }) {
   );
 }
 
-function SuggestedAsks({ asks }: { asks: SuggestedAsks }) {
+function SuggestedAsksPanel({ asks }: { asks: SuggestedAsks }) {
   const tiers = [
     ["Conservative", asks.conservative],
     ["Standard", asks.standard],
@@ -550,10 +535,7 @@ function SuggestedAsks({ asks }: { asks: SuggestedAsks }) {
   );
 }
 
-const handlingSourceLabels: Record<
-  HandlingPlaybook["sources"][number]["sourceType"],
-  string
-> = {
+const handlingSourceLabels: Record<HandlingPlaybook["sources"][number]["sourceType"], string> = {
   industry_guidance: "Industry guidance",
   community_guide: "Community guide",
   official_policy_required: "Official policy check required"
@@ -569,8 +551,7 @@ function HandlingPlaybookSection({ playbook }: { playbook: HandlingPlaybook }) {
               Contact first
             </p>
             <p className="mt-2 text-lg font-semibold">
-              {playbook.contactFirst.name ??
-                playbook.contactFirst.role.replaceAll("_", " ")}
+              {playbook.contactFirst.name ?? playbook.contactFirst.role.replaceAll("_", " ")}
             </p>
             <p className="mt-1 text-xs capitalize text-white/60">
               {playbook.contactFirst.role.replaceAll("_", " ")}
@@ -620,7 +601,10 @@ function HandlingPlaybookSection({ playbook }: { playbook: HandlingPlaybook }) {
                 <h3 className="text-sm font-semibold text-ink">If the first request fails</h3>
                 <ul className="mt-3 space-y-2">
                   {playbook.fallback.map((item) => (
-                    <li className="border-l-2 border-coral/40 pl-3 text-sm leading-6 text-ink/70" key={item}>
+                    <li
+                      className="border-l-2 border-coral/40 pl-3 text-sm leading-6 text-ink/70"
+                      key={item}
+                    >
                       {item}
                     </li>
                   ))}
@@ -692,10 +676,7 @@ const caseSourceLabels: Record<Case["source_type"], string> = {
   synthetic_example: "Synthetic example"
 };
 
-const applicabilityStyles: Record<
-  PolicyApplicabilityAssessment["status"],
-  string
-> = {
+const applicabilityStyles: Record<PolicyApplicabilityAssessment["status"], string> = {
   met: "border-mint/25 bg-mint/10 text-mint",
   unknown: "border-coral/25 bg-coral/10 text-coral",
   not_met: "border-ink/15 bg-paper text-ink/55"
@@ -774,7 +755,10 @@ function PolicySection({
       ) : (
         <div className="grid gap-3">
           {policies.map((policy) => (
-            <article className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm" key={policy.policy_id}>
+            <article
+              className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm"
+              key={policy.policy_id}
+            >
               <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                 <div className="flex flex-col gap-2">
                   <h3 className="text-lg font-semibold text-ink">{policy.policy_name}</h3>
@@ -827,7 +811,10 @@ function CaseSection({ cases }: { cases: Case[] }) {
       ) : (
         <div className="grid gap-3">
           {cases.map((item) => (
-            <article className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm" key={item.case_id}>
+            <article
+              className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm"
+              key={item.case_id}
+            >
               <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                 <div className="flex flex-col gap-2">
                   <h3 className="text-lg font-semibold text-ink">{item.brand_or_airline}</h3>
@@ -899,7 +886,10 @@ function ScriptSection({
       ) : (
         <div className="grid gap-3">
           {scripts.map((script) => (
-            <article className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm" key={script.script_id}>
+            <article
+              className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm"
+              key={script.script_id}
+            >
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
                   <h3 className="text-lg font-semibold capitalize text-ink">
@@ -958,7 +948,10 @@ function TagList({ items }: { items: string[] }) {
   return (
     <div className="mt-4 flex flex-wrap gap-2">
       {items.map((item) => (
-        <span className="rounded-full bg-mint/10 px-3 py-1 text-xs font-medium text-mint" key={item}>
+        <span
+          className="rounded-full bg-mint/10 px-3 py-1 text-xs font-medium text-mint"
+          key={item}
+        >
           {item}
         </span>
       ))}

@@ -17,22 +17,11 @@ export type IssueType =
 
 export type MvpIssueType = Extract<
   IssueType,
-  | "hotel_walk"
-  | "airline_cancellation"
-  | "airline_delay"
-  | "denied_boarding"
+  "hotel_walk" | "airline_cancellation" | "airline_delay" | "denied_boarding"
 >;
 
 export type ProviderType = "hotel" | "airline" | "credit_card" | "ota" | "government";
-export type PolicyRegion =
-  | "EU_EEA_CH"
-  | "UK"
-  | "US"
-  | "CA"
-  | "AU"
-  | "CN"
-  | "other"
-  | "global";
+export type PolicyRegion = "EU_EEA_CH" | "UK" | "US" | "CA" | "AU" | "CN" | "other" | "global";
 export type PolicyRouteRegion = Exclude<PolicyRegion, "global">;
 export type LegalRegime =
   | "provider_policy"
@@ -123,13 +112,7 @@ export type Case = {
   brand_or_airline: string;
   issue_type: string;
   location_country: string;
-  booking_channel:
-    | "direct"
-    | "ota"
-    | "portal"
-    | "travel_agent"
-    | "corporate_travel"
-    | "unknown";
+  booking_channel: "direct" | "ota" | "portal" | "travel_agent" | "corporate_travel" | "unknown";
   loyalty_status: string;
   reservation_type: "paid" | "points" | "award" | "unknown";
   facts: string;
@@ -146,6 +129,7 @@ export type Case = {
 
 export type Script = {
   script_id: string;
+  source_ids: string[];
   incident_types: MvpIssueType[];
   applicable_regions: PolicyRegion[];
   applicability_rule: PolicyApplicabilityRule;
@@ -256,6 +240,7 @@ export type RetrievalResult = {
   facts: ExtractedFacts;
   query: RetrievalQuery;
   issueAliases: string[];
+  legalRegimes: LegalRegime[];
   officialBasis: Policy[];
   policyAssessments: PolicyApplicabilityAssessment[];
   similarCases: Case[];

@@ -13,9 +13,7 @@ function buildEvidenceCoverage(retrieval: RetrievalResult): EvidenceCoverage {
   const confirmedPolicies = retrieval.policyAssessments.filter(
     (assessment) => assessment.status === "met"
   ).length;
-  const conditions = retrieval.policyAssessments.flatMap(
-    (assessment) => assessment.conditions
-  );
+  const conditions = retrieval.policyAssessments.flatMap((assessment) => assessment.conditions);
 
   return {
     officialBasisStatus:
@@ -591,12 +589,14 @@ const cautionsByIssue: Partial<Record<IssueType, string[]>> = {
 };
 
 function getLegalRegimes(retrieval: RetrievalResult): LegalRegime[] {
-  return Array.from(new Set(retrieval.officialBasis.map((policy) => policy.legal_regime)));
+  return retrieval.legalRegimes;
 }
 
 function getPrimaryLegalRegime(retrieval: RetrievalResult): LegalRegime | undefined {
   const regimes = getLegalRegimes(retrieval);
-  const preferredByOrigin: Partial<Record<NonNullable<RetrievalResult["query"]["originRegion"]>, LegalRegime[]>> = {
+  const preferredByOrigin: Partial<
+    Record<NonNullable<RetrievalResult["query"]["originRegion"]>, LegalRegime[]>
+  > = {
     EU_EEA_CH: ["EU261"],
     UK: ["UK261"],
     CA: ["CA_APPR"],
@@ -609,16 +609,13 @@ function getPrimaryLegalRegime(retrieval: RetrievalResult): LegalRegime | undefi
     other: []
   };
   const preferred = retrieval.query.originRegion
-    ? preferredByOrigin[retrieval.query.originRegion] ?? []
+    ? (preferredByOrigin[retrieval.query.originRegion] ?? [])
     : [];
 
   return preferred.find((regime) => regimes.includes(regime)) ?? regimes[0];
 }
 
-function getSuggestedAsks(
-  issueType: IssueType,
-  retrieval: RetrievalResult
-): SuggestedAsks {
+function getSuggestedAsks(issueType: IssueType, retrieval: RetrievalResult): SuggestedAsks {
   const regime = getPrimaryLegalRegime(retrieval);
   if (regime && suggestedAsksByRegime[regime]) {
     return suggestedAsksByRegime[regime];
@@ -644,7 +641,7 @@ function getCautions(issueType: IssueType, retrieval: RetrievalResult): string[]
 
 function buildSummary(facts: ExtractedFacts, retrieval: RetrievalResult): string {
   if (retrieval.selectedCase) {
-    return `Selected scenario: ${retrieval.selectedCase.brand_or_airline}. This result is based on the selected local case and matching knowledge-base records.`;
+    return `Selected reference: ${retrieval.selectedCase.brand_or_airline}. It is presentation-only and does not replace the facts extracted from the user's description.`;
   }
 
   if (facts.issueType === "unknown") {
