@@ -50,10 +50,7 @@ function policyRegionsFromClaimFacts(facts: ClaimFacts): PolicyRegion[] {
   );
 }
 
-export function claimFactsToExtractedFacts(
-  facts: ClaimFacts,
-  description = ""
-): ExtractedFacts {
+export function claimFactsToExtractedFacts(facts: ClaimFacts, description = ""): ExtractedFacts {
   return {
     description,
     issueType: facts.issueType,

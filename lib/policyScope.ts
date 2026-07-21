@@ -71,11 +71,7 @@ export function policyRegionsFromCountry(country: string | undefined): PolicyReg
   if (normalized === "au" || normalized === "australia") {
     return ["AU"];
   }
-  if (
-    normalized === "cn" ||
-    normalized === "china" ||
-    normalized === "mainland china"
-  ) {
+  if (normalized === "cn" || normalized === "china" || normalized === "mainland china") {
     return ["CN"];
   }
   return ["other"];
@@ -108,10 +104,7 @@ function includesRouteRegion(
   return Boolean(region && applicableRegions.includes(region));
 }
 
-function coarseRegionMatch(
-  applicableRegions: PolicyRegion[],
-  query: RouteScopeQuery
-): boolean {
+function coarseRegionMatch(applicableRegions: PolicyRegion[], query: RouteScopeQuery): boolean {
   return (
     applicableRegions.includes("global") ||
     applicableRegions.some((region) => query.policyRegions.includes(region))
@@ -129,10 +122,7 @@ export function applicabilityRuleMatches(
 
   const hasExplicitRoute = Boolean(query.originRegion || query.destinationRegion);
   const originMatches = includesRouteRegion(applicableRegions, query.originRegion);
-  const destinationMatches = includesRouteRegion(
-    applicableRegions,
-    query.destinationRegion
-  );
+  const destinationMatches = includesRouteRegion(applicableRegions, query.destinationRegion);
   const carrier = query.operatingCarrier ?? query.provider;
 
   if (rule === "origin_region") {
@@ -150,9 +140,7 @@ export function applicabilityRuleMatches(
       return true;
     }
     if (query.destinationRegion === "EU_EEA_CH") {
-      return (
-        query.operatingCarrierRegion === "EU_EEA_CH" || isEuOperatingCarrier(carrier)
-      );
+      return query.operatingCarrierRegion === "EU_EEA_CH" || isEuOperatingCarrier(carrier);
     }
     return hasExplicitRoute ? false : coarseRegionMatch(applicableRegions, query);
   }
@@ -194,17 +182,10 @@ export function applicabilityRuleMatches(
 }
 
 export function policyAppliesToRoute(policy: Policy, query: RouteScopeQuery): boolean {
-  return applicabilityRuleMatches(
-    policy.applicability_rule,
-    policy.applicable_regions,
-    query
-  );
+  return applicabilityRuleMatches(policy.applicability_rule, policy.applicable_regions, query);
 }
 
-function evaluateRouteScope(
-  policy: Policy,
-  query: RouteScopeQuery
-): PolicyConditionAssessment {
+function evaluateRouteScope(policy: Policy, query: RouteScopeQuery): PolicyConditionAssessment {
   const { applicability_rule: rule, applicable_regions: regions } = policy;
   const origin = query.originRegion;
   const destination = query.destinationRegion;
@@ -273,10 +254,7 @@ function evaluateRouteScope(
       );
     }
     if (destination === "EU_EEA_CH") {
-      if (
-        carrierRegion === "EU_EEA_CH" ||
-        isEuOperatingCarrier(carrier)
-      ) {
+      if (carrierRegion === "EU_EEA_CH" || isEuOperatingCarrier(carrier)) {
         return condition(
           "route",
           "EU261 route scope",
@@ -402,11 +380,7 @@ function evaluateRouteScope(
   }
 
   if (rule === "china_flight_regulation") {
-    if (
-      origin === "CN" ||
-      carrierRegion === "CN" ||
-      isChineseOperatingCarrier(carrier)
-    ) {
+    if (origin === "CN" || carrierRegion === "CN" || isChineseOperatingCarrier(carrier)) {
       return condition(
         "route",
         "Mainland China service scope",
@@ -430,18 +404,10 @@ function evaluateRouteScope(
     );
   }
 
-  return condition(
-    "route",
-    "Route scope",
-    "unknown",
-    "The route rule could not be evaluated."
-  );
+  return condition("route", "Route scope", "unknown", "The route rule could not be evaluated.");
 }
 
-function evaluateProviderScope(
-  policy: Policy,
-  query: RetrievalQuery
-): PolicyConditionAssessment {
+function evaluateProviderScope(policy: Policy, query: RetrievalQuery): PolicyConditionAssessment {
   if (policy.applicable_providers.length === 0) {
     return condition(
       "provider",
@@ -473,10 +439,7 @@ function evaluateProviderScope(
   );
 }
 
-function evaluateControllability(
-  policy: Policy,
-  query: RetrievalQuery
-): PolicyConditionAssessment {
+function evaluateControllability(policy: Policy, query: RetrievalQuery): PolicyConditionAssessment {
   if (policy.required_controllability === "any") {
     return condition(
       "controllability",
@@ -532,20 +495,13 @@ function evaluateRemedyConditions(
     );
   }
 
-  if (
-    policy.legal_regime === "US_DOT_DENIED_BOARDING" &&
-    query.issueType === "denied_boarding"
-  ) {
+  if (policy.legal_regime === "US_DOT_DENIED_BOARDING" && query.issueType === "denied_boarding") {
     const kind = query.deniedBoardingKind;
     conditions.push(
       condition(
         "denied_boarding_kind",
         "Mandatory denied-boarding compensation",
-        !kind || kind === "unknown"
-          ? "unknown"
-          : kind === "involuntary"
-            ? "met"
-            : "not_met",
+        !kind || kind === "unknown" ? "unknown" : kind === "involuntary" ? "met" : "not_met",
         !kind || kind === "unknown"
           ? "Voluntary versus involuntary denied boarding must be confirmed."
           : kind === "involuntary"

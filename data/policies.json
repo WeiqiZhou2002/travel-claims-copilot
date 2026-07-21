@@ -24,7 +24,7 @@
       "Potential points compensation depending on brand and status"
     ],
     "summary": "Marriott describes an Ultimate Reservation Guarantee for situations where a participating hotel cannot honor a reservation. Compensation depends on brand and member status.",
-    "last_checked": "2026-05-12"
+    "last_checked": "2026-07-19"
   },
   {
     "policy_id": "dot_airline_cancellation_delay_dashboard",
@@ -64,7 +64,7 @@
       "Travel credit or miles in some cases"
     ],
     "summary": "The DOT dashboard summarizes airline commitments for controllable cancellations and delays, such as meals, hotels, transportation, and rebooking.",
-    "last_checked": "2026-05-12"
+    "last_checked": "2026-07-19"
   },
   {
     "policy_id": "dot_bumping_oversales",

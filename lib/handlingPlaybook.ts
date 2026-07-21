@@ -1,9 +1,5 @@
 import type { ClaimFacts, ClaimRecoveryPriority } from "./claimFacts";
-import type {
-  HandlingContactRole,
-  HandlingGuidanceSource,
-  HandlingPlaybook
-} from "./types";
+import type { HandlingGuidanceSource, HandlingPlaybook } from "./types";
 
 const communityGuide: HandlingGuidanceSource = {
   sourceType: "community_guide",
@@ -106,9 +102,7 @@ function contactForPlannedChange(facts: ClaimFacts): HandlingPlaybook["contactFi
   };
 }
 
-function contactForCloseInDisruption(
-  facts: ClaimFacts
-): HandlingPlaybook["contactFirst"] {
+function contactForCloseInDisruption(facts: ClaimFacts): HandlingPlaybook["contactFirst"] {
   return {
     role: "disrupting_airline",
     name: airlineName(facts),
@@ -117,9 +111,7 @@ function contactForCloseInDisruption(
   };
 }
 
-function contactForCompletedDisruption(
-  facts: ClaimFacts
-): HandlingPlaybook["contactFirst"] {
+function contactForCompletedDisruption(facts: ClaimFacts): HandlingPlaybook["contactFirst"] {
   return {
     role: "airline_customer_relations",
     name: airlineName(facts),
@@ -189,7 +181,9 @@ function uncertaintiesFor(facts: ClaimFacts): string[] {
     uncertainties.push("The user's current journey stage is unknown.");
   }
   if (facts.disruptionTiming === "unknown" && facts.journeyStage === "pre_trip") {
-    uncertainties.push("It is unclear whether this is an advance schedule change or close-in disruption.");
+    uncertainties.push(
+      "It is unclear whether this is an advance schedule change or close-in disruption."
+    );
   }
   if (facts.bookingChannel === "unknown" && facts.journeyStage === "pre_trip") {
     uncertainties.push("The booking channel and ticket-control owner are unknown.");
@@ -290,10 +284,7 @@ export function buildHandlingPlaybook(facts: ClaimFacts): HandlingPlaybook {
     };
   }
 
-  if (
-    facts.journeyStage === "pre_trip" &&
-    facts.disruptionTiming === "planned_schedule_change"
-  ) {
+  if (facts.journeyStage === "pre_trip" && facts.disruptionTiming === "planned_schedule_change") {
     const contactFirst = contactForPlannedChange(facts);
     return {
       status: contactFirst.role === "unknown" ? "needs_context" : "actionable",

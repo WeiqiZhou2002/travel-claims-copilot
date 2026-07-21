@@ -1,13 +1,29 @@
 import { NextResponse } from "next/server";
 
+import { createIntakeRouteHandler } from "../../../lib/api/intake-route-handler";
 import { emptyClaimFacts, parseClaimFacts } from "../../../lib/claimFacts";
-import {
-  MAX_INTAKE_MESSAGE_LENGTH,
-  requestBodyExceedsLimit
-} from "../../../lib/inputLimits";
+import { MAX_INTAKE_MESSAGE_LENGTH, requestBodyExceedsLimit } from "../../../lib/inputLimits";
 import { processIntake } from "../../../lib/intake";
 
-export async function POST(request: Request) {
+const canonicalIntakePost = createIntakeRouteHandler();
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isCanonicalIntakeBody(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return ["prior", "baseRevision", "correction", "requestedMode", "privacyAcknowledged"].some(
+    (key) => Object.prototype.hasOwnProperty.call(value, key)
+  );
+}
+
+function withNoStore(response: Response): Response {
+  response.headers.set("Cache-Control", "no-store");
+  return response;
+}
+
+async function legacyIntakePost(request: Request): Promise<Response> {
   if (requestBodyExceedsLimit(request)) {
     return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
   }
@@ -41,4 +57,21 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(await processIntake(message, currentFacts));
+}
+
+export async function POST(request: Request): Promise<Response> {
+  const contentType = request.headers.get("content-type")?.toLowerCase() ?? "";
+  if (!contentType.startsWith("application/json")) {
+    return withNoStore(await canonicalIntakePost(request));
+  }
+
+  const candidate = await request
+    .clone()
+    .json()
+    .catch(() => null);
+  if (isCanonicalIntakeBody(candidate)) {
+    return withNoStore(await canonicalIntakePost(request));
+  }
+
+  return withNoStore(await legacyIntakePost(request));
 }

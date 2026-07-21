@@ -1,5 +1,6 @@
 import {
   emptyClaimFacts,
+  getMissingClaimFields,
   getMissingIntakeFields,
   normalizeClaimFacts,
   parseClaimFacts,
@@ -7,17 +8,42 @@ import {
   type ClaimFacts,
   type ClaimLocation
 } from "./claimFacts";
+import type { AnalyzeClaimIntakeResponse, AnalyzeClaimRequest } from "./api/analyze-contract";
+import { parseAnalyzeClaimRequest } from "./api/analyze-contract";
+import {
+  toApiErrorResponse,
+  toCaughtApiErrorResponse,
+  withRequestId,
+  type RequestIdFactory
+} from "./api/api-response";
+import { INPUT_LIMITS } from "./api/input-limits";
+import {
+  processClaimTurn as processCanonicalClaimTurn,
+  type ProcessClaimDependencies
+} from "./claim-workflow";
 import { classifyInput } from "./classifier";
+import type { ClaimState, RawClaimFacts } from "./domain/claim-contract";
+import { buildResolutionFacts, emptyRawClaimFacts } from "./domain/raw-fact-schema";
+import { isBlockedWorkflowStatus } from "./domain/workflow-status";
 import { isMvpIssueType } from "./issueTaxonomy";
 import { inferRouteLocations } from "./jurisdiction";
-import {
-  createStructuredOutputClientFromEnv,
-  type StructuredOutputClient
-} from "./llm";
+import { createKnowledgeRepository } from "./knowledge/knowledge-repository";
+import { createStructuredOutputClientFromEnv, type StructuredOutputClient } from "./llm";
 import { claimFactsJsonSchema } from "./claimFacts";
+import {
+  LocalRawFactExtractor,
+  OpenAIRawFactExtractor,
+  type LocalRawFactExtractorPort,
+  type OpenAIRawFactExtractorPort
+} from "./model/raw-fact-extractor";
 import { assessHighRiskClaim, type SafetyAssessment } from "./safety";
 
-export type IntakeStatus = "needs_info" | "ready" | "unsupported";
+export type IntakeStatus =
+  | "needs_info"
+  | "ready"
+  | "unsupported"
+  | "out_of_scope"
+  | "unsupported_high_risk";
 export type IntakeExtractionMode = "llm" | "deterministic";
 
 export type IntakeResult = {
@@ -28,10 +54,22 @@ export type IntakeResult = {
   extractionMode: IntakeExtractionMode;
   warning?: "llm_not_configured" | "llm_fallback_used";
   safety?: SafetyAssessment;
+  cautions?: string[];
 };
 
 export type IntakeDependencies = {
   llmClient?: StructuredOutputClient | null;
+  localExtractor?: LocalRawFactExtractorPort;
+  openaiExtractor?: OpenAIRawFactExtractorPort;
+  telemetry?: ProcessClaimDependencies["telemetry"];
+};
+
+export type ProcessClaimTurnDependencies = {
+  localExtractor: LocalRawFactExtractorPort;
+  openaiExtractor?: OpenAIRawFactExtractorPort;
+  knowledgeRepository?: ProcessClaimDependencies["knowledgeRepository"];
+  now?: ProcessClaimDependencies["now"];
+  telemetry?: ProcessClaimDependencies["telemetry"];
 };
 
 const intakeInstructions = `Role: Extract and merge facts for a travel disruption intake.
@@ -59,6 +97,9 @@ Rules:
 - A late inbound aircraft is a reported reason, not by itself a finding that the circumstances were within airline control.
 - Route regions determine which policies may apply; do not encode EU261 or another legal regime as the issue type.
 - Return only the schema-defined structured output.`;
+
+const informationalCaution =
+  "This is an informational condition assessment, not legal advice or a promise of compensation.";
 
 const numberWords: Record<string, number> = {
   one: 1,
@@ -217,7 +258,9 @@ function inferBookingChannel(text: string): ClaimFacts["bookingChannel"] {
   ) {
     return "portal";
   }
-  if (/\b(?:expedia|priceline|orbitz|trip\.com|booking\.com|ota)\b|携程|飞猪|去哪儿/.test(normalized)) {
+  if (
+    /\b(?:expedia|priceline|orbitz|trip\.com|booking\.com|ota)\b|携程|飞猪|去哪儿/.test(normalized)
+  ) {
     return "ota";
   }
   if (
@@ -283,7 +326,7 @@ function carrierForAwardProgram(program: string | null): string | null {
     "Air Canada Aeroplan": "Air Canada",
     "Alaska Mileage Plan": "Alaska Airlines"
   };
-  return program ? carriers[program] ?? null : null;
+  return program ? (carriers[program] ?? null) : null;
 }
 
 function inferAutoRebooked(text: string): boolean | null {
@@ -306,7 +349,10 @@ function inferAutoRebooked(text: string): boolean | null {
 }
 
 function inferContextualBooleanAnswer(text: string): boolean | null {
-  const normalized = text.trim().toLowerCase().replace(/[.!。！]/g, "");
+  const normalized = text
+    .trim()
+    .toLowerCase()
+    .replace(/[.!。！]/g, "");
   if (/^(?:yes|yeah|yep|they did|it has|是|是的|有|已经安排了)$/.test(normalized)) {
     return true;
   }
@@ -339,7 +385,11 @@ function inferRecoveryPriorities(text: string): ClaimFacts["recoveryPriorities"]
 }
 
 function inferPreferredAlternatives(text: string): string[] {
-  if (!/\b(?:prefer|want|would like|please move|can you move)\b|希望|想改到|首选/.test(text.toLowerCase())) {
+  if (
+    !/\b(?:prefer|want|would like|please move|can you move)\b|希望|想改到|首选/.test(
+      text.toLowerCase()
+    )
+  ) {
     return [];
   }
 
@@ -354,10 +404,18 @@ function inferPreferredAlternatives(text: string): string[] {
 
 function inferConnectionsOrReturnSegments(text: string): boolean | null {
   const normalized = text.toLowerCase();
-  if (/\b(?:connection|connecting|layover|return flight|round[ -]trip)\b|联程|转机|中转|返程|往返/.test(normalized)) {
+  if (
+    /\b(?:connection|connecting|layover|return flight|round[ -]trip)\b|联程|转机|中转|返程|往返/.test(
+      normalized
+    )
+  ) {
     return true;
   }
-  if (/\b(?:one-way nonstop|no connections?|no return flight)\b|单程直飞|没有联程|没有返程/.test(normalized)) {
+  if (
+    /\b(?:one-way nonstop|no connections?|no return flight)\b|单程直飞|没有联程|没有返程/.test(
+      normalized
+    )
+  ) {
     return false;
   }
   return null;
@@ -377,10 +435,9 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
   const bookingChannel =
     inferredBookingChannel !== "unknown"
       ? inferredBookingChannel
-      : extracted.bookingChannel ?? current.bookingChannel;
+      : (extracted.bookingChannel ?? current.bookingChannel);
   const inferredTicketType = inferTicketType(message);
-  const ticketType =
-    inferredTicketType === "unknown" ? current.ticketType : inferredTicketType;
+  const ticketType = inferredTicketType === "unknown" ? current.ticketType : inferredTicketType;
   const awardProgram = inferAwardProgram(message) ?? current.awardProgram;
   const inferredAutoRebooked =
     inferAutoRebooked(message) ??
@@ -391,8 +448,7 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
   const incomingPreferredAlternatives = inferPreferredAlternatives(message);
   const inferredConnections = inferConnectionsOrReturnSegments(message);
   const incomingReason = extracted.disruptionReason ?? "unknown";
-  const reasonUnavailable =
-    incomingReason === "unknown" && reportsReasonUnavailable(message);
+  const reasonUnavailable = incomingReason === "unknown" && reportsReasonUnavailable(message);
   const incomingIssue = isMvpIssueType(extracted.issueType)
     ? extracted.issueType
     : current.issueType;
@@ -405,8 +461,7 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
     carrierForAwardProgram(awardProgram) ??
     (providerType === "airline" && bookingChannel === "direct" ? provider : null);
   const bookingProvider =
-    detectedBookingProvider ??
-    (bookingChannel === "direct" ? provider : current.bookingProvider);
+    detectedBookingProvider ?? (bookingChannel === "direct" ? provider : current.bookingProvider);
 
   return normalizeClaimFacts({
     ...current,
@@ -415,17 +470,15 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
     provider,
     validatingCarrier: inferredValidatingCarrier ?? current.validatingCarrier,
     operatingCarrier: extracted.operatingCarrier ?? current.operatingCarrier,
-    operatingCarrierRegion:
-      extracted.operatingCarrierRegion ?? current.operatingCarrierRegion,
+    operatingCarrierRegion: extracted.operatingCarrierRegion ?? current.operatingCarrierRegion,
     origin: mergeLocation(current.origin, route.origin),
     destination: mergeLocation(current.destination, route.destination),
     disruptionType: disruptionType === "unknown" ? current.disruptionType : disruptionType,
-    disruptionReason:
-      reasonUnavailable
-        ? "unknown"
-        : incomingReason !== "unknown"
-          ? incomingReason
-          : current.disruptionReason,
+    disruptionReason: reasonUnavailable
+      ? "unknown"
+      : incomingReason !== "unknown"
+        ? incomingReason
+        : current.disruptionReason,
     disruptionReasonStatus: reasonUnavailable
       ? "unavailable"
       : incomingReason !== "unknown"
@@ -441,9 +494,7 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
     bookingProvider,
     journeyStage,
     disruptionTiming:
-      inferredDisruptionTiming === "unknown"
-        ? current.disruptionTiming
-        : inferredDisruptionTiming,
+      inferredDisruptionTiming === "unknown" ? current.disruptionTiming : inferredDisruptionTiming,
     ticketType,
     awardProgram,
     autoRebooked: inferredAutoRebooked ?? current.autoRebooked,
@@ -453,12 +504,10 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
     preferredAlternatives: Array.from(
       new Set([...current.preferredAlternatives, ...incomingPreferredAlternatives])
     ),
-    hasConnectionsOrReturnSegments:
-      inferredConnections ?? current.hasConnectionsOrReturnSegments,
+    hasConnectionsOrReturnSegments: inferredConnections ?? current.hasConnectionsOrReturnSegments,
     loyaltyStatus: extracted.loyaltyStatus ?? current.loyaltyStatus,
     confidence: extracted.confidence === "high" ? "high" : current.confidence
   });
-
 }
 
 function mergeLlmFactsWithDeterministic(
@@ -467,8 +516,7 @@ function mergeLlmFactsWithDeterministic(
   currentFacts: ClaimFacts
 ): ClaimFacts {
   const deterministicIssueIsExplicit =
-    deterministicFacts.confidence === "high" &&
-    deterministicFacts.issueType !== "unknown";
+    deterministicFacts.confidence === "high" && deterministicFacts.issueType !== "unknown";
 
   return normalizeClaimFacts({
     ...deterministicFacts,
@@ -485,12 +533,10 @@ function mergeLlmFactsWithDeterministic(
     validatingCarrier:
       deterministicFacts.validatingCarrier !== currentFacts.validatingCarrier
         ? deterministicFacts.validatingCarrier
-        : llmFacts.validatingCarrier ?? deterministicFacts.validatingCarrier,
-    marketingCarrier:
-      llmFacts.marketingCarrier ?? deterministicFacts.marketingCarrier,
+        : (llmFacts.validatingCarrier ?? deterministicFacts.validatingCarrier),
+    marketingCarrier: llmFacts.marketingCarrier ?? deterministicFacts.marketingCarrier,
     operatingCarrier: deterministicFacts.operatingCarrier ?? llmFacts.operatingCarrier,
-    disruptingCarrier:
-      llmFacts.disruptingCarrier ?? deterministicFacts.disruptingCarrier,
+    disruptingCarrier: llmFacts.disruptingCarrier ?? deterministicFacts.disruptingCarrier,
     operatingCarrierRegion:
       deterministicFacts.operatingCarrierRegion ?? llmFacts.operatingCarrierRegion,
     origin: mergeLocation(llmFacts.origin, deterministicFacts.origin),
@@ -504,15 +550,14 @@ function mergeLlmFactsWithDeterministic(
       deterministicFacts.disruptionReasonStatus === "unavailable"
         ? "unknown"
         : deterministicFacts.disruptionReason !== "unknown" ||
-      llmFacts.disruptionReason === "unknown"
+            llmFacts.disruptionReason === "unknown"
           ? deterministicFacts.disruptionReason
           : llmFacts.disruptionReason,
     disruptionReasonStatus:
       deterministicFacts.disruptionReasonStatus !== "not_provided"
         ? deterministicFacts.disruptionReasonStatus
         : llmFacts.disruptionReasonStatus,
-    arrivalDelayMinutes:
-      deterministicFacts.arrivalDelayMinutes ?? llmFacts.arrivalDelayMinutes,
+    arrivalDelayMinutes: deterministicFacts.arrivalDelayMinutes ?? llmFacts.arrivalDelayMinutes,
     isOvernight: llmFacts.isOvernight ?? deterministicFacts.isOvernight,
     deniedBoardingKind:
       llmFacts.deniedBoardingKind === "unknown"
@@ -526,7 +571,7 @@ function mergeLlmFactsWithDeterministic(
     bookingProvider:
       deterministicFacts.bookingProvider !== currentFacts.bookingProvider
         ? deterministicFacts.bookingProvider
-        : llmFacts.bookingProvider ?? deterministicFacts.bookingProvider,
+        : (llmFacts.bookingProvider ?? deterministicFacts.bookingProvider),
     journeyStage:
       deterministicFacts.journeyStage !== currentFacts.journeyStage ||
       llmFacts.journeyStage === "unknown"
@@ -538,38 +583,31 @@ function mergeLlmFactsWithDeterministic(
         ? deterministicFacts.disruptionTiming
         : llmFacts.disruptionTiming,
     ticketType:
-      deterministicFacts.ticketType !== currentFacts.ticketType ||
-      llmFacts.ticketType === "unknown"
+      deterministicFacts.ticketType !== currentFacts.ticketType || llmFacts.ticketType === "unknown"
         ? deterministicFacts.ticketType
         : llmFacts.ticketType,
     awardProgram:
       deterministicFacts.awardProgram !== currentFacts.awardProgram
         ? deterministicFacts.awardProgram
-        : llmFacts.awardProgram ?? deterministicFacts.awardProgram,
+        : (llmFacts.awardProgram ?? deterministicFacts.awardProgram),
     autoRebooked:
       deterministicFacts.autoRebooked !== currentFacts.autoRebooked
         ? deterministicFacts.autoRebooked
-        : llmFacts.autoRebooked ?? deterministicFacts.autoRebooked,
+        : (llmFacts.autoRebooked ?? deterministicFacts.autoRebooked),
     autoRebookedItinerary:
       llmFacts.autoRebookedItinerary ?? deterministicFacts.autoRebookedItinerary,
     recoveryPriorities: Array.from(
-      new Set([
-        ...deterministicFacts.recoveryPriorities,
-        ...llmFacts.recoveryPriorities
-      ])
+      new Set([...deterministicFacts.recoveryPriorities, ...llmFacts.recoveryPriorities])
     ),
     preferredAlternatives: Array.from(
-      new Set([
-        ...deterministicFacts.preferredAlternatives,
-        ...llmFacts.preferredAlternatives
-      ])
+      new Set([...deterministicFacts.preferredAlternatives, ...llmFacts.preferredAlternatives])
     ),
     hasConnectionsOrReturnSegments:
       deterministicFacts.hasConnectionsOrReturnSegments !==
       currentFacts.hasConnectionsOrReturnSegments
         ? deterministicFacts.hasConnectionsOrReturnSegments
-        : llmFacts.hasConnectionsOrReturnSegments ??
-          deterministicFacts.hasConnectionsOrReturnSegments,
+        : (llmFacts.hasConnectionsOrReturnSegments ??
+          deterministicFacts.hasConnectionsOrReturnSegments),
     loyaltyStatus: deterministicFacts.loyaltyStatus ?? llmFacts.loyaltyStatus,
     expenses: Array.from(new Set([...deterministicFacts.expenses, ...llmFacts.expenses])),
     evidence: Array.from(new Set([...deterministicFacts.evidence, ...llmFacts.evidence])),
@@ -608,9 +646,7 @@ function questionForMissingFields(
   }
   if (selected.includes("provider")) {
     if (facts.providerType === "hotel" || facts.issueType === "hotel_walk") {
-      return chinese
-        ? "是哪家酒店或酒店集团？"
-        : "Which hotel or hotel group was involved?";
+      return chinese ? "是哪家酒店或酒店集团？" : "Which hotel or hotel group was involved?";
     }
     if (facts.providerType === "airline") {
       return chinese
@@ -637,12 +673,12 @@ function questionForMissingFields(
     return chinese ? "你最终晚到多久？" : "How late did you reach your destination?";
   }
   if (needsDisruptionReason) {
-    return chinese
-      ? "航司给出的延误或取消原因是什么？"
-      : "What reason did the airline give?";
+    return chinese ? "航司给出的延误或取消原因是什么？" : "What reason did the airline give?";
   }
   if (selected.includes("disruptionType")) {
-    return chinese ? "航班是延误、取消，还是拒绝登机？" : "Was the flight delayed, cancelled, or denied boarding?";
+    return chinese
+      ? "航班是延误、取消，还是拒绝登机？"
+      : "Was the flight delayed, cancelled, or denied boarding?";
   }
   if (selected.includes("journeyStage")) {
     return chinese
@@ -687,7 +723,9 @@ function questionForMissingFields(
       : "What matters most in a replacement: earliest arrival, the same date, nonstop travel, the airport, or the cabin?";
   }
 
-  return chinese ? "请再补充一些事情经过。" : "Please add a little more detail about what happened.";
+  return chinese
+    ? "请再补充一些事情经过。"
+    : "Please add a little more detail about what happened.";
 }
 
 async function extractWithLlm(
@@ -699,7 +737,8 @@ async function extractWithLlm(
     schemaName: "travel_claim_facts",
     schema: claimFactsJsonSchema as unknown as Record<string, unknown>,
     instructions: intakeInstructions,
-    input: JSON.stringify({ priorFacts: currentFacts, latestUserMessage: message })
+    input: JSON.stringify({ priorFacts: currentFacts, latestUserMessage: message }),
+    maxOutputTokens: INPUT_LIMITS.modelOutputTokens
   });
   const parsed = parseClaimFacts(raw);
   if (!parsed.success) {
@@ -714,6 +753,10 @@ export async function processIntake(
   currentFacts: ClaimFacts = emptyClaimFacts(),
   dependencies: IntakeDependencies = {}
 ): Promise<IntakeResult> {
+  if (dependencies.localExtractor || dependencies.openaiExtractor) {
+    return processCanonicalIntakeAdapter(message, currentFacts, dependencies);
+  }
+
   const safety = assessHighRiskClaim(message);
   if (safety) {
     return {
@@ -722,13 +765,15 @@ export async function processIntake(
       missingFields: [],
       question: null,
       extractionMode: "deterministic",
-      safety
+      safety,
+      cautions: [safety.message]
     };
   }
 
-  const configuredClient = dependencies.llmClient === undefined
-    ? createStructuredOutputClientFromEnv()
-    : dependencies.llmClient ?? undefined;
+  const configuredClient =
+    dependencies.llmClient === undefined
+      ? createStructuredOutputClientFromEnv()
+      : (dependencies.llmClient ?? undefined);
   const deterministicFacts = mergeDeterministicFacts(message, currentFacts);
   let facts: ClaimFacts;
   let extractionMode: IntakeExtractionMode = "deterministic";
@@ -758,6 +803,238 @@ export async function processIntake(
         ? questionForMissingFields(missingFields, isChinese(message), facts)
         : null,
     extractionMode,
+    cautions: [informationalCaution],
     ...(warning ? { warning } : {})
+  };
+}
+
+export async function processClaimTurn(
+  value: unknown,
+  dependencies: ProcessClaimTurnDependencies
+): Promise<AnalyzeClaimIntakeResponse> {
+  const parsed = parseAnalyzeClaimRequest(value);
+  if (!parsed.success) {
+    throw new Error(`invalid_analyze_claim_request: ${parsed.errors.join("; ")}`);
+  }
+
+  const now = dependencies.now ?? (() => new Date().toISOString().slice(0, 10));
+  const response = await processCanonicalClaimTurn(parsed.data, {
+    localExtractor: dependencies.localExtractor,
+    ...(dependencies.openaiExtractor ? { openaiExtractor: dependencies.openaiExtractor } : {}),
+    knowledgeRepository:
+      dependencies.knowledgeRepository ?? createKnowledgeRepository({ asOf: now() }),
+    now,
+    ...(dependencies.telemetry ? { telemetry: dependencies.telemetry } : {})
+  });
+
+  return { ...response, status: response.result.status };
+}
+
+function legacyFactsToState(facts: ClaimFacts): ClaimState {
+  const empty = emptyRawClaimFacts();
+  const bookingChannel = ["direct", "ota", "portal"].includes(facts.bookingChannel)
+    ? (facts.bookingChannel as RawClaimFacts["bookingChannel"])
+    : null;
+  const raw: RawClaimFacts = {
+    ...empty,
+    incidentType: facts.issueType === "unknown" ? null : facts.issueType,
+    providerType: facts.providerType === "unknown" ? null : facts.providerType,
+    provider: facts.provider,
+    operatingCarrier: facts.operatingCarrier,
+    origin: {
+      city: facts.origin.city,
+      airport: facts.origin.airport,
+      country: facts.origin.country
+    },
+    destination: {
+      city: facts.destination.city,
+      airport: facts.destination.airport,
+      country: facts.destination.country
+    },
+    reasonCategory: facts.disruptionReason === "unknown" ? null : facts.disruptionReason,
+    finalArrivalDelayMinutes: facts.arrivalDelayMinutes,
+    isOvernight: facts.isOvernight,
+    deniedBoardingKind: facts.deniedBoardingKind === "unknown" ? null : facts.deniedBoardingKind,
+    bookingChannel,
+    loyaltyStatus: facts.loyaltyStatus,
+    expenses: [...facts.expenses],
+    evidence: [...facts.evidence],
+    userGoal: facts.userGoal
+  };
+
+  return {
+    facts: raw,
+    provenance: {},
+    revision: 0,
+    conflicts: [],
+    unresolvedFields: []
+  };
+}
+
+function rawFactsToLegacyFacts(facts: RawClaimFacts, prior: ClaimFacts): ClaimFacts {
+  const disruptionTypeByIncident: Record<
+    NonNullable<RawClaimFacts["incidentType"]>,
+    ClaimFacts["disruptionType"]
+  > = {
+    hotel_walk: "hotel_walk",
+    airline_delay: "delay",
+    airline_cancellation: "cancellation",
+    denied_boarding: "denied_boarding"
+  };
+  const reportedReason =
+    facts.reasonCategory === "other_uncontrollable"
+      ? "unknown"
+      : (facts.reasonCategory ?? "unknown");
+
+  return normalizeClaimFacts({
+    ...prior,
+    issueType: facts.incidentType ?? "unknown",
+    providerType: facts.providerType ?? "unknown",
+    provider: facts.provider,
+    operatingCarrier: facts.operatingCarrier,
+    origin: { ...facts.origin, region: prior.origin.region },
+    destination: { ...facts.destination, region: prior.destination.region },
+    disruptionType: facts.incidentType ? disruptionTypeByIncident[facts.incidentType] : "unknown",
+    disruptionReason: reportedReason,
+    disruptionReasonStatus:
+      reportedReason !== "unknown" ? "reported" : prior.disruptionReasonStatus,
+    arrivalDelayMinutes: facts.finalArrivalDelayMinutes,
+    isOvernight: facts.isOvernight,
+    deniedBoardingKind: facts.deniedBoardingKind ?? "unknown",
+    bookingChannel: facts.bookingChannel ?? prior.bookingChannel,
+    loyaltyStatus: facts.loyaltyStatus,
+    expenses: [...facts.expenses],
+    evidence: [...facts.evidence],
+    userGoal: facts.userGoal,
+    confidence: facts.incidentType ? "high" : prior.confidence
+  });
+}
+
+async function processCanonicalIntakeAdapter(
+  message: string,
+  currentFacts: ClaimFacts,
+  dependencies: IntakeDependencies
+): Promise<IntakeResult> {
+  const localExtractor = dependencies.localExtractor ?? new LocalRawFactExtractor();
+  const configuredOpenAIExtractor =
+    dependencies.openaiExtractor ??
+    (dependencies.llmClient ? new OpenAIRawFactExtractor(dependencies.llmClient) : undefined);
+  const request: AnalyzeClaimRequest = {
+    message,
+    prior: legacyFactsToState(currentFacts),
+    baseRevision: 0,
+    requestedMode: configuredOpenAIExtractor ? "gpt" : "local"
+  };
+  let extractionMode: IntakeExtractionMode = configuredOpenAIExtractor ? "llm" : "deterministic";
+  let warning: IntakeResult["warning"] = configuredOpenAIExtractor
+    ? undefined
+    : "llm_not_configured";
+  const response = await processClaimTurn(request, {
+    localExtractor,
+    ...(configuredOpenAIExtractor ? { openaiExtractor: configuredOpenAIExtractor } : {}),
+    ...(dependencies.telemetry ? { telemetry: dependencies.telemetry } : {})
+  });
+
+  if (
+    configuredOpenAIExtractor &&
+    response.result.extraction.performed &&
+    response.result.extraction.requestedMode === "gpt" &&
+    response.result.extraction.provider === "local"
+  ) {
+    extractionMode = "deterministic";
+    warning = "llm_fallback_used";
+  }
+
+  const facts = rawFactsToLegacyFacts(buildResolutionFacts(response.claimState), currentFacts);
+  if (isBlockedWorkflowStatus(response.result.status)) {
+    return {
+      status: response.result.status,
+      facts,
+      missingFields: [],
+      question: null,
+      extractionMode,
+      cautions: [...response.result.cautions]
+    };
+  }
+
+  const missingFields = getMissingClaimFields(facts);
+  const needsInformation =
+    missingFields.length > 0 || response.claimState.unresolvedFields.length > 0;
+  return {
+    status: needsInformation ? "needs_info" : "ready",
+    facts,
+    missingFields,
+    question: needsInformation
+      ? questionForMissingFields(missingFields, isChinese(message), facts)
+      : null,
+    extractionMode,
+    cautions: [...response.result.cautions],
+    ...(warning ? { warning } : {})
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasOwn(value: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function isCanonicalShape(body: Record<string, unknown>): boolean {
+  return ["prior", "baseRevision", "correction", "requestedMode", "privacyAcknowledged"].some(
+    (key) => hasOwn(body, key)
+  );
+}
+
+type IntakePostHandlerOptions = {
+  requestId?: string;
+  requestIdFactory?: RequestIdFactory;
+};
+
+export function createIntakePostHandler(
+  dependencies: ProcessClaimTurnDependencies,
+  options: IntakePostHandlerOptions = {}
+) {
+  return async function intakePost(request: Request): Promise<Response> {
+    const requestId = options.requestId ?? withRequestId(options.requestIdFactory);
+    const body = (await request.json().catch(() => null)) as unknown;
+    if (!isRecord(body)) return toApiErrorResponse("invalid_json", requestId);
+
+    if (isCanonicalShape(body)) {
+      const parsed = parseAnalyzeClaimRequest(body);
+      if (!parsed.success) return toApiErrorResponse("unprocessable_request", requestId);
+      try {
+        return Response.json(await processClaimTurn(parsed.data, dependencies));
+      } catch (error) {
+        return toCaughtApiErrorResponse(error, requestId);
+      }
+    }
+
+    if (!hasOwn(body, "facts")) return toApiErrorResponse("unprocessable_request", requestId);
+    const message = typeof body.message === "string" ? body.message.trim() : "";
+    if (!message) return toApiErrorResponse("unprocessable_request", requestId);
+
+    let currentFacts = emptyClaimFacts();
+    if (body.facts !== null) {
+      const parsed = parseClaimFacts(body.facts);
+      if (!parsed.success) return toApiErrorResponse("unprocessable_request", requestId);
+      currentFacts = parsed.data;
+    }
+
+    try {
+      return Response.json(
+        await processIntake(message, currentFacts, {
+          llmClient: null,
+          localExtractor: dependencies.localExtractor,
+          ...(dependencies.openaiExtractor
+            ? { openaiExtractor: dependencies.openaiExtractor }
+            : {}),
+          ...(dependencies.telemetry ? { telemetry: dependencies.telemetry } : {})
+        })
+      );
+    } catch (error) {
+      return toCaughtApiErrorResponse(error, requestId);
+    }
   };
 }

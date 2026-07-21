@@ -4,16 +4,39 @@ import cases from "../../../data/cases.json";
 import policies from "../../../data/policies.json";
 import scripts from "../../../data/scripts.json";
 import { buildAnalysisFromFacts, buildAnalysisResult } from "../../../lib/analyze";
+import { createAnalyzeRouteHandler } from "../../../lib/api/analyze-route-handler";
+import { toApiErrorResponse, withRequestId } from "../../../lib/api/api-response";
 import { getMissingClaimFields, parseClaimFacts } from "../../../lib/claimFacts";
-import {
-  MAX_ANALYZE_DESCRIPTION_LENGTH,
-  requestBodyExceedsLimit
-} from "../../../lib/inputLimits";
-import { normalizeIssueType } from "../../../lib/issueTaxonomy";
+import { classifyInput } from "../../../lib/classifier";
+import { MAX_ANALYZE_DESCRIPTION_LENGTH, requestBodyExceedsLimit } from "../../../lib/inputLimits";
+import { isMvpIssueType, normalizeIssueType } from "../../../lib/issueTaxonomy";
 import { assessHighRiskClaim } from "../../../lib/safety";
 import type { Case, Policy, Script } from "../../../lib/types";
 
-export async function POST(request: Request) {
+const canonicalAnalyzePost = createAnalyzeRouteHandler();
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isCanonicalAnalyzeBody(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return [
+    "message",
+    "prior",
+    "baseRevision",
+    "correction",
+    "requestedMode",
+    "privacyAcknowledged"
+  ].some((key) => Object.prototype.hasOwnProperty.call(value, key));
+}
+
+function withNoStore(response: Response): Response {
+  response.headers.set("Cache-Control", "no-store");
+  return response;
+}
+
+async function legacyAnalyzePost(request: Request): Promise<Response> {
   if (requestBodyExceedsLimit(request)) {
     return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
   }
@@ -28,6 +51,23 @@ export async function POST(request: Request) {
   const description = typeof body?.description === "string" ? body.description.trim() : "";
   const caseId = typeof body?.caseId === "string" ? body.caseId.trim() : "";
   const issueType = normalizeIssueType(body?.issueType ?? body?.selectedIssueType);
+  const suppliedIssueSelector =
+    isRecord(body) &&
+    (Object.prototype.hasOwnProperty.call(body, "issueType") ||
+      Object.prototype.hasOwnProperty.call(body, "selectedIssueType"));
+  const selectedCase = caseId
+    ? (cases as Case[]).find((item) => item.case_id === caseId)
+    : undefined;
+  const selectedCaseIssue = selectedCase ? normalizeIssueType(selectedCase.issue_type) : undefined;
+  const describedIssue = description ? classifyInput(description).issueType : "unknown";
+
+  if (
+    (suppliedIssueSelector && (!issueType || !isMvpIssueType(issueType))) ||
+    (selectedCase && (!selectedCaseIssue || !isMvpIssueType(selectedCaseIssue))) ||
+    (describedIssue !== "unknown" && !isMvpIssueType(describedIssue))
+  ) {
+    return toApiErrorResponse("unprocessable_request", withRequestId());
+  }
 
   if (description.length > MAX_ANALYZE_DESCRIPTION_LENGTH) {
     return NextResponse.json(
@@ -40,10 +80,7 @@ export async function POST(request: Request) {
 
   const safety = assessHighRiskClaim(description);
   if (safety) {
-    return NextResponse.json(
-      { error: safety.message, safety },
-      { status: 422 }
-    );
+    return NextResponse.json({ error: safety.message, safety }, { status: 422 });
   }
 
   if (body?.facts !== undefined) {
@@ -94,4 +131,21 @@ export async function POST(request: Request) {
   );
 
   return NextResponse.json(result);
+}
+
+export async function POST(request: Request): Promise<Response> {
+  const contentType = request.headers.get("content-type")?.toLowerCase() ?? "";
+  if (!contentType.startsWith("application/json")) {
+    return withNoStore(await canonicalAnalyzePost(request));
+  }
+
+  const candidate = await request
+    .clone()
+    .json()
+    .catch(() => null);
+  if (isCanonicalAnalyzeBody(candidate)) {
+    return withNoStore(await canonicalAnalyzePost(request));
+  }
+
+  return withNoStore(await legacyAnalyzePost(request));
 }

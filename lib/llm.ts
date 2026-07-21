@@ -1,8 +1,17 @@
+import { DeepSeekChatCompletionsClient } from "./deepseek-chat-completions-client";
+import { classifyModelFailure, ModelFailure } from "./model/model-error";
+import { assertExternalModelCallAllowed } from "./external-model-call-policy";
+import { assertStructuredOutputTokenLimit, parseStructuredOutputText } from "./structured-output";
+
+export { DeepSeekChatCompletionsClient } from "./deepseek-chat-completions-client";
+export { assertExternalModelCallAllowed } from "./external-model-call-policy";
+
 export type StructuredOutputRequest = {
   schemaName: string;
   schema: Record<string, unknown>;
   instructions: string;
   input: string;
+  maxOutputTokens: number;
 };
 
 export interface StructuredOutputClient {
@@ -38,57 +47,32 @@ function extractResponseText(payload: unknown): string | undefined {
     return undefined;
   }
 
-  for (const item of payload.output) {
-    if (!isRecord(item) || !Array.isArray(item.content)) {
-      continue;
-    }
-    for (const content of item.content) {
-      if (isRecord(content) && content.type === "output_text" && typeof content.text === "string") {
-        return content.text;
-      }
-    }
-  }
+  const content = payload.output
+    .flatMap((item) => (isRecord(item) && Array.isArray(item.content) ? item.content : []))
+    .find((item) => isRecord(item) && item.type === "output_text" && typeof item.text === "string");
 
-  return undefined;
+  return isRecord(content) ? (content.text as string) : undefined;
 }
 
-function extractDeepSeekMessage(payload: unknown): string | undefined {
-  if (!isRecord(payload) || !Array.isArray(payload.choices)) {
-    return undefined;
-  }
-
-  for (const choice of payload.choices) {
-    if (!isRecord(choice)) {
-      continue;
-    }
-    if (choice.finish_reason === "length") {
-      throw new Error("DeepSeek Chat Completions API truncated the structured output");
-    }
-    if (
-      isRecord(choice.message) &&
-      typeof choice.message.content === "string" &&
-      choice.message.content.trim()
-    ) {
-      return choice.message.content;
-    }
-  }
-
-  return undefined;
-}
-
-function normalizeDeepSeekModel(model: string | undefined): string {
-  const normalized = model?.trim();
-  // The initial V4 release uses tiered API identifiers rather than a bare alias.
-  return normalized === "deepseek-v4"
-    ? "deepseek-v4-flash"
-    : normalized || "deepseek-v4-flash";
+function hasResponseRefusal(payload: unknown): boolean {
+  if (!isRecord(payload) || !Array.isArray(payload.output)) return false;
+  return payload.output.some(
+    (item) =>
+      isRecord(item) &&
+      Array.isArray(item.content) &&
+      item.content.some((content) => isRecord(content) && content.type === "refusal")
+  );
 }
 
 export class OpenAIResponsesClient implements StructuredOutputClient {
   private readonly apiKey: string;
+
   private readonly model: string;
+
   private readonly baseUrl: string;
+
   private readonly timeoutMs: number;
+
   private readonly fetcher: Fetcher;
 
   constructor(options: OpenAIResponsesClientOptions) {
@@ -100,105 +84,64 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
   }
 
   async generate<T>(request: StructuredOutputRequest): Promise<T> {
+    assertExternalModelCallAllowed();
+    assertStructuredOutputTokenLimit(request.maxOutputTokens);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
-      const response = await this.fetcher(`${this.baseUrl}/responses`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: this.model,
-          reasoning: { effort: "none" },
-          store: false,
-          instructions: request.instructions,
-          input: request.input,
-          text: {
-            verbosity: "low",
-            format: {
-              type: "json_schema",
-              name: request.schemaName,
-              strict: true,
-              schema: request.schema
+      let response: Response;
+      try {
+        response = await this.fetcher(`${this.baseUrl}/responses`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: this.model,
+            reasoning: { effort: "none" },
+            store: false,
+            max_output_tokens: request.maxOutputTokens,
+            instructions: request.instructions,
+            input: request.input,
+            text: {
+              verbosity: "low",
+              format: {
+                type: "json_schema",
+                name: request.schemaName,
+                strict: true,
+                schema: request.schema
+              }
             }
-          }
-        }),
-        signal: controller.signal
-      });
+          }),
+          signal: controller.signal
+        });
+      } catch (error) {
+        throw classifyModelFailure(error) ?? error;
+      }
 
       if (!response.ok) {
-        throw new Error(`OpenAI Responses API returned HTTP ${response.status}`);
+        throw (
+          classifyModelFailure({ status: response.status }) ?? new Error("openai_request_failed")
+        );
       }
 
-      const text = extractResponseText(await response.json());
-      if (!text) {
-        throw new Error("OpenAI Responses API returned no structured output text");
+      let payload: unknown;
+      try {
+        payload = (await response.json()) as unknown;
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          throw new ModelFailure("invalid_model_json", true, true);
+        }
+        throw error;
       }
-
-      return JSON.parse(text) as T;
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
-}
-
-export class DeepSeekChatCompletionsClient implements StructuredOutputClient {
-  private readonly apiKey: string;
-  private readonly model: string;
-  private readonly baseUrl: string;
-  private readonly timeoutMs: number;
-  private readonly fetcher: Fetcher;
-
-  constructor(options: DeepSeekChatCompletionsClientOptions) {
-    this.apiKey = options.apiKey;
-    this.model = normalizeDeepSeekModel(options.model);
-    this.baseUrl = (options.baseUrl ?? "https://api.deepseek.com").replace(/\/+$/, "");
-    this.timeoutMs = options.timeoutMs ?? 12_000;
-    this.fetcher = options.fetcher ?? fetch;
-  }
-
-  async generate<T>(request: StructuredOutputRequest): Promise<T> {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
-    const systemPrompt = [
-      request.instructions,
-      "Return only valid JSON matching this JSON Schema exactly:",
-      JSON.stringify(request.schema)
-    ].join("\n\n");
-
-    try {
-      const response = await this.fetcher(`${this.baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: request.input }
-          ],
-          thinking: { type: "disabled" },
-          response_format: { type: "json_object" },
-          stream: false
-        }),
-        signal: controller.signal
-      });
-
-      if (!response.ok) {
-        throw new Error(`DeepSeek Chat Completions API returned HTTP ${response.status}`);
+      if (hasResponseRefusal(payload)) {
+        throw new ModelFailure("model_refusal", false, false);
       }
-
-      const content = extractDeepSeekMessage(await response.json());
-      if (!content) {
-        throw new Error("DeepSeek Chat Completions API returned no structured output text");
-      }
-
-      return JSON.parse(content) as T;
+      return parseStructuredOutputText<T>(extractResponseText(payload));
+    } catch (error) {
+      throw classifyModelFailure(error) ?? error;
     } finally {
       clearTimeout(timeout);
     }
@@ -220,6 +163,14 @@ export function createOpenAIClientFromEnv(
   });
 }
 
+/** Public routes use only this pinned official OpenAI factory. */
+export function createPublicOpenAIClientFromEnv(
+  env: LlmEnvironment = process.env
+): OpenAIResponsesClient | undefined {
+  const apiKey = env.OPENAI_API_KEY?.trim();
+  return apiKey ? new OpenAIResponsesClient({ apiKey, model: "gpt-5.6-luna" }) : undefined;
+}
+
 export function createDeepSeekClientFromEnv(
   env: LlmEnvironment = process.env
 ): DeepSeekChatCompletionsClient | undefined {
@@ -236,14 +187,11 @@ export function createDeepSeekClientFromEnv(
       env.DEEPSEEK_INTAKE_MODEL?.trim() ||
       (!dedicatedApiKey ? env.OPENAI_INTAKE_MODEL?.trim() : undefined),
     baseUrl:
-      env.DEEPSEEK_BASE_URL?.trim() ||
-      (!dedicatedApiKey ? env.OPENAI_BASE_URL?.trim() : undefined)
+      env.DEEPSEEK_BASE_URL?.trim() || (!dedicatedApiKey ? env.OPENAI_BASE_URL?.trim() : undefined)
   });
 }
 
-export function resolveLlmProvider(
-  env: LlmEnvironment = process.env
-): LlmProvider | undefined {
+export function resolveLlmProvider(env: LlmEnvironment = process.env): LlmProvider | undefined {
   const explicitProvider = env.LLM_PROVIDER?.trim().toLowerCase();
   if (explicitProvider === "openai" || explicitProvider === "deepseek") {
     return explicitProvider;
@@ -253,10 +201,14 @@ export function resolveLlmProvider(
   }
 
   const model = (
-    env.DEEPSEEK_INTAKE_MODEL?.trim() || env.OPENAI_INTAKE_MODEL?.trim() || ""
+    env.DEEPSEEK_INTAKE_MODEL?.trim() ||
+    env.OPENAI_INTAKE_MODEL?.trim() ||
+    ""
   ).toLowerCase();
   const baseUrl = (
-    env.DEEPSEEK_BASE_URL?.trim() || env.OPENAI_BASE_URL?.trim() || ""
+    env.DEEPSEEK_BASE_URL?.trim() ||
+    env.OPENAI_BASE_URL?.trim() ||
+    ""
   ).toLowerCase();
 
   if (

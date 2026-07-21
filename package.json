@@ -4,11 +4,28 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:offline": "node scripts/run-offline-next.mjs dev",
     "build": "next build",
+    "build:offline": "node scripts/run-offline-next.mjs build",
     "start": "next start",
-    "lint": "next lint",
-    "validate:data": "node scripts/validate-data.mjs",
-    "test": "vitest run"
+    "lint": "eslint . --ext .js,.mjs,.ts,.tsx --max-warnings 0",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "validate:data": "tsx scripts/validate-data.ts",
+    "test": "vitest run --config vitest.config.ts",
+    "test:ci": "vitest run --config vitest.config.ts tests/ci",
+    "test:offline": "vitest run --config vitest.config.ts tests/offline",
+    "test:e2e": "playwright test",
+    "test:e2e:rehearsals": "node scripts/run-e2e-rehearsals.mjs",
+    "eval:live": "tsx evals/run-live-eval.ts",
+    "scan:secrets": "node scripts/scan-secrets.mjs",
+    "release:source-review": "node scripts/check-source-reachability.mjs",
+    "release:security-review": "node scripts/check-release-security.mjs",
+    "release:verify": "node scripts/run-release-verify.mjs",
+    "release:record": "node scripts/record-release-input.mjs",
+    "release:evidence": "node scripts/assemble-release-evidence.mjs",
+    "validate:evidence": "node scripts/validate-build-week-evidence.mjs --scope all",
+    "verify": "npm run validate:data && npm run lint && npm run typecheck && npm test && npm run scan:secrets && npm run build:offline"
   },
   "dependencies": {
     "next": "^15.0.0",
@@ -16,15 +33,32 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.55.1",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "7.18.0",
+    "@typescript-eslint/parser": "7.18.0",
     "autoprefixer": "latest",
     "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-airbnb-typescript": "18.0.0",
     "eslint-config-next": "^15.0.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "5.2.0",
     "postcss": "latest",
+    "prettier": "3.6.2",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.0.0",
+    "tsx": "4.20.3",
+    "typescript": "5.5.4",
     "vitest": "^4.1.10"
-  }
+  },
+  "engines": {
+    "node": ">=22.14 <26",
+    "npm": ">=10.9 <12"
+  },
+  "packageManager": "npm@10.9.2"
 }

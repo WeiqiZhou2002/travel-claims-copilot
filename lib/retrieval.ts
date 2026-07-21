@@ -1,4 +1,4 @@
-import { getIssueAliases, normalizeIssueType } from "./issueTaxonomy";
+import { getIssueAliases } from "./issueTaxonomy";
 import {
   controllabilityFromReason,
   evaluatePolicyApplicability,
@@ -26,24 +26,7 @@ function isApprovedCase(item: Case): boolean {
 }
 
 function withSelectedCaseFacts(facts: ExtractedFacts, selectedCase?: Case): ExtractedFacts {
-  if (!selectedCase) {
-    return facts;
-  }
-
-  const selectedIssueType = normalizeIssueType(selectedCase.issue_type);
-
-  return {
-    ...facts,
-    description: facts.description || selectedCase.facts,
-    issueType: selectedIssueType ?? facts.issueType,
-    provider: selectedCase.provider,
-    providerType: selectedCase.provider_type,
-    country: selectedCase.location_country,
-    bookingChannel: selectedCase.booking_channel,
-    loyaltyStatus: selectedCase.loyalty_status,
-    confidence: selectedIssueType ? "high" : facts.confidence,
-    source: "selected_case"
-  };
+  return selectedCase ? { ...facts } : facts;
 }
 
 export function buildRetrievalQuery(facts: ExtractedFacts): RetrievalQuery {
@@ -67,8 +50,7 @@ export function buildRetrievalQuery(facts: ExtractedFacts): RetrievalQuery {
       facts.policyRegions && facts.policyRegions.length > 0
         ? Array.from(new Set(facts.policyRegions))
         : policyRegionsFromCountry(facts.country),
-    controllability:
-      facts.controllability ?? controllabilityFromReason(facts.disruptionReason)
+    controllability: facts.controllability ?? controllabilityFromReason(facts.disruptionReason)
   };
 }
 
@@ -114,20 +96,18 @@ export function retrieveKnowledge(
     : undefined;
   const resolvedFacts = withSelectedCaseFacts(facts, selectedCase);
   const query = buildRetrievalQuery(resolvedFacts);
-  const officialBasis = searchPolicies(
-    query,
-    policies,
-    limits.policyLimit ?? defaultLimits.policyLimit
-  );
+  const rankedPolicies = rankPolicies(query, policies);
+  const officialBasis = rankedPolicies
+    .slice(0, limits.policyLimit ?? defaultLimits.policyLimit)
+    .map(({ item }) => item);
 
   return {
     facts: resolvedFacts,
     query,
     issueAliases: getIssueAliases(resolvedFacts.issueType),
+    legalRegimes: Array.from(new Set(rankedPolicies.map(({ item }) => item.legal_regime))),
     officialBasis,
-    policyAssessments: officialBasis.map((policy) =>
-      evaluatePolicyApplicability(policy, query)
-    ),
+    policyAssessments: officialBasis.map((policy) => evaluatePolicyApplicability(policy, query)),
     similarCases: searchCases(query, cases, limits.caseLimit ?? defaultLimits.caseLimit),
     scripts: searchScripts(query, scripts, limits.scriptLimit ?? defaultLimits.scriptLimit),
     selectedCase

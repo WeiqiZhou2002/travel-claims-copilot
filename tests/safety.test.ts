@@ -3,10 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { POST as analyzePost } from "../app/api/analyze/route";
 import { POST as intakePost } from "../app/api/intake/route";
 import { emptyClaimFacts } from "../lib/claimFacts";
-import {
-  MAX_ANALYZE_DESCRIPTION_LENGTH,
-  MAX_INTAKE_MESSAGE_LENGTH
-} from "../lib/inputLimits";
+import { MAX_ANALYZE_DESCRIPTION_LENGTH, MAX_INTAKE_MESSAGE_LENGTH } from "../lib/inputLimits";
 import { processIntake } from "../lib/intake";
 import { assessHighRiskClaim } from "../lib/safety";
 import type { StructuredOutputClient } from "../lib/llm";
@@ -23,9 +20,7 @@ describe("professional-help safety boundary", () => {
   });
 
   it("does not flag an ordinary supported disruption", () => {
-    expect(
-      assessHighRiskClaim("My Air France flight from Paris was cancelled.")
-    ).toBeUndefined();
+    expect(assessHighRiskClaim("My Air France flight from Paris was cancelled.")).toBeUndefined();
   });
 
   it("stops before calling the LLM or retrieval workflow", async () => {

@@ -89,9 +89,7 @@ describe("regional policy applicability", () => {
     expect(result.officialBasis.map((policy) => policy.policy_id)).toContain(
       "uk261_assimilated_regulation_261_2004"
     );
-    expect(result.scripts.map((script) => script.script_id)).toContain(
-      "uk261_claim_email_en"
-    );
+    expect(result.scripts.map((script) => script.script_id)).toContain("uk261_claim_email_en");
   });
 
   it("does not apply UK261 to an inbound flight on an unconfirmed non-UK/EU carrier", () => {
@@ -103,9 +101,7 @@ describe("regional policy applicability", () => {
     });
 
     expect(result.legalRegimes).not.toContain("UK261");
-    expect(result.scripts.map((script) => script.script_id)).not.toContain(
-      "uk261_claim_email_en"
-    );
+    expect(result.scripts.map((script) => script.script_id)).not.toContain("uk261_claim_email_en");
   });
 
   it("applies EU261 to an EU-carrier arrival but not a non-EU-carrier arrival", () => {
@@ -175,13 +171,9 @@ describe("regional policy applicability", () => {
     const euPolicyId = retrieval.officialBasis.find(
       (policy) => policy.legal_regime === "EU261"
     )?.policy_id;
-    const assessment = retrieval.policyAssessments.find(
-      (item) => item.policyId === euPolicyId
-    );
+    const assessment = retrieval.policyAssessments.find((item) => item.policyId === euPolicyId);
 
-    expect(retrieval.officialBasis.map((policy) => policy.legal_regime)).toContain(
-      "EU261"
-    );
+    expect(retrieval.officialBasis.map((policy) => policy.legal_regime)).toContain("EU261");
     expect(assessment?.status).toBe("unknown");
     expect(assessment?.conditions).toContainEqual(
       expect.objectContaining({ code: "route", status: "unknown" })
@@ -231,7 +223,9 @@ describe("regional policy applicability", () => {
     });
 
     expect(result.legalRegimes).toEqual(["AU_ACL"]);
-    expect(result.cautions.join(" ")).toContain("does not create an EU-style fixed compensation table");
+    expect(result.cautions.join(" ")).toContain(
+      "does not create an EU-style fixed compensation table"
+    );
   });
 
   it("retrieves both Chinese passenger-service regulations for a mainland departure", () => {

@@ -4,6 +4,7 @@ import casesJson from "../data/cases.json";
 import policiesJson from "../data/policies.json";
 import scriptsJson from "../data/scripts.json";
 import { classifyInput } from "../lib/classifier";
+import { generateAnalysis } from "../lib/generator";
 import { MVP_ISSUE_TYPES } from "../lib/issueTaxonomy";
 import { retrieveKnowledge } from "../lib/retrieval";
 import { rankCases } from "../lib/retrievalScoring";
@@ -157,9 +158,7 @@ describe("classification safeguards", () => {
   });
 
   it("recognizes a Chinese voluntary-bump description", () => {
-    const facts = classifyInput(
-      "达美航班超售，登机口正在征集自愿改签到第二天航班的乘客。"
-    );
+    const facts = classifyInput("达美航班超售，登机口正在征集自愿改签到第二天航班的乘客。");
 
     expect(facts.issueType).toBe("denied_boarding");
     expect(facts.provider).toBe("Delta");
@@ -181,16 +180,12 @@ describe("retrieval quality controls", () => {
     expect(retrieval.similarCases.map((item) => item.case_id)).toEqual([
       "marriott_walk_synthetic_001"
     ]);
-    expect(retrieval.similarCases.every((item) => item.provider === "Marriott")).toBe(
-      true
-    );
+    expect(retrieval.similarCases.every((item) => item.provider === "Marriott")).toBe(true);
   });
 
   it("selects official policies by incident, jurisdiction, provider, and controllability", () => {
     const euCancellation = retrieveKnowledge(
-      classifyInput(
-        "My Air France flight from Paris was cancelled because of a mechanical issue."
-      ),
+      classifyInput("My Air France flight from Paris was cancelled because of a mechanical issue."),
       policies,
       cases,
       scripts
@@ -214,13 +209,11 @@ describe("retrieval quality controls", () => {
     ]);
     expect(euCancellation.scripts[0]?.script_id).toBe("eu261_claim_email_en");
     expect(
-      euCancellation.scripts.some((script) =>
-        script.applicable_regions.includes("EU_EEA_CH")
-      )
+      euCancellation.scripts.some((script) => script.applicable_regions.includes("EU_EEA_CH"))
     ).toBe(true);
-    expect(
-      usControllableCancellation.officialBasis.map((policy) => policy.policy_id)
-    ).toContain("dot_airline_cancellation_delay_dashboard");
+    expect(usControllableCancellation.officialBasis.map((policy) => policy.policy_id)).toContain(
+      "dot_airline_cancellation_delay_dashboard"
+    );
     expect(
       usControllableCancellation.scripts.every((script) =>
         script.applicable_regions.includes("global")
@@ -250,6 +243,26 @@ describe("retrieval quality controls", () => {
 
     expect(retrieval.selectedCase).toBeUndefined();
     expect(retrieval.similarCases).toEqual([]);
+  });
+
+  it("keeps an approved selected case presentation-only and preserves unsliced legal regimes", () => {
+    const facts = {
+      ...classifyInput("United cancelled my flight because the crew timed out."),
+      caseId: "united_crew_delay_synthetic_001"
+    };
+    const selected = retrieveKnowledge(facts, policies, cases, scripts, { policyLimit: 0 });
+    const displayed = retrieveKnowledge(facts, policies, cases, scripts, { policyLimit: 3 });
+
+    expect(selected.selectedCase?.case_id).toBe("united_crew_delay_synthetic_001");
+    expect(selected.facts).toEqual(facts);
+    expect(selected.query).toEqual(displayed.query);
+    expect(selected.facts.issueType).toBe(displayed.facts.issueType);
+    expect(selected.facts.provider).toBe(displayed.facts.provider);
+    expect(selected.legalRegimes).toEqual(displayed.legalRegimes);
+    expect(generateAnalysis(selected.facts, selected).legalRegimes).toEqual(
+      generateAnalysis(displayed.facts, displayed).legalRegimes
+    );
+    expect(generateAnalysis(selected.facts, selected).summary).toContain("presentation-only");
   });
 
   it("publishes only the four incident-based MVP scenarios", () => {

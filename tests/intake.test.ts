@@ -1,8 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "../app/api/intake/route";
 import { emptyClaimFacts, normalizeClaimFacts } from "../lib/claimFacts";
-import { processIntake } from "../lib/intake";
+import { parseAnalyzeClaimRequest } from "../lib/api/analyze-contract";
+import { createIntakePostHandler, processClaimTurn, processIntake } from "../lib/intake";
+import { isBlockedWorkflowStatus } from "../lib/domain/workflow-status";
+import { LocalRawFactExtractor, type RawFactExtractor } from "../lib/model/raw-fact-extractor";
 import {
   createStructuredOutputClientFromEnv,
   DeepSeekChatCompletionsClient,
@@ -10,6 +13,24 @@ import {
   resolveLlmProvider,
   type StructuredOutputClient
 } from "../lib/llm";
+import { claimState } from "./fixtures/raw-claims";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
+
+describe("workflow status safety predicate", () => {
+  it.each([
+    ["unsupported_high_risk", true],
+    ["out_of_scope", true],
+    ["ready", false],
+    ["needs_information", false],
+    ["needs_info", false]
+  ] as const)("classifies %s blocked=%s", (status, blocked) => {
+    expect(isBlockedWorkflowStatus(status)).toBe(blocked);
+  });
+});
 
 describe("deterministic intake fallback", () => {
   it("understands a natural Paris cancellation without an explicit EU261 keyword", async () => {
@@ -81,11 +102,9 @@ describe("deterministic intake fallback", () => {
   });
 
   it("asks a hotel-specific provider question for a Chinese walk report", async () => {
-    const result = await processIntake(
-      "我订了酒店但是到店无房",
-      emptyClaimFacts(),
-      { llmClient: null }
-    );
+    const result = await processIntake("我订了酒店但是到店无房", emptyClaimFacts(), {
+      llmClient: null
+    });
 
     expect(result.facts.issueType).toBe("hotel_walk");
     expect(result.missingFields).toEqual(["provider"]);
@@ -120,11 +139,7 @@ describe("deterministic intake fallback", () => {
       { llmClient: null }
     );
 
-    expect(first.missingFields).toEqual([
-      "bookingChannel",
-      "ticketType",
-      "autoRebooked"
-    ]);
+    expect(first.missingFields).toEqual(["bookingChannel", "ticketType", "autoRebooked"]);
     expect(first.question).toContain("OTA/travel agent");
 
     const second = await processIntake(
@@ -414,9 +429,7 @@ describe("OpenAI Responses client", () => {
         JSON.stringify({
           output: [
             {
-              content: [
-                { type: "output_text", text: JSON.stringify(emptyClaimFacts()) }
-              ]
+              content: [{ type: "output_text", text: JSON.stringify(emptyClaimFacts()) }]
             }
           ]
         }),
@@ -433,7 +446,8 @@ describe("OpenAI Responses client", () => {
       schemaName: "test_schema",
       schema: { type: "object" },
       instructions: "Extract facts.",
-      input: "Example"
+      input: "Example",
+      maxOutputTokens: 1_200
     });
 
     const request = JSON.parse(fetcher.mock.calls[0][1].body as string);
@@ -477,7 +491,8 @@ describe("DeepSeek Chat Completions client", () => {
       schemaName: "claim_facts",
       schema: { type: "object", required: ["issueType"] },
       instructions: "Extract facts.",
-      input: "Example"
+      input: "Example",
+      maxOutputTokens: 1_200
     });
 
     expect(result).toEqual(emptyClaimFacts());
@@ -494,6 +509,7 @@ describe("DeepSeek Chat Completions client", () => {
     ]);
     expect(request.thinking).toEqual({ type: "disabled" });
     expect(request.response_format).toEqual({ type: "json_object" });
+    expect(request.max_tokens).toBe(1_200);
     expect(request).not.toHaveProperty("text");
     expect(request).not.toHaveProperty("input");
   });
@@ -519,9 +535,10 @@ describe("DeepSeek Chat Completions client", () => {
         schemaName: "claim_facts",
         schema: { type: "object" },
         instructions: "Extract facts.",
-        input: "Example"
+        input: "Example",
+        maxOutputTokens: 1_200
       })
-    ).rejects.toThrow("truncated");
+    ).rejects.toMatchObject({ code: "invalid_model_schema" });
   });
 });
 
@@ -534,9 +551,7 @@ describe("LLM provider configuration", () => {
     };
 
     expect(resolveLlmProvider(env)).toBe("deepseek");
-    expect(createStructuredOutputClientFromEnv(env)).toBeInstanceOf(
-      DeepSeekChatCompletionsClient
-    );
+    expect(createStructuredOutputClientFromEnv(env)).toBeInstanceOf(DeepSeekChatCompletionsClient);
   });
 
   it("respects an explicit OpenAI provider", () => {
@@ -557,7 +572,8 @@ describe("intake API", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: "My Air France flight from Paris was cancelled and I arrived four hours late."
+        message: "My Air France flight from Paris was cancelled and I arrived four hours late.",
+        facts: null
       })
     });
 
@@ -569,5 +585,815 @@ describe("intake API", () => {
     expect(result.question).toBe(
       "Where did the flight fly to? A city name or airport code is enough."
     );
+    expect(result.cautions).toEqual([
+      "This is an informational condition assessment, not legal advice or a promise of compensation."
+    ]);
+  });
+
+  it("preserves a legacy high-risk block without calling either extractor", async () => {
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    const openaiExtractor: RawFactExtractor = {
+      provider: "openai",
+      model: "gpt-5.6-luna",
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    const handler = createIntakePostHandler({ localExtractor, openaiExtractor });
+    const response = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "There is an active fire and I need emergency help",
+          facts: null
+        })
+      })
+    );
+    const result = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(result.status).toBe("unsupported_high_risk");
+    expect(result.question).toBeNull();
+    expect(result.missingFields).toEqual([]);
+    expect(result.cautions).toEqual([
+      "This may require immediate emergency or medical help; this tool cannot analyze it as an ordinary travel claim."
+    ]);
+    expect(localExtractor.extract).not.toHaveBeenCalled();
+    expect(openaiExtractor.extract).not.toHaveBeenCalled();
+  });
+
+  it("preserves a legacy out-of-scope block without returning an ordinary ask", async () => {
+    const currentFacts = normalizeClaimFacts({
+      ...emptyClaimFacts(),
+      issueType: "hotel_walk",
+      providerType: "hotel",
+      provider: "Hyatt",
+      disruptionType: "hotel_walk",
+      confidence: "high"
+    });
+    const handler = createIntakePostHandler({
+      localExtractor: {
+        provider: "local",
+        model: null,
+        extract: vi.fn().mockResolvedValue({ set: {} })
+      }
+    });
+    const response = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "No additional facts.", facts: currentFacts })
+      })
+    );
+    const result = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(result.status).toBe("out_of_scope");
+    expect(result.question).toBeNull();
+    expect(result.missingFields).toEqual([]);
+    expect(result.cautions).toEqual(["This competition build cannot assess this journey."]);
+  });
+});
+
+describe("canonical revision-safe intake", () => {
+  const validProviderConflict = {
+    field: "provider",
+    candidates: [
+      { value: "Delta", source: "deterministic_extraction" },
+      { value: "Air France", source: "openai_extraction" }
+    ]
+  };
+
+  it.each([
+    [
+      "high-risk",
+      {
+        message: "There is an active fire and I need emergency help",
+        prior: claimState(),
+        baseRevision: 0,
+        requestedMode: "local"
+      },
+      "unsupported_high_risk"
+    ],
+    [
+      "out-of-scope",
+      {
+        message: "No additional facts.",
+        prior: claimState({
+          incidentType: "hotel_walk",
+          providerType: "hotel",
+          provider: "Hyatt",
+          confirmedHotelReservation: true,
+          wasWalked: true
+        }),
+        baseRevision: 0,
+        requestedMode: "local"
+      },
+      "out_of_scope"
+    ]
+  ] as const)("preserves the canonical top-level status for %s", async (_label, body, status) => {
+    const handler = createIntakePostHandler({
+      localExtractor: {
+        provider: "local",
+        model: null,
+        extract: vi.fn().mockResolvedValue({ set: {} })
+      }
+    });
+    const response = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      })
+    );
+    const result = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(result.result.status).toBe(status);
+    expect(result.status).toBe(result.result.status);
+  });
+
+  it.each([
+    ["stale base revision", { message: "new facts", prior: claimState({}, 2), baseRevision: 1 }],
+    [
+      "message plus correction",
+      {
+        message: "new facts",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: { provider: "Delta" }, clear: [] }
+      }
+    ],
+    ["blank message", { message: "", prior: claimState(), baseRevision: 0 }],
+    [
+      "whitespace correction message",
+      {
+        message: "  ",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: { provider: "Delta" }, clear: [] }
+      }
+    ],
+    [
+      "empty correction",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: {}, clear: [] }
+      }
+    ],
+    [
+      "null correction set",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: { provider: null }, clear: [] }
+      }
+    ],
+    [
+      "duplicate clear",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: {}, clear: ["provider", "provider"] }
+      }
+    ],
+    [
+      "unknown clear",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: {}, clear: ["origin.region"] }
+      }
+    ],
+    [
+      "set-clear overlap",
+      {
+        message: "",
+        prior: claimState(),
+        baseRevision: 0,
+        correction: { set: { provider: "Delta" }, clear: ["provider"] }
+      }
+    ],
+    [
+      "untrusted provenance source",
+      {
+        message: "new facts",
+        prior: {
+          ...claimState(),
+          provenance: { provider: { source: "client_asserted", factsRevision: 0 } }
+        },
+        baseRevision: 0
+      }
+    ],
+    [
+      "untrusted conflict source",
+      {
+        message: "new facts",
+        prior: {
+          ...claimState(),
+          conflicts: [
+            {
+              field: "provider",
+              candidates: [{ value: "Delta", source: "user_correction" }]
+            }
+          ]
+        },
+        baseRevision: 0
+      }
+    ],
+    [
+      "untrusted unresolved path",
+      {
+        message: "new facts",
+        prior: { ...claimState(), unresolvedFields: ["origin.region"] },
+        baseRevision: 0
+      }
+    ],
+    [
+      "duplicate conflict fields",
+      {
+        message: "new facts",
+        prior: {
+          ...claimState(),
+          conflicts: [validProviderConflict, structuredClone(validProviderConflict)],
+          unresolvedFields: ["provider"]
+        },
+        baseRevision: 0
+      }
+    ],
+    [
+      "a conflict with one candidate",
+      {
+        message: "new facts",
+        prior: {
+          ...claimState(),
+          conflicts: [
+            {
+              field: "provider",
+              candidates: [{ value: "Delta", source: "deterministic_extraction" }]
+            }
+          ],
+          unresolvedFields: ["provider"]
+        },
+        baseRevision: 0
+      }
+    ],
+    [
+      "a conflict with duplicate candidate sources",
+      {
+        message: "new facts",
+        prior: {
+          ...claimState(),
+          conflicts: [
+            {
+              field: "provider",
+              candidates: [
+                { value: "Delta", source: "deterministic_extraction" },
+                { value: "Air France", source: "deterministic_extraction" }
+              ]
+            }
+          ],
+          unresolvedFields: ["provider"]
+        },
+        baseRevision: 0
+      }
+    ],
+    [
+      "a conflict with equal normalized values",
+      {
+        message: "new facts",
+        prior: {
+          ...claimState(),
+          conflicts: [
+            {
+              field: "provider",
+              candidates: [
+                { value: "Delta", source: "deterministic_extraction" },
+                { value: " Delta ", source: "openai_extraction" }
+              ]
+            }
+          ],
+          unresolvedFields: ["provider"]
+        },
+        baseRevision: 0
+      }
+    ],
+    [
+      "a conflict missing its unresolved marker",
+      {
+        message: "new facts",
+        prior: {
+          ...claimState(),
+          conflicts: [validProviderConflict],
+          unresolvedFields: []
+        },
+        baseRevision: 0
+      }
+    ]
+  ])("rejects %s", (_label, request) => {
+    expect(parseAnalyzeClaimRequest(request).success).toBe(false);
+  });
+
+  it.each([
+    [
+      "duplicate conflict fields",
+      {
+        ...claimState(),
+        conflicts: [validProviderConflict, structuredClone(validProviderConflict)],
+        unresolvedFields: ["provider"]
+      }
+    ],
+    [
+      "invalid candidate cardinality",
+      {
+        ...claimState(),
+        conflicts: [
+          {
+            field: "provider",
+            candidates: [{ value: "Delta", source: "deterministic_extraction" }]
+          }
+        ],
+        unresolvedFields: ["provider"]
+      }
+    ],
+    [
+      "conflict not marked unresolved",
+      {
+        ...claimState(),
+        conflicts: [validProviderConflict],
+        unresolvedFields: []
+      }
+    ]
+  ])("rejects route state with %s before extraction", async (_label, prior) => {
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    const openaiExtractor: RawFactExtractor = {
+      provider: "openai",
+      model: "gpt-5.6-luna",
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    const handler = createIntakePostHandler({ localExtractor, openaiExtractor });
+    const response = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({ message: "new facts", prior, baseRevision: 0 })
+      })
+    );
+
+    expect(response.status).toBe(422);
+    expect(localExtractor.extract).not.toHaveBeenCalled();
+    expect(openaiExtractor.extract).not.toHaveBeenCalled();
+  });
+
+  it("rejects malformed state before calling either extractor", async () => {
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    const openaiExtractor: RawFactExtractor = {
+      provider: "openai",
+      model: "gpt-5.6-luna",
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+
+    await expect(
+      processClaimTurn(
+        {
+          message: "new facts",
+          prior: {
+            ...claimState(),
+            provenance: { "origin.region": { source: "user_message", factsRevision: 0 } }
+          },
+          baseRevision: 0
+        },
+        { localExtractor, openaiExtractor }
+      )
+    ).rejects.toThrow("invalid_analyze_claim_request");
+    expect(localExtractor.extract).not.toHaveBeenCalled();
+    expect(openaiExtractor.extract).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      "an unresolved mask without a conflict",
+      claimState(
+        {
+          incidentType: "denied_boarding",
+          origin: { airport: "JFK" },
+          deniedBoardingKind: "voluntary"
+        },
+        0,
+        { unresolvedFields: ["deniedBoardingKind"] }
+      )
+    ],
+    [
+      "a valid stored conflict",
+      claimState(
+        {
+          incidentType: "denied_boarding",
+          origin: { airport: "JFK" },
+          provider: "Delta"
+        },
+        0,
+        {
+          conflicts: [validProviderConflict as never],
+          unresolvedFields: ["provider"]
+        }
+      )
+    ]
+  ])(
+    "returns needs_information for %s even when scenario admission resolves",
+    async (_label, prior) => {
+      const response = await processClaimTurn(
+        { message: "No new material fact.", prior, baseRevision: 0, requestedMode: "local" },
+        {
+          localExtractor: {
+            provider: "local",
+            model: null,
+            extract: vi.fn().mockResolvedValue({ set: {} })
+          }
+        }
+      );
+
+      expect(response.status).toBe("needs_information");
+    }
+  );
+
+  it.each([
+    [undefined, 0],
+    ["local", 0],
+    ["gpt", 1]
+  ] as const)("calls OpenAI only for requestedMode %s", async (requestedMode, openaiCalls) => {
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    const openaiExtractor: RawFactExtractor = {
+      provider: "openai",
+      model: "gpt-5.6-luna",
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    await processClaimTurn(
+      {
+        message: "No new material fact.",
+        prior: claimState(),
+        baseRevision: 0,
+        ...(requestedMode ? { requestedMode } : {})
+      },
+      { localExtractor, openaiExtractor }
+    );
+
+    expect(localExtractor.extract).toHaveBeenCalledOnce();
+    expect(openaiExtractor.extract).toHaveBeenCalledTimes(openaiCalls);
+  });
+
+  it("preserves a nonblank message exactly in the parsed contract", () => {
+    const message = "  Keep this spacing and punctuation!  ";
+    const parsed = parseAnalyzeClaimRequest({ message, prior: claimState(), baseRevision: 0 });
+
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) throw new Error(parsed.errors.join("; "));
+    expect(parsed.data.message).toBe(message);
+  });
+
+  it("passes the exact nonblank message to extractors", async () => {
+    const message = "  Keep this spacing and punctuation!  ";
+    const extract = vi.fn().mockResolvedValue({ set: {} });
+
+    await processClaimTurn(
+      { message, prior: claimState(), baseRevision: 0, requestedMode: "local" },
+      { localExtractor: { provider: "local", model: null, extract } }
+    );
+
+    expect(extract).toHaveBeenCalledWith(expect.objectContaining({ message }));
+  });
+
+  it("does not mark an unconfirmed hotel reservation ready in canonical intake", async () => {
+    const response = await processClaimTurn(
+      {
+        message: "I had an unconfirmed reservation at Marriott, and the hotel had no room.",
+        prior: claimState(),
+        baseRevision: 0,
+        requestedMode: "local"
+      },
+      { localExtractor: new LocalRawFactExtractor() }
+    );
+
+    expect(response.status).toBe("needs_information");
+    expect(response.claimState.facts.incidentType).toBe("hotel_walk");
+    expect(response.claimState.facts.confirmedHotelReservation).not.toBe(true);
+  });
+
+  it("masks a legacy dual-extractor conflict instead of projecting the old value as ready", async () => {
+    const currentFacts = normalizeClaimFacts({
+      ...emptyClaimFacts(),
+      issueType: "denied_boarding",
+      providerType: "airline",
+      provider: "Delta",
+      origin: { city: null, airport: "JFK", country: "United States", region: "US" },
+      disruptionType: "denied_boarding",
+      deniedBoardingKind: "voluntary",
+      confidence: "high"
+    });
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({ set: { deniedBoardingKind: "voluntary" } })
+    };
+    const openaiExtractor: RawFactExtractor = {
+      provider: "openai",
+      model: "gpt-5.6-luna",
+      extract: vi.fn().mockResolvedValue({ set: { deniedBoardingKind: "involuntary" } })
+    };
+
+    const result = await processIntake("I was bumped.", currentFacts, {
+      localExtractor,
+      openaiExtractor
+    });
+
+    expect(result.status).toBe("needs_info");
+    expect(result.facts.deniedBoardingKind).toBe("unknown");
+    expect(result.missingFields).toContain("deniedBoardingKind");
+  });
+
+  it("asks a generic legacy question when an unresolved field is not a legacy missing field", async () => {
+    const currentFacts = normalizeClaimFacts({
+      ...emptyClaimFacts(),
+      issueType: "hotel_walk",
+      providerType: "hotel",
+      provider: "Marriott",
+      loyaltyStatus: "Titanium",
+      confidence: "high"
+    });
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({ set: { loyaltyStatus: "Gold" } })
+    };
+    const openaiExtractor: RawFactExtractor = {
+      provider: "openai",
+      model: "gpt-5.6-luna",
+      extract: vi.fn().mockResolvedValue({ set: { loyaltyStatus: "Platinum" } })
+    };
+
+    const result = await processIntake("My status changed.", currentFacts, {
+      localExtractor,
+      openaiExtractor
+    });
+
+    expect(result.status).toBe("needs_info");
+    expect(result.missingFields).toEqual([]);
+    expect(result.question).toBe("Please add a little more detail about what happened.");
+  });
+
+  it("runs a stateless two-turn correction without replaying narrative or extractors", async () => {
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({
+        set: {
+          incidentType: "denied_boarding",
+          "origin.airport": "JFK",
+          deniedBoardingKind: "voluntary"
+        }
+      })
+    };
+    const openaiExtractor: RawFactExtractor = {
+      provider: "openai",
+      model: "gpt-5.6-luna",
+      extract: vi.fn().mockResolvedValue({
+        set: {
+          incidentType: "denied_boarding",
+          "origin.airport": "JFK",
+          deniedBoardingKind: "voluntary"
+        }
+      })
+    };
+    const handler = createIntakePostHandler({ localExtractor, openaiExtractor });
+
+    const firstResponse = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({
+          message: "My original anonymous denied-boarding narrative.",
+          prior: claimState(),
+          baseRevision: 0,
+          requestedMode: "gpt"
+        })
+      })
+    );
+    const first = await firstResponse.json();
+    const secondResponse = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({
+          message: "",
+          prior: first.claimState,
+          baseRevision: first.claimState.revision,
+          correction: { set: { deniedBoardingKind: "involuntary" }, clear: [] },
+          requestedMode: "gpt"
+        })
+      })
+    );
+    const second = await secondResponse.json();
+
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(200);
+    expect(localExtractor.extract).toHaveBeenCalledTimes(1);
+    expect(openaiExtractor.extract).toHaveBeenCalledTimes(1);
+    expect(first.baseRevision).toBe(0);
+    expect(first.claimState.revision).toBe(1);
+    expect(second.baseRevision).toBe(1);
+    expect(second.claimState.revision).toBe(2);
+    expect(second.claimState.facts.deniedBoardingKind).toBe("involuntary");
+    expect(second.result.extraction).toEqual({
+      performed: false,
+      requestedMode: "gpt",
+      provider: null,
+      model: null,
+      notRunReason: "correction_only"
+    });
+    expect(JSON.stringify(first)).not.toContain("original anonymous denied-boarding narrative");
+    expect(JSON.stringify(second)).not.toContain("original anonymous denied-boarding narrative");
+  });
+
+  it("does not select DeepSeek or create an external model without GPT access", async () => {
+    vi.stubEnv("DEEPSEEK_API_KEY", "configured-but-must-not-be-used");
+    vi.stubEnv("LLM_PROVIDER", "deepseek");
+    const fetcher = vi.spyOn(globalThis, "fetch");
+
+    const response = await POST(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          message: "My flight was delayed by 20 minutes.",
+          prior: claimState(),
+          baseRevision: 0,
+          requestedMode: "gpt"
+        })
+      })
+    );
+
+    expect(response.status).toBe(401);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("keeps malformed canonical-shaped requests out of the legacy branch", async () => {
+    const localExtractor: RawFactExtractor = {
+      provider: "local",
+      model: null,
+      extract: vi.fn().mockResolvedValue({ set: {} })
+    };
+    const handler = createIntakePostHandler({ localExtractor });
+    const response = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({
+          message: "new facts",
+          prior: claimState(),
+          facts: null
+        })
+      })
+    );
+
+    expect(response.status).toBe(422);
+    expect(localExtractor.extract).not.toHaveBeenCalled();
+  });
+
+  it("returns a fixed safe 422 envelope for canonical parse failures", async () => {
+    const handler = createIntakePostHandler({
+      localExtractor: {
+        provider: "local",
+        model: null,
+        extract: vi.fn().mockResolvedValue({ set: {} })
+      }
+    });
+    const response = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({ message: "new facts", prior: claimState() })
+      })
+    );
+
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "unprocessable_request",
+        message: "Request could not be processed.",
+        requestId: expect.any(String),
+        retryable: false
+      }
+    });
+  });
+
+  it.each([new Error("private upstream response"), "model_refusal", "model_timeout"] as const)(
+    "returns a fixed safe 502 for an untrusted canonical rejection",
+    async (rejection) => {
+      const handler = createIntakePostHandler({
+        localExtractor: {
+          provider: "local",
+          model: null,
+          extract: vi.fn().mockRejectedValue(rejection)
+        }
+      });
+      const response = await handler(
+        new Request("http://localhost/api/intake", {
+          method: "POST",
+          body: JSON.stringify({
+            message: "new facts",
+            prior: claimState(),
+            baseRevision: 0,
+            requestedMode: "local"
+          })
+        })
+      );
+      const body = await response.json();
+
+      expect(response.status).toBe(502);
+      expect(body).toEqual({
+        error: {
+          code: "upstream_failure",
+          message: "The analysis service is temporarily unavailable.",
+          requestId: expect.any(String),
+          retryable: true
+        }
+      });
+      expect(JSON.stringify(body)).not.toContain(
+        rejection instanceof Error ? rejection.message : rejection
+      );
+    }
+  );
+
+  it.each([new Error("private legacy detail"), "model_refusal", "model_timeout"] as const)(
+    "returns a fixed safe 502 for an untrusted legacy rejection",
+    async (rejection) => {
+      const handler = createIntakePostHandler({
+        localExtractor: {
+          provider: "local",
+          model: null,
+          extract: vi.fn().mockRejectedValue(rejection)
+        }
+      });
+      const response = await handler(
+        new Request("http://localhost/api/intake", {
+          method: "POST",
+          body: JSON.stringify({ message: "new facts", facts: null })
+        })
+      );
+      const body = await response.json();
+
+      expect(response.status).toBe(502);
+      expect(body).toEqual({
+        error: {
+          code: "upstream_failure",
+          message: "The analysis service is temporarily unavailable.",
+          requestId: expect.any(String),
+          retryable: true
+        }
+      });
+      expect(JSON.stringify(body)).not.toContain(
+        rejection instanceof Error ? rejection.message : rejection
+      );
+    }
+  );
+
+  it("returns a fixed safe 422 for invalid legacy facts", async () => {
+    const handler = createIntakePostHandler({
+      localExtractor: {
+        provider: "local",
+        model: null,
+        extract: vi.fn().mockResolvedValue({ set: {} })
+      }
+    });
+    const response = await handler(
+      new Request("http://localhost/api/intake", {
+        method: "POST",
+        body: JSON.stringify({ message: "new facts", facts: {} })
+      })
+    );
+
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "unprocessable_request",
+        message: "Request could not be processed.",
+        requestId: expect.any(String),
+        retryable: false
+      }
+    });
   });
 });

@@ -226,9 +226,10 @@ the user explicitly cannot obtain. An `unavailable` reason does not trigger anot
 cause-dependent policies remain conditional instead.
 
 The OpenAI adapter requests strict JSON Schema output with `store: false`. The DeepSeek adapter
-uses Chat Completions JSON Output and includes the same schema in its system prompt. Both use a
-bounded timeout, runtime `ClaimFacts` validation, and a deterministic fallback. `/api/analyze`
-never relies on model memory for policies, cases, compensation amounts, or sources.
+uses Chat Completions JSON Output and includes the same schema in its system prompt. Both enforce
+the same 1,200-token output ceiling, 64 KiB response ceiling, bounded timeout, safe failure codes,
+runtime `ClaimFacts` validation, and deterministic fallback. `/api/analyze` never relies on model
+memory for policies, cases, compensation amounts, or sources.
 
 The LLM should not invent policies, cases, compensation amounts, or sources.
 
