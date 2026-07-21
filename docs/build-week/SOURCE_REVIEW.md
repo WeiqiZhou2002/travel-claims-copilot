@@ -7,13 +7,35 @@
   authorization. Direct `HEAD` responses were recorded only as transport observations; browser-readable
   official content was used for the substantive review.
 - Reviewer: Codex official-source audit, authorized by the project owner.
-- Human content confirmation: **confirmed**. The project owner confirmed the conservative mappings
-  below in this Codex task at `2026-07-19T05:51:39Z`.
+- Human content confirmation: **pending**. The automated and Codex review is complete, but the
+  project owner has not yet signed off on the source-to-product mappings below.
 - Formal release reachability: **pending**. `scripts/check-source-reachability.mjs` is reserved for a
   separately approved check within 48 hours of release.
 
 No source result is legal advice or an outcome guarantee. Policy text establishes scope and evidence;
 only typed facts and predicates determine eligibility.
+
+## Project-owner review checklist
+
+This review does not require the project owner to give a legal opinion. It checks that the product
+faithfully represents the cited page and does not turn a conditional statement into a promise.
+
+1. Open each canonical URL in the table and confirm that its title and publisher match the row.
+2. Compare the official page with `applicable_conditions`, `compensation_or_rights`, and `summary`
+   for the same `policy_id` in `data/policies.json`. Reject wording that omits a material condition or
+   changes “may”, “if”, or “subject to” into an unconditional right.
+3. On the DOT dashboard, confirm that the unfiltered page is regulator context, while United care
+   remedies come from the United-filtered carrier record in `data/carrier-commitments.json`.
+4. Confirm these product boundaries with the sample scenarios:
+   - Paris departure: EU261 may be retrieved because of route scope, not because the incident is
+     labelled “controllable”.
+   - Chicago-to-China United departure: U.S. sources may be retrieved; EU261 must not be retrieved.
+   - Unknown airline cause: cause-dependent remedies remain conditional and the cause question is
+     not repeated.
+   - Marriott hotel walk: Marriott policy and provider-matched cases take priority.
+5. Run `npm run validate:data` to confirm every script citation resolves to a current policy record.
+6. Change “Human content confirmation” above to **confirmed**, add the reviewer and date, and record
+   any rejected wording before a public demo.
 
 ## Critical policy sources
 
@@ -22,8 +44,7 @@ only typed facts and predicates determine eligibility.
 | `marriott_ultimate_reservation_guarantee` | *Elite Benefit Guarantees* — “Ultimate Reservation Guarantee”; Marriott Bonvoy | https://www.marriott.com/loyalty/member-benefits/guarantee.mi | `provider_policy` / high | `2026-07-19T04:36:19Z` | Verified member-number-at-booking requirement, nearby lodging for an unhonored reservation, and brand/status-dependent compensation. | `marriott_walk_frontdesk_en`, `hotel_walk_escalation_email_en` | Official content browser-readable; direct non-browser `HEAD` returned 403. |
 | `dot_airline_cancellation_delay_dashboard` | *Airline Cancellation and Delay Dashboard*; U.S. Department of Transportation | https://www.transportation.gov/airconsumer/airline-cancellation-delay-dashboard | `US_AIRLINE_COMMITMENT` / high regulator context | `2026-07-19T04:36:19Z` | Retained only as regulator context for controllable disruptions. Carrier-specific care comes exclusively from a reviewed carrier record. | `airline_controllable_delay_hotel_en`, `airline_controllable_cancellation_email_en` | Official content browser-readable; direct non-browser `HEAD` returned 403. |
 | `dot_bumping_oversales` | *Bumping & Oversales*; U.S. Department of Transportation | https://www.transportation.gov/individuals/aviation-consumer-protection/bumping-oversales | `US_DOT_DENIED_BOARDING` / high | `2026-07-19T04:37:35Z` | Verified U.S.-departure oversales scope, volunteer-first process, check-in/gate requirements, written rights, and conditional denied-boarding compensation. Removed “confirmed alternate transportation” as an unconditional standalone right. | `denied_boarding_volunteer_gate_en`, `denied_boarding_involuntary_email_en` | Official content browser-readable; direct non-browser `HEAD` returned 403. |
-| `eu261_air_passenger_rights` | *Air passenger rights*; Your Europe / European Commission DG GROW | https://europa.eu/youreurope/citizens/travel/passenger-rights/air/index_en.htm | `EU261` / high | `2026-07-19T04:38:07Z` | Verified care, refund/rerouting, and conditional compensation. Added the official guidance scope for Iceland, Norway, and Switzerland. | `eu261_claim_email_en`, `eu261_authority_escalation_en` | Official content browser-readable; direct `HEAD` returned 200. |
-| `eu261_regulation_261_2004` | *Regulation (EC) No 261/2004 … denied boarding … cancellation or long delay of flights*; EUR-Lex / Publications Office of the European Union | https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32004R0261 | `EU261` / high | `2026-07-19T04:38:07Z` | Verified Article 3 route/reservation scope, Article 8 reimbursement/rerouting, Article 9 care, and conditional Articles 5/7 compensation. EEA/Swiss extension is grounded by the companion Your Europe guidance rather than inferred from Article 3 alone. | `eu261_claim_email_en`, `eu261_authority_escalation_en` | Official content browser-readable; direct `HEAD` returned 200. |
+| `eu261_regulation_261_2004` | *Regulation (EC) No 261/2004 … denied boarding … cancellation or long delay of flights*; EUR-Lex / Publications Office of the European Union | https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32004R0261 | `EU261` / high | `2026-07-19T04:38:07Z` | Verified Article 3 route/reservation scope, Article 8 reimbursement/rerouting, Article 9 care, and conditional Articles 5/7 compensation. EEA/Swiss scope was cross-checked against the official Your Europe guidance, but that guidance is supporting audit evidence rather than a second policy record. | `eu261_claim_email_en`, `eu261_authority_escalation_en` | Official content browser-readable; direct `HEAD` returned 200. |
 | `uk261_assimilated_regulation_261_2004` | *Regulation (EC) No 261/2004* — latest available revised UK version; legislation.gov.uk / The National Archives | https://www.legislation.gov.uk/eur/2004/261/contents | `UK261` / high | `2026-07-19T04:38:07Z` | Corrected the source publisher and added the UK-air-carrier route arriving in an EU Member State, subject to the applicable third-country-rights exception. Care, refund/rerouting, compensation, and denied-boarding summaries remain conditional. | `uk261_claim_email_en` | Official contents and linked text returned 200; the text extractor for the contents page was limited. |
 | `ca_appr_sor_2019_150` | *Air Passenger Protection Regulations (SOR/2019-150)*; Justice Laws / Department of Justice Canada, regulation by the Canadian Transportation Agency | https://laws-lois.justice.gc.ca/eng/regulations/SOR-2019-150/FullText.html | `CA_APPR` / high | `2026-07-19T04:38:07Z` | Verified cause-dependent duties, status updates, qualifying care, rebooking/refund, inconvenience compensation, denied-boarding protections, and large/small-carrier distinctions. | `ca_appr_disruption_claim_en` | Official content browser-readable; direct `HEAD` returned 200. |
 | `us_dot_automatic_ticket_refunds` | *Final Rule - Refunds and Other Consumer Protections*; U.S. Department of Transportation | https://www.transportation.gov/airconsumer/refundsfinalruleapril2024 | `US_DOT_REFUND` / high | `2026-07-19T04:37:35Z` | Verified automatic-refund conditions, original-payment method, unused amount/fees, and advance notice. Clarified that the path includes no alternative being offered as well as rejection of an offered alternative. | `us_dot_refund_request_en` | Official content browser-readable; direct non-browser `HEAD` returned 403. |
@@ -72,8 +93,8 @@ fresh record does not match.
 | `airline_controllable_cancellation_email_en` | `dot_airline_cancellation_delay_dashboard` | DOT regulator context; carrier care still requires an exact record |
 | `denied_boarding_volunteer_gate_en` | `dot_bumping_oversales` | U.S. DOT oversales guidance |
 | `denied_boarding_involuntary_email_en` | `dot_bumping_oversales` | U.S. DOT denied-boarding guidance |
-| `eu261_claim_email_en` | `eu261_regulation_261_2004`, `eu261_air_passenger_rights` | EU regulation plus official practical guidance |
-| `eu261_authority_escalation_en` | `eu261_regulation_261_2004`, `eu261_air_passenger_rights` | EU regulation plus guidance; citation remains valid outside display Top-K |
+| `eu261_claim_email_en` | `eu261_regulation_261_2004` | Primary EU legal text; official practical guidance remains audit evidence rather than a second policy record |
+| `eu261_authority_escalation_en` | `eu261_regulation_261_2004` | Primary EU legal text; citation remains valid outside display Top-K |
 | `uk261_claim_email_en` | `uk261_assimilated_regulation_261_2004` | Revised UK legal text |
 | `ca_appr_disruption_claim_en` | `ca_appr_sor_2019_150` | Canadian APPR |
 | `us_dot_refund_request_en` | `us_dot_automatic_ticket_refunds` | U.S. DOT refund rule |

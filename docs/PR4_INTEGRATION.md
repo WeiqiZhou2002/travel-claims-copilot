@@ -36,8 +36,8 @@ This document records how PR #4 was integrated on top of the current product bra
 
 1. Decide whether the canonical public GPT mode should remain OpenAI-only or gain a reviewed
    DeepSeek runtime with equivalent output limits, access controls, and privacy behavior.
-2. Review the source judgments in `docs/build-week/SOURCE_REVIEW.md`, especially the distinction
-   between DOT regulator context and United's carrier commitments, before a public demo.
+2. Complete the project-owner checklist in `docs/build-week/SOURCE_REVIEW.md`, especially the
+   distinction between DOT regulator context and United's carrier commitments, before a public demo.
 
 ## Verification at integration
 
