@@ -509,6 +509,7 @@ describe("DeepSeek Chat Completions client", () => {
     ]);
     expect(request.thinking).toEqual({ type: "disabled" });
     expect(request.response_format).toEqual({ type: "json_object" });
+    expect(request.max_tokens).toBe(1_200);
     expect(request).not.toHaveProperty("text");
     expect(request).not.toHaveProperty("input");
   });
@@ -537,7 +538,7 @@ describe("DeepSeek Chat Completions client", () => {
         input: "Example",
         maxOutputTokens: 1_200
       })
-    ).rejects.toThrow("truncated");
+    ).rejects.toMatchObject({ code: "invalid_model_schema" });
   });
 });
 

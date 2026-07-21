@@ -27,18 +27,17 @@ This document records how PR #4 was integrated on top of the current product bra
 - `/api/intake` and `/api/analyze` accept both the current guided-intake request format and the
   canonical structured format from PR #4.
 - The guided intake supports OpenAI or DeepSeek through `LLM_PROVIDER` and provider-specific
-  environment variables.
+  environment variables. They share the same extraction schema, output bounds, timeout, failure,
+  runtime-validation, and deterministic-fallback contract while using provider-native endpoints.
 - The canonical public GPT mode remains pinned to OpenAI and protected by its reviewed release
-  controls. Extending that mode to DeepSeek is a separate product and security decision.
+  controls. Product work on that separate protocol is deferred.
 - Supported Node.js versions are `>=22.14 <26`; CI and `.nvmrc` continue to use Node 22.
 - The default Playwright suite exercises the retained public UI. PR #4's unused alternative
   workspace components, client state layer, and UI-only tests were removed after product review.
 
 ## Product review still requested
 
-1. Decide whether the canonical public GPT mode should remain OpenAI-only or gain a reviewed
-   DeepSeek runtime with equivalent output limits, access controls, and privacy behavior.
-2. Complete the project-owner checklist in `docs/build-week/SOURCE_REVIEW.md`, especially the
+1. Complete the project-owner checklist in `docs/build-week/SOURCE_REVIEW.md`, especially the
    distinction between DOT regulator context and United's carrier commitments, before a public demo.
 
 ## Verification at integration

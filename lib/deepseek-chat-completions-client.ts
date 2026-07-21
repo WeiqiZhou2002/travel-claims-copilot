@@ -4,6 +4,8 @@ import type {
   StructuredOutputRequest
 } from "./llm";
 import { assertExternalModelCallAllowed } from "./external-model-call-policy";
+import { classifyModelFailure, ModelFailure } from "./model/model-error";
+import { assertStructuredOutputTokenLimit, parseStructuredOutputText } from "./structured-output";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -19,7 +21,13 @@ function extractDeepSeekMessage(payload: unknown): string | undefined {
       return false;
     }
     if (candidate.finish_reason === "length") {
-      throw new Error("DeepSeek Chat Completions API truncated the structured output");
+      throw new ModelFailure("invalid_model_schema", true, true);
+    }
+    if (candidate.finish_reason === "content_filter") {
+      throw new ModelFailure("model_refusal", false, false);
+    }
+    if (candidate.finish_reason === "insufficient_system_resource") {
+      throw new ModelFailure("upstream_unavailable", true, true);
     }
     return (
       isRecord(candidate.message) &&
@@ -60,6 +68,7 @@ export class DeepSeekChatCompletionsClient implements StructuredOutputClient {
 
   async generate<T>(request: StructuredOutputRequest): Promise<T> {
     assertExternalModelCallAllowed();
+    assertStructuredOutputTokenLimit(request.maxOutputTokens);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
     const systemPrompt = [
@@ -69,35 +78,49 @@ export class DeepSeekChatCompletionsClient implements StructuredOutputClient {
     ].join("\n\n");
 
     try {
-      const response = await this.fetcher(`${this.baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: request.input }
-          ],
-          thinking: { type: "disabled" },
-          response_format: { type: "json_object" },
-          stream: false
-        }),
-        signal: controller.signal
-      });
+      let response: Response;
+      try {
+        response = await this.fetcher(`${this.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: this.model,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: request.input }
+            ],
+            thinking: { type: "disabled" },
+            response_format: { type: "json_object" },
+            max_tokens: request.maxOutputTokens,
+            stream: false
+          }),
+          signal: controller.signal
+        });
+      } catch (error) {
+        throw classifyModelFailure(error) ?? error;
+      }
 
       if (!response.ok) {
-        throw new Error(`DeepSeek Chat Completions API returned HTTP ${response.status}`);
+        throw (
+          classifyModelFailure({ status: response.status }) ?? new Error("deepseek_request_failed")
+        );
       }
 
-      const content = extractDeepSeekMessage(await response.json());
-      if (!content) {
-        throw new Error("DeepSeek Chat Completions API returned no structured output text");
+      let payload: unknown;
+      try {
+        payload = (await response.json()) as unknown;
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          throw new ModelFailure("invalid_model_json", true, true);
+        }
+        throw error;
       }
-
-      return JSON.parse(content) as T;
+      return parseStructuredOutputText<T>(extractDeepSeekMessage(payload));
+    } catch (error) {
+      throw classifyModelFailure(error) ?? error;
     } finally {
       clearTimeout(timeout);
     }

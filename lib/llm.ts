@@ -1,7 +1,7 @@
 import { DeepSeekChatCompletionsClient } from "./deepseek-chat-completions-client";
-import { INPUT_LIMITS } from "./api/input-limits";
 import { classifyModelFailure, ModelFailure } from "./model/model-error";
 import { assertExternalModelCallAllowed } from "./external-model-call-policy";
+import { assertStructuredOutputTokenLimit, parseStructuredOutputText } from "./structured-output";
 
 export { DeepSeekChatCompletionsClient } from "./deepseek-chat-completions-client";
 export { assertExternalModelCallAllowed } from "./external-model-call-policy";
@@ -85,9 +85,7 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
 
   async generate<T>(request: StructuredOutputRequest): Promise<T> {
     assertExternalModelCallAllowed();
-    if (request.maxOutputTokens !== INPUT_LIMITS.modelOutputTokens) {
-      throw new Error("invalid_model_output_token_limit");
-    }
+    assertStructuredOutputTokenLimit(request.maxOutputTokens);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
@@ -141,19 +139,7 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
       if (hasResponseRefusal(payload)) {
         throw new ModelFailure("model_refusal", false, false);
       }
-      const text = extractResponseText(payload);
-      if (!text) {
-        throw new ModelFailure("invalid_model_schema", true, true);
-      }
-      if (new TextEncoder().encode(text).byteLength > INPUT_LIMITS.modelOutputBytes) {
-        throw new ModelFailure("invalid_model_schema", true, true);
-      }
-
-      try {
-        return JSON.parse(text) as T;
-      } catch {
-        throw new ModelFailure("invalid_model_json", true, true);
-      }
+      return parseStructuredOutputText<T>(extractResponseText(payload));
     } catch (error) {
       throw classifyModelFailure(error) ?? error;
     } finally {
