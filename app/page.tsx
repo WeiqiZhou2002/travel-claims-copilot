@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { ActionWorkspace, type FeedbackHistoryItem } from "../components/action-workspace";
+import { ActionWorkspace } from "../components/action-workspace";
 import type { ClaimFacts } from "../lib/claimFacts";
 import type { IntakeExtractionMode, IntakeResult } from "../lib/intake";
 import type { SafetyAssessment } from "../lib/safety";
@@ -16,7 +16,8 @@ import type {
 
 type ConversationMessage = {
   id: string;
-  role: "assistant" | "user";
+  role: "assistant" | "user" | "provider";
+  label?: string;
   content: string;
 };
 
@@ -64,6 +65,7 @@ function factSummary(facts: ClaimFacts): string[] {
 }
 
 export default function Home() {
+  const conversationRef = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<ConversationMessage[]>(initialMessages);
   const [facts, setFacts] = useState<ClaimFacts | null>(null);
@@ -74,12 +76,20 @@ export default function Home() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [actionMode, setActionMode] = useState<"script" | "feedback" | null>(null);
-  const [actionError, setActionError] = useState("");
+  const [scriptError, setScriptError] = useState("");
+  const [feedbackError, setFeedbackError] = useState("");
   const [generatedScript, setGeneratedScript] = useState<GeneratedActionScript | null>(null);
   const [copied, setCopied] = useState(false);
   const [feedbackDraft, setFeedbackDraft] = useState("");
-  const [feedbackResult, setFeedbackResult] = useState<ProviderFeedbackResult | null>(null);
-  const [feedbackHistory, setFeedbackHistory] = useState<FeedbackHistoryItem[]>([]);
+
+  useEffect(() => {
+    const conversation = conversationRef.current;
+    if (!conversation) return;
+    conversation.scrollTo({
+      top: conversation.scrollHeight,
+      behavior: messages.length > 1 ? "smooth" : "auto"
+    });
+  }, [messages]);
 
   async function submitIntake(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -99,8 +109,6 @@ export default function Home() {
     setSafetyNotice(null);
     setActionPlan(null);
     setGeneratedScript(null);
-    setFeedbackResult(null);
-    setFeedbackHistory([]);
 
     try {
       const intakeResponse = await fetch("/api/intake", {
@@ -177,7 +185,7 @@ export default function Home() {
   async function requestScript(channel: ActionScriptChannel) {
     if (!facts || !actionPlan || actionMode) return;
     setActionMode("script");
-    setActionError("");
+    setScriptError("");
     setCopied(false);
     try {
       const response = await fetch("/api/action", {
@@ -196,7 +204,7 @@ export default function Home() {
       if (!response.ok) throw new Error(body.error ?? "Script generation failed.");
       setGeneratedScript(body);
     } catch (caughtError) {
-      setActionError(
+      setScriptError(
         caughtError instanceof Error ? caughtError.message : "Script generation failed."
       );
     } finally {
@@ -204,11 +212,12 @@ export default function Home() {
     }
   }
 
-  async function submitProviderFeedback() {
+  async function submitProviderFeedback(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     const feedback = feedbackDraft.trim();
     if (!facts || !actionPlan || !feedback || actionMode) return;
     setActionMode("feedback");
-    setActionError("");
+    setFeedbackError("");
     try {
       const response = await fetch("/api/action", {
         method: "POST",
@@ -223,14 +232,19 @@ export default function Home() {
       const body = (await response.json()) as ProviderFeedbackResult & { error?: string };
       if (!response.ok) throw new Error(body.error ?? "Provider response analysis failed.");
 
-      setFeedbackResult(body);
-      setFeedbackHistory((current) => [
+      const messageId = Date.now();
+      setMessages((current) => [
         ...current,
         {
-          id: `feedback-${Date.now()}`,
-          response: feedback,
-          summary: body.summary,
-          status: body.signals.responseStatus
+          id: `provider-${messageId}`,
+          role: "provider",
+          label: "Provider reply",
+          content: feedback
+        },
+        {
+          id: `assistant-feedback-${messageId}`,
+          role: "assistant",
+          content: `${body.summary} I’ve updated the next move.`
         }
       ]);
       setActionPlan(body.nextAction);
@@ -238,7 +252,7 @@ export default function Home() {
       setFeedbackDraft("");
       setCopied(false);
     } catch (caughtError) {
-      setActionError(
+      setFeedbackError(
         caughtError instanceof Error ? caughtError.message : "Provider response analysis failed."
       );
     } finally {
@@ -262,12 +276,11 @@ export default function Home() {
     setActionPlan(null);
     setError("");
     setActionMode(null);
-    setActionError("");
+    setScriptError("");
+    setFeedbackError("");
     setGeneratedScript(null);
     setCopied(false);
     setFeedbackDraft("");
-    setFeedbackResult(null);
-    setFeedbackHistory([]);
   }
 
   return (
@@ -320,7 +333,9 @@ export default function Home() {
                   {isLoading
                     ? "Checking one detail…"
                     : actionPlan
-                      ? "Action ready"
+                      ? actionMode === "feedback"
+                        ? "Reading their reply…"
+                        : "Continue here after they respond"
                       : "Tell us what happened"}
                 </p>
               </div>
@@ -331,20 +346,26 @@ export default function Home() {
               ) : null}
             </div>
 
-            <div className="max-h-[410px] space-y-4 overflow-y-auto p-5" aria-live="polite">
+            <div
+              ref={conversationRef}
+              className="max-h-[410px] space-y-4 overflow-y-auto p-5"
+              aria-live="polite"
+            >
               {messages.map((message) => (
                 <article
-                  className={`max-w-[92%] ${message.role === "user" ? "ml-auto" : "mr-auto"}`}
+                  className={`max-w-[92%] ${message.role === "assistant" ? "mr-auto" : "ml-auto"}`}
                   key={message.id}
                 >
                   <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink/35">
-                    {message.role === "assistant" ? "Copilot" : "You"}
+                    {message.label ?? (message.role === "assistant" ? "Copilot" : "You")}
                   </p>
                   <p
                     className={`rounded-xl px-4 py-3 text-sm leading-6 ${
                       message.role === "assistant"
                         ? "rounded-tl-sm bg-mint/[0.075] text-ink/70"
-                        : "rounded-tr-sm bg-ink text-white/90"
+                        : message.role === "provider"
+                          ? "rounded-tr-sm border border-coral/20 bg-coral/[0.055] text-ink/75"
+                          : "rounded-tr-sm bg-ink text-white/90"
                     }`}
                   >
                     {message.content}
@@ -361,29 +382,57 @@ export default function Home() {
               </div>
             ) : null}
 
-            <form className="border-t border-ink/10 p-4" onSubmit={submitIntake}>
+            <form
+              className="border-t border-ink/10 p-4"
+              onSubmit={actionPlan ? submitProviderFeedback : submitIntake}
+            >
               <label className="flex flex-col gap-2">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/40">
-                  Your message
+                  {actionPlan ? "What did they say?" : "Your message"}
                 </span>
                 <textarea
                   className="min-h-28 resize-y rounded-xl border border-ink/15 bg-paper/40 p-4 text-sm leading-6 text-ink outline-none transition placeholder:text-ink/35 focus:border-mint focus:bg-white focus:ring-4 focus:ring-mint/10"
                   placeholder={
                     actionPlan
-                      ? "Add a correction if any case fact is wrong."
+                      ? "Paste the exact reply, or summarize what the provider offered or refused."
                       : "Describe what happened, or answer the follow-up question."
                   }
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
+                  maxLength={actionPlan ? 4_000 : undefined}
+                  value={actionPlan ? feedbackDraft : draft}
+                  onChange={(event) =>
+                    actionPlan ? setFeedbackDraft(event.target.value) : setDraft(event.target.value)
+                  }
                 />
               </label>
+              {actionPlan ? (
+                <p className="mt-2 text-xs leading-5 text-ink/45">
+                  {actionPlan.providerFeedbackPrompt}
+                </p>
+              ) : null}
               <button
                 className="mt-3 h-11 w-full rounded-xl bg-ink text-sm font-semibold text-white transition hover:bg-mint disabled:cursor-not-allowed disabled:bg-ink/30"
-                disabled={isLoading || !draft.trim()}
+                disabled={
+                  actionPlan
+                    ? actionMode !== null || !feedbackDraft.trim()
+                    : isLoading || !draft.trim()
+                }
                 type="submit"
               >
-                {isLoading ? "Checking…" : facts ? "Continue" : "Start"}
+                {actionPlan
+                  ? actionMode === "feedback"
+                    ? "Reading reply…"
+                    : "Find my next move"
+                  : isLoading
+                    ? "Checking…"
+                    : facts
+                      ? "Continue"
+                      : "Start"}
               </button>
+              {feedbackError ? (
+                <p className="mt-3 text-sm font-medium text-coral" role="alert">
+                  {feedbackError}
+                </p>
+              ) : null}
             </form>
 
             {intakeWarning ? (
@@ -397,19 +446,14 @@ export default function Home() {
 
           {actionPlan && facts ? (
             <ActionWorkspace
-              actionError={actionError}
               actionMode={actionMode}
               copied={copied}
               facts={facts}
-              feedbackDraft={feedbackDraft}
-              feedbackHistory={feedbackHistory}
-              feedbackResult={feedbackResult}
               plan={actionPlan}
               script={generatedScript}
+              scriptError={scriptError}
               onCopyScript={copyScript}
-              onFeedbackDraftChange={setFeedbackDraft}
               onRequestScript={requestScript}
-              onSubmitFeedback={submitProviderFeedback}
             />
           ) : (
             <section className="overflow-hidden rounded-2xl border border-dashed border-ink/20 bg-white/55">

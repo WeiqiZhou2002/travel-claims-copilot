@@ -78,11 +78,25 @@ test("uses a provider denial to replace the current action", async ({ page }) =>
     page,
     "My United flight from Chicago to Beijing was cancelled. I am at the airport and no reason was given."
   );
-  await page
-    .getByLabel("Hotel or airline response")
-    .fill("We cannot rebook you and gave no reason.");
+  await page.getByLabel("What did they say?").fill("We cannot rebook you and gave no reason.");
   await page.getByRole("button", { name: "Find my next move" }).click();
 
   await expect(page.getByText(/Get the denial in writing/i).first()).toBeVisible();
-  await expect(page.getByText(/Denied:/).first()).toBeVisible();
+  await expect(page.getByText("Provider reply", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("We cannot rebook you and gave no reason.", { exact: true })
+  ).toBeVisible();
+  await expect(page.getByText(/The provider denied/i).first()).toBeVisible();
+});
+
+test("keeps the continuation input in the conversation on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await submit(
+    page,
+    "My United flight from Chicago to Beijing was cancelled. I am at the airport and no reason was given."
+  );
+
+  await expect(page.getByLabel("What did they say?")).toBeVisible();
+  await expect(page.getByLabel("What did they say?")).toHaveCount(1);
+  await expect(page.getByText("Continue here after they respond", { exact: true })).toBeVisible();
 });

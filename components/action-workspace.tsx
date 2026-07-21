@@ -1,17 +1,5 @@
 import type { ClaimFacts } from "../lib/claimFacts";
-import type {
-  ActionPlan,
-  ActionScriptChannel,
-  GeneratedActionScript,
-  ProviderFeedbackResult
-} from "../lib/types";
-
-export type FeedbackHistoryItem = {
-  id: string;
-  response: string;
-  summary: string;
-  status: ProviderFeedbackResult["signals"]["responseStatus"];
-};
+import type { ActionPlan, ActionScriptChannel, GeneratedActionScript } from "../lib/types";
 
 type ActionWorkspaceProps = {
   plan: ActionPlan;
@@ -19,14 +7,9 @@ type ActionWorkspaceProps = {
   script: GeneratedActionScript | null;
   copied: boolean;
   actionMode: "script" | "feedback" | null;
-  actionError: string;
-  feedbackDraft: string;
-  feedbackResult: ProviderFeedbackResult | null;
-  feedbackHistory: FeedbackHistoryItem[];
+  scriptError: string;
   onRequestScript: (channel: ActionScriptChannel) => void;
   onCopyScript: () => void;
-  onFeedbackDraftChange: (value: string) => void;
-  onSubmitFeedback: () => void;
 };
 
 const channelLabels: Record<ActionScriptChannel, string> = {
@@ -36,14 +19,6 @@ const channelLabels: Record<ActionScriptChannel, string> = {
   chat: "Chat script",
   email: "Email draft",
   corporate_escalation: "Escalation email"
-};
-
-const statusLabels: Record<FeedbackHistoryItem["status"], string> = {
-  approved: "Approved",
-  partial_offer: "Offer received",
-  denied: "Denied",
-  needs_clarification: "Needs proof",
-  no_decision: "No decision"
 };
 
 function channelsFor(plan: ActionPlan): ActionScriptChannel[] {
@@ -79,14 +54,9 @@ export function ActionWorkspace({
   script,
   copied,
   actionMode,
-  actionError,
-  feedbackDraft,
-  feedbackResult,
-  feedbackHistory,
+  scriptError,
   onRequestScript,
-  onCopyScript,
-  onFeedbackDraftChange,
-  onSubmitFeedback
+  onCopyScript
 }: ActionWorkspaceProps) {
   const channels = channelsFor(plan);
   const contactName = plan.contactNow.name ?? plan.contactNow.role.replaceAll("_", " ");
@@ -237,7 +207,7 @@ export function ActionWorkspace({
           <div className="mt-4 rounded-xl border border-mint/20 bg-white p-4" aria-live="polite">
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-mint">
-                {channelLabels[script.channel]} · {script.generatedBy}
+                {channelLabels[script.channel]}
               </p>
               <button
                 className="rounded-full border border-ink/10 px-3 py-1.5 text-xs font-semibold text-ink/65 transition hover:border-mint hover:text-mint"
@@ -251,83 +221,12 @@ export function ActionWorkspace({
             <p className="mt-3 text-xs leading-5 text-ink/40">{script.disclaimer}</p>
           </div>
         ) : null}
-      </div>
-
-      <div className="p-5 md:p-7">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-coral">
-              Continue the case
-            </p>
-            <h3 className="mt-2 text-xl font-semibold text-ink">What did they say?</h3>
-          </div>
-          <p className="max-w-md text-sm leading-6 text-ink/50">{plan.providerFeedbackPrompt}</p>
-        </div>
-
-        {feedbackResult ? (
-          <div className="mt-4 rounded-xl border border-mint/20 bg-mint/[0.045] px-4 py-3 text-sm leading-6 text-ink/70">
-            <span className="font-semibold text-mint">
-              {statusLabels[feedbackResult.signals.responseStatus]}:
-            </span>{" "}
-            {feedbackResult.summary}
-            {feedbackResult.warning ? (
-              <span className="mt-1 block text-xs text-coral">{feedbackResult.warning}</span>
-            ) : null}
-          </div>
-        ) : null}
-
-        <form
-          className="mt-4 grid gap-3 md:grid-cols-[1fr_auto] md:items-end"
-          onSubmit={(event) => {
-            event.preventDefault();
-            onSubmitFeedback();
-          }}
-        >
-          <label className="flex flex-col gap-2">
-            <span className="sr-only">Hotel or airline response</span>
-            <textarea
-              className="min-h-28 resize-y rounded-xl border border-ink/15 bg-paper/45 p-4 text-sm leading-6 text-ink outline-none transition placeholder:text-ink/35 focus:border-mint focus:bg-white focus:ring-4 focus:ring-mint/10"
-              maxLength={4_000}
-              placeholder="Paste the exact reply, or summarize what the agent offered or refused."
-              value={feedbackDraft}
-              onChange={(event) => onFeedbackDraftChange(event.target.value)}
-            />
-          </label>
-          <button
-            className="h-12 rounded-xl bg-coral px-5 text-sm font-semibold text-white transition hover:bg-ink disabled:cursor-not-allowed disabled:bg-coral/35"
-            disabled={!feedbackDraft.trim() || actionMode !== null}
-            type="submit"
-          >
-            {actionMode === "feedback" ? "Reading reply…" : "Find my next move"}
-          </button>
-        </form>
-
-        {actionError ? (
+        {scriptError ? (
           <p className="mt-3 text-sm font-medium text-coral" role="alert">
-            {actionError}
+            {scriptError}
           </p>
         ) : null}
-
-        {feedbackHistory.length > 0 ? (
-          <details className="mt-5 border-t border-ink/10 pt-4">
-            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.12em] text-ink/45">
-              Provider response history · {feedbackHistory.length}
-            </summary>
-            <ol className="mt-3 space-y-3">
-              {feedbackHistory.map((item) => (
-                <li className="grid gap-1 text-sm md:grid-cols-[110px_1fr]" key={item.id}>
-                  <span className="font-semibold text-ink/50">{statusLabels[item.status]}</span>
-                  <span className="leading-6 text-ink/65">
-                    {item.summary}
-                    <span className="block truncate text-xs text-ink/35">“{item.response}”</span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </details>
-        ) : null}
-
-        <p className="mt-5 text-xs leading-5 text-ink/35">
+        <p className="mt-5 border-t border-ink/10 pt-4 text-xs leading-5 text-ink/35">
           Informational guidance only—not legal advice or a promise of compensation.
         </p>
       </div>

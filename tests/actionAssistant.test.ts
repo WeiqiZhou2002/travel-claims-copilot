@@ -97,6 +97,44 @@ describe("action script composer", () => {
     expect(result.text).not.toContain("$500");
     expect(result.text).toContain("earliest reasonable onward itinerary");
   });
+
+  it("rejects provider-voice copy and unknown operational details", async () => {
+    const result = await generateActionScript({
+      facts: normalizeClaimFacts({
+        ...emptyClaimFacts(),
+        issueType: "airline_cancellation",
+        providerType: "airline",
+        provider: "United",
+        operatingCarrier: "United",
+        origin: { city: "Chicago", airport: "ORD", country: "United States", region: "US" },
+        destination: {
+          city: "San Francisco",
+          airport: "SFO",
+          country: "United States",
+          region: "US"
+        },
+        disruptionType: "cancellation",
+        disruptionReasonStatus: "unavailable",
+        journeyStage: "at_airport"
+      }),
+      actionPlan: actionPlan(),
+      channel: "airport_counter",
+      language: "en",
+      tone: "polite_firm",
+      client: clientReturning({
+        opening: "Thank you for your patience.",
+        situation:
+          "I understand your flight was cancelled due to an operational issue. We are here to help.",
+        request: "Please confirm that you will rebook me tomorrow.",
+        fallback: "If not, please find another flight.",
+        closing: "Thank you."
+      })
+    });
+
+    expect(result.generatedBy).toBe("deterministic");
+    expect(result.text).toContain("My United flight from ORD to SFO was cancelled.");
+    expect(result.text).not.toMatch(/operational issue|tomorrow|your flight|we are here to help/i);
+  });
 });
 
 describe("provider feedback loop", () => {
