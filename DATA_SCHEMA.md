@@ -7,6 +7,8 @@
 - `issueType`: `hotel_walk | airline_delay | airline_cancellation | denied_boarding | unknown`
 - `providerType`: `hotel | airline | unknown`
 - `provider`: string | null
+
+此处 ClaimFacts.provider 暂保留旧 intake 的服务商识别字段，不作为出票方匹配依据。航司案例检索通过适配读取 `bookingProvider ?? validatingCarrier` 为出票方、`operatingCarrier` 为 carrier；未知 carrier 不再从 provider 回填。页面分别展示出票方和实际承运方。
 - `origin`, `destination`: city / airport / country / region
 - `disruptionType`, `disruptionReason`, `disruptionReasonStatus`
 - `arrivalDelayMinutes`, `isOvernight`, `deniedBoardingKind`
@@ -18,6 +20,8 @@
 - `validatingCarrier`, `marketingCarrier`, `operatingCarrier`, `disruptingCarrier`
 - `awardProgram`: string | null
 - `autoRebooked`: boolean | null
+- `acceptedAlternative`: boolean | null，用户明确接受或使用替代航班、credit 或 voucher；自动改签不等于接受。
+- `riskContext`: optional string[]，保留已触发范围限制的输入片段供后续检查；不是可信身份或服务器会话。
 - `autoRebookedItinerary`: string | null
 - `recoveryPriorities`: (`earliest_arrival | same_date | nonstop | same_airport | same_cabin | preserve_trip_length`)[]
 - `preferredAlternatives`: string[]
@@ -84,7 +88,10 @@ where required, the operating carrier. It must not be inferred solely from the i
 - source_name: string
 - source_url: string
 - provider_type: "hotel" | "airline" | "credit_card" | "ota"
-- provider: string
+- provider: string | null；航司案例为原出票/订票服务方，酒店案例仍为酒店集团。
+- carrier: string | null；受影响航段的实际承运方；非航司案例为 null。
+- legacy_provider?: string；迁移前标签，仅供追溯，不参与角色匹配。
+- role_notes?: string[]；角色来源及未知说明。
 - brand_or_airline: string
 - issue_type: string
 - location_country: string
@@ -104,7 +111,13 @@ where required, the operating carrier. It must not be inferred solely from the i
 
 `review_status` controls product retrieval. Only `approved` cases may appear as similar cases. Records marked `needs_review` or `excluded` remain in the consolidated file for provenance and future cleanup, but must not be presented to users.
 
+`synthetic_example` is excluded from similar-case retrieval even when approved. An empty result is valid.
+
 `issue_type` describes the incident itself. Legal regimes such as EU261 must not be stored as a case issue type.
+
+provider 与 carrier 独立匹配；同一组合匹配优先。旧记录不能因为 booking_channel=direct 就认定出票与承运为同一航司。迁移仅使用已有事实中的明确出票信息，其余为 null。政策及话术对象中的 provider 仍是政策发布方/适用服务商，不采用案例出票方语义。
+
+DP v0.3 使用 `event.provider` 与 `event.carrier`。`scripts/export-dp-cases.mjs` 将完整且 ready_for_review 的候选导出为 Case 格式预览，保持 needs_review，不写生产库。证据与分阶段回应保存在原始 DP，通过 provenance 关联；论坛证据不能自动变成旅客的 evidence_used。
 
 ## Script
 
@@ -123,6 +136,14 @@ where required, the operating carrier. It must not be inferred solely from the i
 - language: "en" | "zh"
 - template: string
 - when_to_use: string
+- required_denied_boarding_kind?: "voluntary" | "involuntary"
+- remedy?: RemedyDecision id; requests unsupported by the current facts are filtered out.
+
+## RemedyDecision
+
+`id`, `title`, `status` (`needs_verification | not_supported`), `explanation`, `sourceIds`, `request`.
+This first implementation identifies candidate requests and exclusions, not confirmed entitlement.
+AnalysisResult includes `remedies`; suggested requests and script filtering use those decisions.
 
 ## Outcome
 

@@ -57,11 +57,11 @@ export function normalizeIssueType(value: unknown): IssueType | undefined {
     return undefined;
   }
 
-  if (value in legacyIssueTypes) {
+  if (Object.hasOwn(legacyIssueTypes, value)) {
     return legacyIssueTypes[value];
   }
 
-  return value in issueLabels ? (value as IssueType) : undefined;
+  return Object.hasOwn(issueLabels, value) ? (value as IssueType) : undefined;
 }
 
 export function getIssueAliases(issueType: IssueType): string[] {

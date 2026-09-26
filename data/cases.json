@@ -5,7 +5,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/504904",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": null,
     "brand_or_airline": "American Airlines",
     "issue_type": "airline_baggage_not_checked",
     "location_country": "US",
@@ -34,6 +34,11 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
+    ],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -42,7 +47,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/269310",
     "provider_type": "airline",
-    "provider": "American Airlines / Amex",
+    "provider": null,
     "brand_or_airline": "American Airlines",
     "issue_type": "airline_delay_trip_insurance",
     "location_country": "US",
@@ -72,7 +77,12 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "American Airlines / Amex",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_amex_trip_delay_delay_trip_insu_unknown",
@@ -111,7 +121,8 @@
     "review_status": "needs_review",
     "review_notes": [
       "Card-benefit terms and eligible expenses require current official verification before use."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_ua_explorer_delay_delay_trip_insu_unknown",
@@ -119,7 +130,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/478937",
     "provider_type": "airline",
-    "provider": "United Airlines",
+    "provider": "United",
     "brand_or_airline": "United Airlines",
     "issue_type": "airline_delay_trip_insurance",
     "location_country": "US",
@@ -147,6 +158,11 @@
     "review_status": "needs_review",
     "review_notes": [
       "Card-benefit terms and eligible expenses require current official verification before use."
+    ],
+    "legacy_provider": "United Airlines",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -155,7 +171,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/504658",
     "provider_type": "airline",
-    "provider": "Cathay Pacific / United",
+    "provider": "Chase Travel",
     "brand_or_airline": "Cathay Pacific → United Airlines",
     "issue_type": "airline_rebooking_mixed_carrier_delay",
     "location_country": "US",
@@ -179,7 +195,12 @@
     "confidence": "high",
     "notes": "CX837 (SFO-HKG, not CX837 to YVR as one commenter confused). Chase Freedom Flex has limited travel insurance. CX873 was another flight from the same night with similar issues.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Cathay Pacific / United",
+    "carrier": "Cathay Pacific",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_aa_damaged_luggage_missing_items_2026_03",
@@ -187,7 +208,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/491435",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": "Alaska Airlines",
     "brand_or_airline": "American Airlines",
     "issue_type": "baggage_delay",
     "location_country": "US",
@@ -218,6 +239,11 @@
     "review_status": "excluded",
     "review_notes": [
       "Baggage damage/loss was misclassified as baggage delay."
+    ],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -226,7 +252,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/491624",
     "provider_type": "airline",
-    "provider": "ANA / United Airlines",
+    "provider": "ANA",
     "brand_or_airline": "ANA (domestic US leg by United)",
     "issue_type": "baggage_delay",
     "location_country": "JP",
@@ -253,6 +279,12 @@
     "review_status": "excluded",
     "review_notes": [
       "Low-signal thread centered on insurance eligibility rather than a clear disruption outcome."
+    ],
+    "legacy_provider": "ANA / United Airlines",
+    "carrier": null,
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。",
+      "受影响航段实际承运角色无法唯一确定，保留未知。"
     ]
   },
   {
@@ -261,7 +293,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/495742",
     "provider_type": "airline",
-    "provider": "Delta Air Lines",
+    "provider": null,
     "brand_or_airline": "Delta",
     "issue_type": "baggage_delay",
     "location_country": "USA",
@@ -289,7 +321,12 @@
     "confidence": "high",
     "notes": "The source reports that this passenger was told about a six-hour airport deadline; verify the carrier's current written deadline rather than treating that statement as a universal rule.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Delta Air Lines",
+    "carrier": "Delta",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_iberia_checked_baggage_delay_2025_04",
@@ -297,7 +334,7 @@
     "source_name": "USCardForum thread summary",
     "source_url": "https://www.uscardforum.com/t/topic/379591",
     "provider_type": "airline",
-    "provider": "Iberia",
+    "provider": null,
     "brand_or_airline": "Iberia",
     "issue_type": "baggage_delay",
     "location_country": "EU",
@@ -328,6 +365,11 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
+    ],
+    "legacy_provider": "Iberia",
+    "carrier": "Iberia",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -336,7 +378,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/345212",
     "provider_type": "airline",
-    "provider": "Southwest",
+    "provider": null,
     "brand_or_airline": "Southwest",
     "issue_type": "baggage_delay",
     "location_country": "US",
@@ -362,7 +404,12 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Good DP on Southwest baggage delay procedures.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Southwest",
+    "carrier": "Southwest",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_southwest_gate_check_baggage_delay_2025_03",
@@ -370,7 +417,7 @@
     "source_name": "USCardForum thread summary",
     "source_url": "https://www.uscardforum.com/t/topic/362877",
     "provider_type": "airline",
-    "provider": "Southwest",
+    "provider": null,
     "brand_or_airline": "Southwest",
     "issue_type": "baggage_delay",
     "location_country": "US",
@@ -401,6 +448,11 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
+    ],
+    "legacy_provider": "Southwest",
+    "carrier": "Southwest",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -409,7 +461,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/512557",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": null,
     "brand_or_airline": "American Airlines",
     "issue_type": "airline_cancellation",
     "location_country": "US",
@@ -439,6 +491,11 @@
     "review_status": "needs_review",
     "review_notes": [
       "Airline cited weather; other operating flights do not by themselves prove controllability."
+    ],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -447,7 +504,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/508856",
     "provider_type": "airline",
-    "provider": "China Eastern Airlines",
+    "provider": null,
     "brand_or_airline": "China Eastern",
     "issue_type": "airline_cancellation",
     "location_country": "China",
@@ -477,7 +534,12 @@
     "confidence": "high",
     "notes": "Insightful DP on Chinese airline practices vs US carriers. Process took 2-3 weeks.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "China Eastern Airlines",
+    "carrier": "China Eastern Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_delta_six_hours_cancel_sfo_lax_2026_02",
@@ -485,7 +547,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/483836",
     "provider_type": "airline",
-    "provider": "Delta",
+    "provider": null,
     "brand_or_airline": "Delta",
     "issue_type": "airline_cancellation",
     "location_country": "US",
@@ -512,6 +574,11 @@
     "review_status": "needs_review",
     "review_notes": [
       "Disruption cause is missing, so controllable classification is unverified."
+    ],
+    "legacy_provider": "Delta",
+    "carrier": "Delta",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -520,7 +587,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/479581",
     "provider_type": "airline",
-    "provider": "United",
+    "provider": null,
     "brand_or_airline": "United",
     "issue_type": "airline_cancellation",
     "location_country": "US",
@@ -549,6 +616,11 @@
     "review_status": "needs_review",
     "review_notes": [
       "Disruption cause is missing, so controllable classification is unverified."
+    ],
+    "legacy_provider": "United",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -557,7 +629,7 @@
     "source_name": "Synthetic demo case",
     "source_url": "",
     "provider_type": "airline",
-    "provider": "United",
+    "provider": null,
     "brand_or_airline": "United",
     "issue_type": "airline_cancellation",
     "location_country": "US",
@@ -587,6 +659,11 @@
     "review_status": "approved",
     "review_notes": [
       "Synthetic demo example; never present as a community outcome."
+    ],
+    "legacy_provider": "United",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -595,7 +672,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/516057",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": "Alaska Airlines",
     "brand_or_airline": "American Airlines",
     "issue_type": "airline_delay",
     "location_country": "US",
@@ -624,7 +701,12 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Clear facts: AC mechanical, crew timeout, overnight delay, rebooked next day.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_ac_syd_yvr_delay_missed_connection_2026_02",
@@ -632,7 +714,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/483768",
     "provider_type": "airline",
-    "provider": "Air Canada",
+    "provider": "BOA Premium Rewards travel portal",
     "brand_or_airline": "Air Canada",
     "issue_type": "airline_delay",
     "location_country": "CA",
@@ -661,6 +743,11 @@
     "review_status": "needs_review",
     "review_notes": [
       "Disruption cause is missing, so controllable classification is unverified."
+    ],
+    "legacy_provider": "Air Canada",
+    "carrier": "Air Canada",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -669,7 +756,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/516805",
     "provider_type": "airline",
-    "provider": "Alaska Airlines",
+    "provider": null,
     "brand_or_airline": "Alaska Airlines",
     "issue_type": "airline_delay",
     "location_country": "US",
@@ -700,6 +787,11 @@
     "review_status": "needs_review",
     "review_notes": [
       "Mixed weather and equipment chain; controllability is not established."
+    ],
+    "legacy_provider": "Alaska Airlines",
+    "carrier": "Alaska Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -708,7 +800,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/513323",
     "provider_type": "airline",
-    "provider": "United Airlines",
+    "provider": null,
     "brand_or_airline": "United Airlines",
     "issue_type": "airline_delay",
     "location_country": "US",
@@ -732,6 +824,11 @@
     "review_status": "excluded",
     "review_notes": [
       "Passenger made the flight; no compensable disruption or reported claim outcome."
+    ],
+    "legacy_provider": "United Airlines",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -740,7 +837,7 @@
     "source_name": "Synthetic demo case",
     "source_url": "",
     "provider_type": "airline",
-    "provider": "United",
+    "provider": null,
     "brand_or_airline": "United",
     "issue_type": "airline_delay",
     "location_country": "US",
@@ -772,6 +869,11 @@
     "review_status": "approved",
     "review_notes": [
       "Synthetic demo example; never present as a community outcome."
+    ],
+    "legacy_provider": "United",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -780,7 +882,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/480105",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": null,
     "brand_or_airline": "American Airlines",
     "issue_type": "denied_boarding",
     "location_country": "US",
@@ -809,6 +911,11 @@
     "review_status": "excluded",
     "review_notes": [
       "Not an overbooking or involuntary denied-boarding case; the source says the passenger had an EVUS issue and reported no actual loss."
+    ],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -817,7 +924,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/476427",
     "provider_type": "airline",
-    "provider": "Delta Air Lines",
+    "provider": null,
     "brand_or_airline": "Delta Air Lines",
     "issue_type": "denied_boarding",
     "location_country": "US",
@@ -840,7 +947,12 @@
     "confidence": "high",
     "notes": "Original ticket was ~3,000 miles (basic economy). Rebooked next morning via ATL with an overnight stay. The passenger noted they would use Hilton points for the hotel.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Delta Air Lines",
+    "carrier": "Delta",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "synthetic_us_involuntary_denied_boarding_001",
@@ -848,7 +960,7 @@
     "source_name": "Synthetic demo case",
     "source_url": "",
     "provider_type": "airline",
-    "provider": "Generic US airline",
+    "provider": null,
     "brand_or_airline": "US airline",
     "issue_type": "denied_boarding",
     "location_country": "US",
@@ -880,6 +992,12 @@
     "review_status": "approved",
     "review_notes": [
       "Synthetic demo example; never present as a community outcome."
+    ],
+    "legacy_provider": "Generic US airline",
+    "carrier": null,
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。",
+      "受影响航段实际承运角色无法唯一确定，保留未知。"
     ]
   },
   {
@@ -888,7 +1006,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/472168",
     "provider_type": "airline",
-    "provider": "Air France",
+    "provider": null,
     "brand_or_airline": "Air France",
     "issue_type": "airline_cancellation",
     "location_country": "France",
@@ -918,7 +1036,12 @@
     "confidence": "medium",
     "notes": "The payment outcome is reported by the source. The legal basis for fixed compensation was not explained, so do not generalize it to other weather cancellations.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Air France",
+    "carrier": "Air France",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_lh_eu261_claim_2022_05",
@@ -926,7 +1049,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/83404",
     "provider_type": "airline",
-    "provider": "Lufthansa",
+    "provider": "Air Canada",
     "brand_or_airline": "Lufthansa",
     "issue_type": "airline_delay",
     "location_country": "Germany",
@@ -954,7 +1077,12 @@
     "confidence": "high",
     "notes": "Excellent step-by-step DP with timeline. 6-month process but paid after regulatory pressure.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Lufthansa",
+    "carrier": "Lufthansa",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "case_eu261_three_hour_arrival_delay",
@@ -962,7 +1090,7 @@
     "source_name": "Synthetic demo case",
     "source_url": "",
     "provider_type": "airline",
-    "provider": "European Union",
+    "provider": null,
     "brand_or_airline": "EU carrier",
     "issue_type": "airline_delay",
     "location_country": "EU",
@@ -992,6 +1120,12 @@
     "review_status": "approved",
     "review_notes": [
       "Synthetic demo example; never present as a community outcome."
+    ],
+    "legacy_provider": "European Union",
+    "carrier": null,
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。",
+      "受影响航段实际承运角色无法唯一确定，保留未知。"
     ]
   },
   {
@@ -1028,7 +1162,8 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_regency_maui_club_closed_2026_02",
@@ -1064,7 +1199,8 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic read via Nitan.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_marriott_renaissance_nyc_breakfast_denied_2026_03",
@@ -1100,7 +1236,8 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_conrad_shampoo_property_loss_2026_01",
@@ -1135,7 +1272,8 @@
     "review_status": "excluded",
     "review_notes": [
       "Possible chemical ingestion is a health/safety case requiring professional help, outside the product boundary."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_personal_towel_removed_2023_10",
@@ -1174,7 +1312,8 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_rome_central_relocation_hgi_2026_04",
@@ -1214,7 +1353,8 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_conrad_borabora_paid_upgrade_denied_2026_07",
@@ -1253,7 +1393,8 @@
     "review_status": "needs_review",
     "review_notes": [
       "Claim/refund outcome is not reported after the guest cancelled."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_fairmont_banff_springs_fhr_room_misrepresentation_2026_06",
@@ -1289,7 +1430,8 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Very complete DP with clear outcome and actionable lessons.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_andaz_5th_suite_amenity_mismatch_2026_05",
@@ -1328,7 +1470,8 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hampton_in_hotel_qr_restaurant_closed_2023_12",
@@ -1368,7 +1511,8 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hgv_hawaii_service_issue_2026_01",
@@ -1398,7 +1542,8 @@
     "confidence": "high",
     "notes": "Located in Hawaii (Big Island). The $190 in waived fees roughly matched the guest's on-property spending for the day.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hilton_home2_amenities_missing_diamond_2026_07",
@@ -1438,7 +1583,8 @@
     "review_status": "needs_review",
     "review_notes": [
       "Reclassified from hotel_walk to hotel_service_issue; source outcome is not reported."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hilton_room_service_issue_2026_06",
@@ -1473,7 +1619,8 @@
     "confidence": "high",
     "notes": "Multiple serious hygiene/safety issues documented. OP accepted 1-night refund without further push.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hotel_false_fire_alarm_ascott_penang_2026_03",
@@ -1509,7 +1656,8 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. OTA booking complicates resolution. Forum consensus was that a false alarm alone is hard to claim compensation for.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hotel_water_outage_hampton_fn_2026_06",
@@ -1543,7 +1691,8 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Clear facts and reported partial outcome (refund offered, points compensation pending).",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_centric_ny_service_issue_2026_06",
@@ -1575,7 +1724,8 @@
     "review_status": "needs_review",
     "review_notes": [
       "No reported resolution; useful only as an issue narrative, not an outcome datapoint."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_naked_intruder_unauthorized_entry_2026_06",
@@ -1612,7 +1762,8 @@
     "review_status": "needs_review",
     "review_notes": [
       "Privacy/safety incident with disputed facts and no reported outcome."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_place_reno_service_issue_2025_12",
@@ -1644,7 +1795,8 @@
     "review_status": "needs_review",
     "review_notes": [
       "No reported resolution; useful only as an issue narrative, not an outcome datapoint."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_lxr_honolulu_power_outage_2026_03",
@@ -1680,7 +1832,8 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_marriott_nanjing_mouse_pest_issue_2026_06",
@@ -1718,7 +1871,8 @@
     "review_status": "approved",
     "review_notes": [
       "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_figueroa_walk_2023_06",
@@ -1752,7 +1906,8 @@
     "confidence": "medium",
     "notes": "OP was proactive and negotiated before arrival. Outcome was positive.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_kyoto_walk_2025_05",
@@ -1785,7 +1940,8 @@
     "confidence": "medium",
     "notes": "Limited compensation because walk was to a higher-category hotel. Japanese hotel practices differ from North America.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_suncadia_walk_2025_10",
@@ -1821,7 +1977,8 @@
     "confidence": "medium",
     "notes": "Source-checked: the rooms and dining credit were confirmed, but the initially promised 68,000-point refund was not confirmed in the final update.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_ihg_crowne_plaza_walk_2024_09",
@@ -1857,7 +2014,8 @@
     "review_status": "needs_review",
     "review_notes": [
       "The captured source does not report the claimed 15,000-point outcome."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_ihg_holidayinn_springfield_walk_2023_09",
@@ -1890,7 +2048,8 @@
     "confidence": "high",
     "notes": "Full points refund without even asking. Walk was handled poorly (handwritten note, no notification to receiving hotel).",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "marriott_walk_synthetic_001",
@@ -1929,7 +2088,8 @@
     "review_status": "approved",
     "review_notes": [
       "Synthetic demo example; never present as a community outcome."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_cathay_business_seat_unknown_unknown",
@@ -1937,7 +2097,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/470340",
     "provider_type": "airline",
-    "provider": "Cathay Pacific",
+    "provider": null,
     "brand_or_airline": "Cathay Pacific (CX870, HKG-SFO)",
     "issue_type": "unknown",
     "location_country": "US",
@@ -1963,6 +2123,11 @@
     "review_status": "excluded",
     "review_notes": [
       "Unknown issue type is not eligible for retrieval."
+    ],
+    "legacy_provider": "Cathay Pacific",
+    "carrier": "Cathay Pacific",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -1971,7 +2136,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/508950",
     "provider_type": "airline",
-    "provider": "Japan Airlines",
+    "provider": null,
     "brand_or_airline": "Japan Airlines / British Airways / Air France",
     "issue_type": "unknown",
     "location_country": "FR",
@@ -1997,6 +2162,11 @@
     "review_status": "excluded",
     "review_notes": [
       "Unknown issue type is not eligible for retrieval."
+    ],
+    "legacy_provider": "Japan Airlines",
+    "carrier": "Japan Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   }
 ]

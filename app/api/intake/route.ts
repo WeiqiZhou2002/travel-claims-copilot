@@ -3,19 +3,15 @@ import { NextResponse } from "next/server";
 import { emptyClaimFacts, parseClaimFacts } from "../../../lib/claimFacts";
 import {
   MAX_INTAKE_MESSAGE_LENGTH,
-  requestBodyExceedsLimit
+  readBoundedJson
 } from "../../../lib/inputLimits";
 import { processIntake } from "../../../lib/intake";
+import { acquireIntakeCapacity } from "../../../lib/intakeCapacity";
 
 export async function POST(request: Request) {
-  if (requestBodyExceedsLimit(request)) {
-    return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
-  }
-
-  const body = (await request.json().catch(() => null)) as {
-    message?: unknown;
-    facts?: unknown;
-  } | null;
+  const parsedBody = await readBoundedJson(request);
+  if (!parsedBody.ok) return NextResponse.json({ error: parsedBody.error }, { status: parsedBody.status });
+  const body = parsedBody.value;
   const message = typeof body?.message === "string" ? body.message.trim() : "";
 
   if (!message) {
@@ -40,5 +36,10 @@ export async function POST(request: Request) {
     currentFacts = parsed.data;
   }
 
-  return NextResponse.json(await processIntake(message, currentFacts));
+  const release = acquireIntakeCapacity();
+  if (!release) return NextResponse.json({ error: "Intake is busy. Please retry shortly." },
+    { status: 429, headers: { "Retry-After": "60" } });
+  try {
+    return NextResponse.json(await processIntake(message, currentFacts));
+  } finally { release(); }
 }

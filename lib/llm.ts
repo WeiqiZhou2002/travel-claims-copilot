@@ -112,6 +112,7 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
         },
         body: JSON.stringify({
           model: this.model,
+          max_output_tokens: 4096,
           reasoning: { effort: "none" },
           store: false,
           instructions: request.instructions,
@@ -178,6 +179,7 @@ export class DeepSeekChatCompletionsClient implements StructuredOutputClient {
         },
         body: JSON.stringify({
           model: this.model,
+          max_tokens: 4096,
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: request.input }

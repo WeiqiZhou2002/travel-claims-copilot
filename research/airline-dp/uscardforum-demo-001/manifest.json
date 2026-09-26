@@ -1,0 +1,71 @@
+{
+  "batch_id": "uscardforum-demo-001",
+  "observed_at": "2026-09-26T08:05:37Z",
+  "requested_method": "Chrome",
+  "actual_method": "web_search_and_open",
+  "scope": {
+    "forum": "www.uscardforum.com",
+    "topic": "airline_cancellation",
+    "airlines": "any",
+    "event_window": "2025-09-26 to 2026-09-26; 通知时间与计划旅行时间分开"
+  },
+  "budget": {
+    "max_search_queries": 6,
+    "max_threads_opened": 15,
+    "max_candidates": 2,
+    "max_minutes": 30
+  },
+  "queries": [
+    {
+      "id": "q1",
+      "text": "site:uscardforum.com 航班取消 改签 2026",
+      "method": "web_search",
+      "new_result_urls": 12
+    }
+  ],
+  "browser_attempts": [
+    {
+      "method": "Chrome createBrowserTab",
+      "result": "failed_before_navigation",
+      "error": "Unable to load browser request-header policy",
+      "attempts": 2
+    }
+  ],
+  "visited": [
+    {
+      "source_id": "s1",
+      "url": "https://www.uscardforum.com/t/topic/513378",
+      "forum": "美卡论坛",
+      "post_locator": "主题正文及下列楼层",
+      "posted_at": "2026-06-18 17:50 (页面时间，时区未标)",
+      "observed_at": "2026-09-26T08:05:37Z",
+      "reading_scope": "partial；工具返回正文与楼层1–21，含缺号；采用1楼，未宣称全帖已读",
+      "access_method": "web_open_fallback",
+      "limitation": "网页工具返回的文本视图；未通过 Chrome 核验动态页面或全部后续更新。"
+    },
+    {
+      "source_id": "s1",
+      "url": "https://www.uscardforum.com/t/topic/485645",
+      "forum": "美卡论坛",
+      "post_locator": "主题正文及下列楼层",
+      "posted_at": "2026-02-22 07:00 (页面时间，时区未标)",
+      "observed_at": "2026-09-26T08:05:37Z",
+      "reading_scope": "partial；工具返回楼层1–18，采用1/6/8/11/14/15/18；无实际成行报告",
+      "access_method": "web_open_fallback",
+      "limitation": "网页工具返回的文本视图；未通过 Chrome 核验动态页面或全部后续更新。"
+    }
+  ],
+  "counts": {
+    "discovered_urls": 12,
+    "read_topics": 2,
+    "new_dp_candidates": 2,
+    "updated_dp": 0,
+    "incomplete_dp": 0,
+    "exact_duplicate_candidates": 0,
+    "unread_links": 10,
+    "browser_initialization_failures": 2
+  },
+  "stop_reason": "Reached two-candidate demonstration limit using disclosed web fallback. Chrome execution remains unverified.",
+  "review_status": "needs_review",
+  "production_data_changed": false
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "url": "https://www.uscardforum.com/t/topic/513378",
+    "discovered_by_query": "q1",
+    "state": "extracted",
+    "reason": "四部分已整理，待审核",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": "工具仅返回至21楼",
+    "linked_dp_ids": [
+      "uscf-513378-op"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/485645",
+    "discovered_by_query": "q1",
+    "state": "followup",
+    "reason": "核验后续成行更新",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": "作者18楼之后",
+    "linked_dp_ids": [
+      "uscf-485645-op"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/500342",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/493023?page=2",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/481530",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/495569?page=4",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/477236",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/473103?page=2",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/502773",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/496402",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/495947",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/234255?page=9",
+    "discovered_by_query": "q1",
+    "state": "queued",
+    "reason": "仅在搜索结果发现；尚未打开核验或做主题级去重",
+    "last_observed_at": "2026-09-26T08:05:37Z",
+    "resume_locator": null,
+    "linked_dp_ids": []
+  }
+]

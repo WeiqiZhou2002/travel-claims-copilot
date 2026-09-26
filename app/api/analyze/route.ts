@@ -7,24 +7,16 @@ import { buildAnalysisFromFacts, buildAnalysisResult } from "../../../lib/analyz
 import { getMissingClaimFields, parseClaimFacts } from "../../../lib/claimFacts";
 import {
   MAX_ANALYZE_DESCRIPTION_LENGTH,
-  requestBodyExceedsLimit
+  readBoundedJson
 } from "../../../lib/inputLimits";
 import { normalizeIssueType } from "../../../lib/issueTaxonomy";
-import { assessHighRiskClaim } from "../../../lib/safety";
+import { assessClaimSafety, assessHighRiskClaim } from "../../../lib/safety";
 import type { Case, Policy, Script } from "../../../lib/types";
 
 export async function POST(request: Request) {
-  if (requestBodyExceedsLimit(request)) {
-    return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
-  }
-
-  const body = (await request.json().catch(() => null)) as {
-    caseId?: unknown;
-    description?: unknown;
-    issueType?: unknown;
-    selectedIssueType?: unknown;
-    facts?: unknown;
-  } | null;
+  const parsedBody = await readBoundedJson(request);
+  if (!parsedBody.ok) return NextResponse.json({ error: parsedBody.error }, { status: parsedBody.status });
+  const body = parsedBody.value;
   const description = typeof body?.description === "string" ? body.description.trim() : "";
   const caseId = typeof body?.caseId === "string" ? body.caseId.trim() : "";
   const issueType = normalizeIssueType(body?.issueType ?? body?.selectedIssueType);
@@ -56,6 +48,8 @@ export async function POST(request: Request) {
     }
 
     const missingFields = getMissingClaimFields(parsedFacts.data);
+    const factSafety = assessClaimSafety(description, parsedFacts.data);
+    if (factSafety) return NextResponse.json({ error: factSafety.message, safety: factSafety }, { status: 422 });
     if (missingFields.length > 0) {
       return NextResponse.json(
         {

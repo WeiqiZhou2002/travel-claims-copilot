@@ -202,7 +202,7 @@ export function assessEu261Candidate(facts: ClaimFacts): Eu261CandidateAssessmen
 
   if (
     enriched.operatingCarrierRegion === "EU_EEA_CH" ||
-    isEuOperatingCarrier(enriched.operatingCarrier ?? enriched.provider)
+    isEuOperatingCarrier(enriched.operatingCarrier)
   ) {
     return {
       isCandidate: true,
@@ -241,7 +241,7 @@ export function assessUk261Candidate(facts: ClaimFacts): Uk261CandidateAssessmen
   if (
     enriched.operatingCarrierRegion === "UK" ||
     enriched.operatingCarrierRegion === "EU_EEA_CH" ||
-    isUkOrEuOperatingCarrier(enriched.operatingCarrier ?? enriched.provider)
+    isUkOrEuOperatingCarrier(enriched.operatingCarrier)
   ) {
     return {
       isCandidate: true,

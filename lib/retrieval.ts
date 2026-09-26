@@ -22,7 +22,7 @@ const defaultLimits: Required<RetrievalLimits> = {
 };
 
 function isApprovedCase(item: Case): boolean {
-  return item.review_status === "approved";
+  return item.review_status === "approved" && item.source_type !== "synthetic_example";
 }
 
 function withSelectedCaseFacts(facts: ExtractedFacts, selectedCase?: Case): ExtractedFacts {
@@ -36,7 +36,9 @@ function withSelectedCaseFacts(facts: ExtractedFacts, selectedCase?: Case): Extr
     ...facts,
     description: facts.description || selectedCase.facts,
     issueType: selectedIssueType ?? facts.issueType,
-    provider: selectedCase.provider,
+    provider: (selectedCase.provider_type === "airline" ? selectedCase.carrier : selectedCase.provider) ?? undefined,
+    ticketingProvider: selectedCase.provider_type === "airline" ? selectedCase.provider ?? undefined : undefined,
+    operatingCarrier: selectedCase.carrier ?? undefined,
     providerType: selectedCase.provider_type,
     country: selectedCase.location_country,
     bookingChannel: selectedCase.booking_channel,
@@ -49,6 +51,10 @@ function withSelectedCaseFacts(facts: ExtractedFacts, selectedCase?: Case): Extr
 export function buildRetrievalQuery(facts: ExtractedFacts): RetrievalQuery {
   return {
     description: facts.description,
+    ticketingProvider: facts.ticketingProvider,
+    carrier: facts.operatingCarrier,
+    journeyStage: facts.journeyStage,
+    acceptedAlternative: facts.acceptedAlternative,
     issueType: facts.issueType,
     provider: facts.provider,
     providerType: facts.providerType,
@@ -59,7 +65,7 @@ export function buildRetrievalQuery(facts: ExtractedFacts): RetrievalQuery {
     arrivalDelayMinutes: facts.arrivalDelayMinutes,
     isOvernight: facts.isOvernight,
     deniedBoardingKind: facts.deniedBoardingKind,
-    operatingCarrier: facts.operatingCarrier ?? facts.provider,
+    operatingCarrier: facts.operatingCarrier,
     operatingCarrierRegion: facts.operatingCarrierRegion,
     originRegion: facts.originRegion,
     destinationRegion: facts.destinationRegion,
@@ -117,7 +123,7 @@ export function retrieveKnowledge(
   const officialBasis = searchPolicies(
     query,
     policies,
-    limits.policyLimit ?? defaultLimits.policyLimit
+    limits.policyLimit ?? policies.length
   );
 
   return {

@@ -53,7 +53,7 @@ export function controllabilityFromReason(
 
 export function policyRegionsFromCountry(country: string | undefined): PolicyRegion[] {
   const normalized = country?.trim().toLowerCase();
-  if (!normalized) {
+  if (!normalized || normalized === "unknown") {
     return [];
   }
   if (euCountries.has(normalized)) {
@@ -133,7 +133,7 @@ export function applicabilityRuleMatches(
     applicableRegions,
     query.destinationRegion
   );
-  const carrier = query.operatingCarrier ?? query.provider;
+  const carrier = query.operatingCarrier;
 
   if (rule === "origin_region") {
     return hasExplicitRoute ? originMatches : coarseRegionMatch(applicableRegions, query);
@@ -208,7 +208,7 @@ function evaluateRouteScope(
   const { applicability_rule: rule, applicable_regions: regions } = policy;
   const origin = query.originRegion;
   const destination = query.destinationRegion;
-  const carrier = query.operatingCarrier ?? query.provider;
+  const carrier = query.operatingCarrier;
   const carrierRegion =
     query.operatingCarrierRegion ??
     (carrier ? findProviderMatch(carrier, "airline")?.operatingCarrierRegion : undefined);
@@ -451,7 +451,8 @@ function evaluateProviderScope(
     );
   }
 
-  if (!query.provider) {
+  const responsibleProvider = policy.legal_regime === "US_AIRLINE_COMMITMENT" ? query.operatingCarrier : query.provider;
+  if (!responsibleProvider) {
     return condition(
       "provider",
       "Provider scope",
@@ -461,15 +462,15 @@ function evaluateProviderScope(
   }
 
   const matches = policy.applicable_providers.some((provider) =>
-    providersMatch(provider, query.provider)
+    providersMatch(provider, responsibleProvider)
   );
   return condition(
     "provider",
     "Provider scope",
     matches ? "met" : "not_met",
     matches
-      ? `${query.provider} matches the source's provider scope.`
-      : `${query.provider} is outside the source's listed providers.`
+      ? `${responsibleProvider} matches the source's provider scope.`
+      : `${responsibleProvider} is outside the source's listed providers.`
   );
 }
 
@@ -510,7 +511,16 @@ function evaluateRemedyConditions(
   policy: Policy,
   query: RetrievalQuery
 ): PolicyConditionAssessment[] {
-  const conditions: PolicyConditionAssessment[] = [];
+  const conditions: PolicyConditionAssessment[] = [condition(
+    "eligibility_details", "Other remedy requirements", "unknown",
+    policy.applicable_conditions.join("; "), "remedy"
+  )];
+  if (policy.legal_regime === "provider_policy" && /not (?:a )?member|non.member|不是会员|非会员/i.test(query.loyaltyStatus ?? "")) {
+    conditions[0] = condition("eligibility_details", "Membership requirement", "not_met", "Reported non-member status does not meet this member guarantee's requirements.", "remedy");
+  }
+  if (policy.legal_regime === "US_DOT_REFUND" && (query.journeyStage === "completed" || query.acceptedAlternative === true)) {
+    conditions[0] = condition("eligibility_details", "Unused travel and alternatives", "not_met", "This journey was completed or an alternative was accepted. Review any other unused segment separately.", "remedy");
+  }
 
   if (
     (policy.legal_regime === "EU261" || policy.legal_regime === "UK261") &&
@@ -544,12 +554,12 @@ function evaluateRemedyConditions(
         !kind || kind === "unknown"
           ? "unknown"
           : kind === "involuntary"
-            ? "met"
+            ? query.disruptionReason === "oversales" ? "met" : "unknown"
             : "not_met",
         !kind || kind === "unknown"
           ? "Voluntary versus involuntary denied boarding must be confirmed."
           : kind === "involuntary"
-            ? "The passenger reports involuntary denied boarding."
+            ? "The passenger reports involuntary denied boarding; oversales must also be confirmed. Other eligibility conditions remain to be verified."
             : "The passenger reports a voluntary bump, which uses negotiated terms instead of mandatory involuntary compensation.",
         "remedy"
       )

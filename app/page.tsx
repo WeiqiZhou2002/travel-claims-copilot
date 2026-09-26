@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { parseClaimFacts } from "../lib/claimFacts";
+import { FactEditor, RemedySection, OutcomeSection } from "./claim-tools";
 
 import type { ClaimFacts } from "../lib/claimFacts";
 import type { IntakeExtractionMode, IntakeResult } from "../lib/intake";
@@ -69,6 +71,63 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [copiedScriptId, setCopiedScriptId] = useState<string | null>(null);
 
+  const requestVersion = useRef(0);
+  const activeRequest = useRef<AbortController | null>(null);
+  const transcript = useRef<HTMLDivElement>(null);
+  const [remember, setRemember] = useState(false);
+  const [storageReady, setStorageReady] = useState(false);
+  const [failureCategory, setFailureCategory] = useState<IntakeResult["failureCategory"]>();
+  const draftKey = "travel-claim-draft-v1";
+
+  useEffect(() => {
+    const versionRef = requestVersion;
+    const requestRef = activeRequest;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw && raw.length <= 200_000) {
+        const saved = JSON.parse(raw);
+        const parsed = saved.facts ? parseClaimFacts(saved.facts) : null;
+        if (saved.version === 1 && (!saved.facts || parsed?.success)) {
+          setFacts(parsed?.success ? parsed.data : null);
+          setDraft(typeof saved.draft === "string" ? saved.draft.slice(0, 4000) : "");
+          if (Array.isArray(saved.messages) && saved.messages.length <= 20 && saved.messages.every((item: ConversationMessage) =>
+            item && typeof item.id === "string" && typeof item.content === "string" && item.content.length <= 4000 && ["user", "assistant"].includes(item.role))) setMessages(saved.messages);
+          setRemember(true);
+        }
+      }
+    } catch { /* Unavailable or old browser storage does not prevent a new claim. */ }
+    setStorageReady(true);
+    return () => { versionRef.current++; requestRef.current?.abort(); };
+  }, []);
+
+  useEffect(() => {
+    if (!storageReady) return;
+    try {
+      if (remember) localStorage.setItem(draftKey, JSON.stringify({ version: 1, facts, draft, messages: messages.slice(-20) }));
+      else localStorage.removeItem(draftKey);
+    } catch { setError("Browser storage is unavailable. Keep this page open or export your result."); }
+  }, [storageReady, remember, facts, draft, messages]);
+
+  useEffect(() => { if (transcript.current) transcript.current.scrollTop = transcript.current.scrollHeight; }, [messages]);
+
+  async function reanalyzeFacts() {
+    if (!facts || isLoading) return;
+    const version = ++requestVersion.current;
+    const controller = new AbortController(); activeRequest.current = controller;
+    const timer = setTimeout(() => controller.abort(), 30000);
+    setIsLoading(true); setError(""); setResult(null);
+    try {
+      const response = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ facts }), signal: controller.signal });
+      const payload = await response.json();
+      if (version !== requestVersion.current) return;
+      if (!response.ok) { setSafetyNotice(payload.safety ?? null); throw new Error(payload.error ?? "Analysis failed."); }
+      setResult(payload);
+    } catch (error) {
+      if (version === requestVersion.current) setError(error instanceof Error && error.name !== "AbortError" ? error.message : "Request timed out. You can retry.");
+    } finally { clearTimeout(timer); if (version === requestVersion.current) setIsLoading(false); }
+  }
+
   async function submitIntake(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const message = draft.trim();
@@ -76,6 +135,9 @@ export default function Home() {
       return;
     }
 
+    const version = ++requestVersion.current;
+    const controller = new AbortController(); activeRequest.current = controller;
+    const timer = setTimeout(() => controller.abort(), 30000);
     const userMessage: ConversationMessage = {
       id: `user-${Date.now()}`,
       role: "user",
@@ -96,10 +158,12 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ message, facts })
+        body: JSON.stringify({ message, facts }),
+        signal: controller.signal
       });
       const intake = (await intakeResponse.json()) as IntakeResult & { error?: string };
 
+      if (version !== requestVersion.current) return;
       if (!intakeResponse.ok) {
         throw new Error(intake.error ?? "Intake failed.");
       }
@@ -107,6 +171,7 @@ export default function Home() {
       setFacts(intake.facts);
       setExtractionMode(intake.extractionMode);
       setIntakeWarning(intake.warning);
+      setFailureCategory(intake.failureCategory);
       setSafetyNotice(intake.safety ?? null);
 
       if (intake.status === "unsupported") {
@@ -135,20 +200,19 @@ export default function Home() {
         return;
       }
 
-      const description = nextMessages
-        .filter((item) => item.role === "user")
-        .map((item) => item.content)
-        .join("\n");
       const analyzeResponse = await fetch("/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ description, facts: intake.facts })
+        body: JSON.stringify({ facts: intake.facts }),
+        signal: controller.signal
       });
       const analysis = (await analyzeResponse.json()) as AnalysisResult & { error?: string };
 
+      if (version !== requestVersion.current) return;
       if (!analyzeResponse.ok) {
+        setSafetyNotice((analysis as typeof analysis & { safety?: SafetyAssessment }).safety ?? null);
         throw new Error(analysis.error ?? "Analysis failed.");
       }
 
@@ -165,14 +229,17 @@ export default function Home() {
         }
       ]);
     } catch (caughtError) {
-      setResult(null);
-      setError(caughtError instanceof Error ? caughtError.message : "Analysis failed.");
+      if (version !== requestVersion.current) return;
+      setMessages(messages); setDraft(message); setFacts(facts); setResult(result);
+      setError(caughtError instanceof Error && caughtError.name !== "AbortError" ? caughtError.message : "Request timed out. Your answer is restored; you can retry.");
     } finally {
-      setIsLoading(false);
+      clearTimeout(timer);
+      if (version === requestVersion.current) setIsLoading(false);
     }
   }
 
   function resetClaim() {
+    requestVersion.current++; activeRequest.current?.abort(); setIsLoading(false); setFailureCategory(undefined);
     setDraft("");
     setMessages(initialMessages);
     setFacts(null);
@@ -185,8 +252,8 @@ export default function Home() {
   }
 
   async function copyScript(script: Script) {
-    await navigator.clipboard.writeText(script.template);
-    setCopiedScriptId(script.script_id);
+    try { await navigator.clipboard.writeText(script.template); setCopiedScriptId(script.script_id); }
+    catch { setError("Copy failed. Select and copy the script text manually."); }
   }
 
   return (
@@ -224,7 +291,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="max-h-96 space-y-4 overflow-y-auto px-5 py-5 md:px-7" aria-live="polite">
+            <div ref={transcript} className="max-h-96 space-y-4 overflow-y-auto px-5 py-5 md:px-7" aria-live="polite">
               {messages.map((item, index) => (
                 <article
                   className="grid gap-2 md:grid-cols-[92px_1fr]"
@@ -256,6 +323,8 @@ export default function Home() {
                 </span>
                 <textarea
                   className="min-h-28 w-full resize-y rounded-lg border border-ink/15 bg-white p-4 text-base leading-7 text-ink shadow-sm outline-none transition focus:border-mint focus:ring-4 focus:ring-mint/15"
+                  maxLength={4000}
+                  disabled={isLoading}
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="Describe what happened, or answer the follow-up question."
@@ -271,6 +340,8 @@ export default function Home() {
             </form>
           </div>
 
+          <label className="flex items-center gap-2 text-sm text-ink/65"><input type="checkbox" checked={remember} onChange={event => setRemember(event.target.checked)} />Keep this case and the last 20 messages on this device</label>
+          {failureCategory && <p className="text-sm text-ink/60">Automatic extraction was unavailable ({failureCategory.replaceAll("_", " ")}). Review the locally extracted facts.</p>}
           {error ? (
             <div className="rounded-lg border border-coral/30 bg-white px-4 py-3 text-sm font-medium text-coral">
               {error}
@@ -296,6 +367,7 @@ export default function Home() {
             extractionMode={extractionMode}
             warning={intakeWarning}
           />
+          {facts && <FactEditor facts={facts} disabled={isLoading} onChange={next => { setFacts(next); setResult(null); }} onAnalyze={reanalyzeFacts} />}
           <SummaryPanel result={result} />
           {result ? <SuggestedAsks asks={result.suggestedAsks} /> : null}
         </aside>
@@ -308,6 +380,7 @@ export default function Home() {
               {result.handlingPlaybook ? (
                 <HandlingPlaybookSection playbook={result.handlingPlaybook} />
               ) : null}
+              <RemedySection result={result} />
               <PolicySection
                 policies={result.officialBasis}
                 assessments={result.policyAssessments}
@@ -320,6 +393,7 @@ export default function Home() {
                 onCopy={copyScript}
               />
               <Checklist title="Cautions" items={result.cautions} />
+              {facts && <OutcomeSection key={requestVersion.current} facts={facts} result={result} />}
             </>
           )}
         </div>
@@ -365,7 +439,10 @@ function ClaimSnapshot({
       {facts ? (
         <dl className="mt-4 space-y-3 text-sm">
           <FactRow label="Issue" value={issueLabels[facts.issueType] ?? "Needs more detail"} />
-          <FactRow label="Provider" value={facts.provider ?? facts.operatingCarrier ?? "Unknown"} />
+          {facts.providerType === "airline" ? <>
+            <FactRow label="Ticketing provider" value={facts.bookingProvider ?? facts.validatingCarrier ?? "Unknown"} />
+            <FactRow label="Operating carrier" value={facts.operatingCarrier ?? "Unknown"} />
+          </> : <FactRow label="Provider" value={facts.provider ?? "Unknown"} />}
           <FactRow label="Route" value={route || "Unknown"} />
           <FactRow
             label="Event"
@@ -397,7 +474,7 @@ function ClaimSnapshot({
         <p className="mt-4 border-l-2 border-coral/50 pl-3 text-xs leading-5 text-ink/60">
           {warning === "llm_not_configured"
             ? "Using the local fallback because no server-side LLM key is configured."
-            : "The LLM response failed validation, so this turn used the local fallback."}
+            : "Automatic extraction was unavailable, so this turn used local extraction. Please review the facts."}
         </p>
       ) : null}
     </div>
@@ -536,6 +613,7 @@ function SuggestedAsks({ asks }: { asks: SuggestedAsks }) {
         {tiers.map(([label, items]) => (
           <div key={label}>
             <h3 className="text-sm font-semibold text-ink">{label}</h3>
+            {items.length === 0 && <p className="mt-2 text-sm text-ink/60">No additional request is supported by the current facts and local sources.</p>}
             <ul className="mt-2 space-y-2 text-sm leading-6 text-ink/70">
               {items.map((item) => (
                 <li className="border-l-2 border-mint/40 pl-3" key={item}>
@@ -832,8 +910,11 @@ function CaseSection({ cases }: { cases: Case[] }) {
                 <div className="flex flex-col gap-2">
                   <h3 className="text-lg font-semibold text-ink">{item.brand_or_airline}</h3>
                   <p className="text-sm text-ink/60">
-                    {item.provider} · {item.booking_channel} · {item.confidence} record confidence
+                    {item.provider_type === "airline"
+                      ? `Ticketing provider: ${item.provider ?? "Unknown"} · Operating carrier: ${item.carrier ?? "Unknown"}`
+                      : item.provider} · {item.booking_channel} · {item.confidence} record confidence
                   </p>
+                  {item.provider_type === "airline" && item.location_country === "unknown" && <p className="text-xs text-ink/60">Route scope is unverified; compare the original itinerary before relying on this case.</p>}
                   <div className="flex flex-wrap gap-2">
                     <Badge
                       className={

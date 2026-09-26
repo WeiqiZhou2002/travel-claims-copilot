@@ -221,9 +221,10 @@ describe("structured analyze API", () => {
     expect(result.legalRegimes).toEqual(["EU261", "US_DOT_REFUND"]);
     expect(result.controllability).toBe("controllable");
     expect(result.officialBasis[0]?.policy_id).toBe("eu261_regulation_261_2004");
-    expect(result.suggestedAsks.aggressive).toContain(
-      "Fixed EU261 compensation if eligibility is met"
-    );
+    expect(result.remedies).toContainEqual(expect.objectContaining({
+      id: "fixed_compensation", status: "needs_verification",
+      sourceIds: expect.arrayContaining(["eu261_regulation_261_2004"])
+    }));
     expect(result.handlingPlaybook).toMatchObject({
       situation: "completed_disruption",
       contactFirst: {
@@ -278,13 +279,13 @@ describe("structured analyze API", () => {
         officialBasisStatus: "scope_confirmed",
         officialSourceCount: 2,
         reportedCaseCount: expect.any(Number),
-        unresolvedConditionCount: 0
+        unresolvedConditionCount: 1
       })
     );
     expect(policyIds).toContain("eu261_regulation_261_2004");
     expect(result.scripts.map((script: { script_id: string }) => script.script_id)).toEqual([
       "eu261_claim_email_en",
-      "eu261_authority_escalation_en"
+      "us_dot_refund_request_en"
     ]);
   });
 

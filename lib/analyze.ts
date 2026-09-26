@@ -56,8 +56,11 @@ export function claimFactsToExtractedFacts(
 ): ExtractedFacts {
   return {
     description,
+    journeyStage: facts.journeyStage,
+    ticketingProvider: facts.bookingProvider ?? facts.validatingCarrier ?? undefined,
+    acceptedAlternative: facts.acceptedAlternative,
     issueType: facts.issueType,
-    provider: facts.provider ?? facts.operatingCarrier ?? undefined,
+    provider: facts.providerType === "airline" ? facts.operatingCarrier ?? facts.provider ?? undefined : facts.provider ?? undefined,
     providerType: facts.providerType === "unknown" ? undefined : facts.providerType,
     country: facts.origin.country ?? facts.destination.country ?? undefined,
     bookingChannel: facts.bookingChannel === "unknown" ? undefined : facts.bookingChannel,
@@ -66,7 +69,7 @@ export function claimFactsToExtractedFacts(
     arrivalDelayMinutes: facts.arrivalDelayMinutes ?? undefined,
     isOvernight: facts.isOvernight ?? undefined,
     deniedBoardingKind: facts.deniedBoardingKind,
-    operatingCarrier: facts.operatingCarrier ?? facts.provider ?? undefined,
+    operatingCarrier: facts.operatingCarrier ?? undefined,
     operatingCarrierRegion: facts.operatingCarrierRegion ?? undefined,
     originRegion: facts.origin.region ?? undefined,
     destinationRegion: facts.destination.region ?? undefined,
@@ -106,9 +109,14 @@ export function buildAnalysisFromFacts(
 ): AnalysisResult {
   const extractedFacts = claimFactsToExtractedFacts(facts, description);
   const retrieval = retrieveKnowledge(extractedFacts, policies, cases, scripts);
+  const analysis = generateAnalysis(retrieval.facts, retrieval);
+  const handlingPlaybook = buildHandlingPlaybook(facts);
+  if (facts.journeyStage === "completed") {
+    handlingPlaybook.askLadder = [...analysis.suggestedAsks.conservative, ...analysis.suggestedAsks.standard];
+  }
 
   return {
-    ...generateAnalysis(retrieval.facts, retrieval),
-    handlingPlaybook: buildHandlingPlaybook(facts)
+    ...analysis,
+    handlingPlaybook
   };
 }

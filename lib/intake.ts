@@ -1,3 +1,4 @@
+import { arrivalDelayFromText, affirmativeDisruptionText } from "./factText";
 import {
   emptyClaimFacts,
   getMissingIntakeFields,
@@ -15,7 +16,8 @@ import {
   type StructuredOutputClient
 } from "./llm";
 import { claimFactsJsonSchema } from "./claimFacts";
-import { assessHighRiskClaim, type SafetyAssessment } from "./safety";
+import { assessClaimSafety, type SafetyAssessment } from "./safety";
+import { findProviderMatch } from "./provider";
 
 export type IntakeStatus = "needs_info" | "ready" | "unsupported";
 export type IntakeExtractionMode = "llm" | "deterministic";
@@ -27,6 +29,7 @@ export type IntakeResult = {
   question: string | null;
   extractionMode: IntakeExtractionMode;
   warning?: "llm_not_configured" | "llm_fallback_used";
+  failureCategory?: "timeout" | "authentication" | "rate_limit" | "input_budget" | "invalid_output" | "upstream";
   safety?: SafetyAssessment;
 };
 
@@ -51,6 +54,7 @@ Rules:
 - disruptionTiming describes when the disruption was handled: planned_schedule_change for an advance change, close_in_irrops for a disruption on or close to travel, or unknown. Do not infer an exact boundary unless the message supplies timing.
 - Distinguish the booking provider, validating/ticketing carrier, marketing carrier, operating carrier, and carrier that caused the disruption. Keep a role null when it is not stated or safely implied.
 - ticketType is award only when miles, points, or a frequent-flyer program issued the airline ticket. Otherwise use cash only when paid travel is clear.
+- acceptedAlternative is true only when the user accepted or used an offered alternative flight, credit or voucher; false only when explicitly declined. An automatic rebooking alone does not establish acceptance.
 - autoRebooked records whether the airline or ticketing agent already supplied a replacement itinerary. Preserve the itinerary text when stated.
 - recoveryPriorities may only contain preferences explicitly expressed by the user. preferredAlternatives contains specific flights, dates, routes, or airports the user asks for.
 - A hotel with no room for a confirmed guest is hotel_walk.
@@ -61,18 +65,7 @@ Rules:
 - Route regions determine which policies may apply; do not encode EU261 or another legal regime as the issue type.
 - Return only the schema-defined structured output.`;
 
-const numberWords: Record<string, number> = {
-  one: 1,
-  two: 2,
-  three: 3,
-  four: 4,
-  five: 5,
-  six: 6,
-  seven: 7,
-  eight: 8,
-  nine: 9,
-  ten: 10
-};
+
 
 function isChinese(text: string): boolean {
   return /[\p{Script=Han}]/u.test(text);
@@ -143,26 +136,8 @@ function selectGroundedRouteLocation(
   return llm;
 }
 
-function extractArrivalDelayMinutes(text: string): number | null {
-  const normalized = text.toLowerCase();
-  const digitHours = normalized.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|小时)/);
-  if (digitHours) {
-    return Math.round(Number(digitHours[1]) * 60);
-  }
-
-  const wordHours = normalized.match(
-    new RegExp(`\\b(${Object.keys(numberWords).join("|")})\\s+hours?\\b`)
-  );
-  if (wordHours) {
-    return numberWords[wordHours[1]] * 60;
-  }
-
-  const minutes = normalized.match(/(\d+)\s*(?:minutes?|mins?|分钟)/);
-  return minutes ? Number(minutes[1]) : null;
-}
-
 function inferDisruptionType(text: string): ClaimFacts["disruptionType"] {
-  const normalized = text.toLowerCase();
+  const normalized = affirmativeDisruptionText(text);
   if (/cancelled|canceled|cancellation|取消/.test(normalized)) {
     return "cancellation";
   }
@@ -195,6 +170,10 @@ function reportsReasonUnavailable(text: string): boolean {
 
 function inferJourneyStage(text: string): ClaimFacts["journeyStage"] {
   const normalized = text.toLowerCase();
+  // An event which has not happened cannot establish a completed journey.
+  if (/not arrived|haven't arrived|还没(?:有)?(?:起飞|到达)|尚未(?:起飞|到达)|不知道最终/.test(normalized)) {
+    return "unknown";
+  }
   if (
     /(?:arrived|reached) (?:at )?(?:my |the )?final destination|arrived.{0,20}late|trip (?:is |was )?(?:over|complete|completed)|(?:已经|最终).{0,10}(?:到达|抵达|晚到)|行程(?:已经)?结束|已经飞完/.test(
       normalized
@@ -420,7 +399,7 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
   const extracted = classifyInput(message);
   const route = inferRouteLocations(message);
   const disruptionType = inferDisruptionType(message);
-  const delayMinutes = extractArrivalDelayMinutes(message);
+  const delayMinutes = arrivalDelayFromText(message, getMissingIntakeFields(current).includes("arrivalDelayMinutes"));
   const inferredJourneyStage = inferJourneyStage(message);
   const journeyStage =
     inferredJourneyStage === "unknown" ? current.journeyStage : inferredJourneyStage;
@@ -455,15 +434,19 @@ function mergeDeterministicFacts(message: string, current: ClaimFacts): ClaimFac
       : current.providerType;
   const provider = extracted.provider ?? current.provider;
   const inferredValidatingCarrier =
+    (extracted.ticketingProvider ? findProviderMatch(extracted.ticketingProvider, "airline")?.provider : null) ??
     carrierForAwardProgram(awardProgram) ??
     (providerType === "airline" && bookingChannel === "direct" ? provider : null);
   const bookingProvider =
     detectedBookingProvider ??
+    extracted.ticketingProvider ??
     (bookingChannel === "direct" ? provider : current.bookingProvider);
   const allowRouteReplacement = reportsRouteCorrection(message);
 
   return normalizeClaimFacts({
     ...current,
+    acceptedAlternative: /(?:did not|didn't|have not|haven't) (?:accept|use)|拒绝(?:了)?(?:改签|代金券)|没有接受/.test(message.toLowerCase()) ? false
+      : /(?:accepted|used|took|flew on) (?:the |an? )?(?:offered |replacement |alternative |rebooked )?(?:flight|transportation|voucher|credit)|接受了(?:改签|代金券)|乘坐了改签/.test(message.toLowerCase()) ? true : current.acceptedAlternative,
     issueType: incomingIssue,
     providerType,
     provider,
@@ -535,6 +518,8 @@ function mergeLlmFactsWithDeterministic(
 
   return normalizeClaimFacts({
     ...deterministicFacts,
+    acceptedAlternative: deterministicFacts.acceptedAlternative !== currentFacts.acceptedAlternative
+      ? deterministicFacts.acceptedAlternative : llmFacts.acceptedAlternative ?? deterministicFacts.acceptedAlternative,
     issueType:
       deterministicIssueIsExplicit || llmFacts.issueType === "unknown"
         ? deterministicFacts.issueType
@@ -768,11 +753,13 @@ async function extractWithLlm(
   message: string,
   currentFacts: ClaimFacts
 ): Promise<ClaimFacts> {
+  const input = JSON.stringify({ priorFacts: currentFacts, latestUserMessage: message });
+  if (input.length > 20_000) throw new Error("Intake input budget exceeded");
   const raw = await client.generate<unknown>({
     schemaName: "travel_claim_facts",
     schema: claimFactsJsonSchema as unknown as Record<string, unknown>,
     instructions: intakeInstructions,
-    input: JSON.stringify({ priorFacts: currentFacts, latestUserMessage: message })
+    input
   });
   const parsed = parseClaimFacts(raw);
   if (!parsed.success) {
@@ -787,11 +774,11 @@ export async function processIntake(
   currentFacts: ClaimFacts = emptyClaimFacts(),
   dependencies: IntakeDependencies = {}
 ): Promise<IntakeResult> {
-  const safety = assessHighRiskClaim(message);
+  const safety = assessClaimSafety(message, currentFacts);
   if (safety) {
     return {
       status: "unsupported",
-      facts: currentFacts,
+      facts: { ...currentFacts, riskContext: [...(currentFacts.riskContext ?? []), message.slice(0, 1500)].slice(-32) },
       missingFields: [],
       question: null,
       extractionMode: "deterministic",
@@ -806,6 +793,8 @@ export async function processIntake(
   let facts: ClaimFacts;
   let extractionMode: IntakeExtractionMode = "deterministic";
   let warning: IntakeResult["warning"];
+  let failureCategory: IntakeResult["failureCategory"];
+  const started = Date.now();
 
   if (configuredClient) {
     try {
@@ -817,16 +806,31 @@ export async function processIntake(
         reportsRouteCorrection(message)
       );
       extractionMode = "llm";
-    } catch {
+    } catch (error) {
       facts = deterministicFacts;
       warning = "llm_fallback_used";
+      const detail = error instanceof Error ? error.message : "";
+      failureCategory = error instanceof Error && error.name === "AbortError" ? "timeout"
+        : /HTTP (401|403)/.test(detail) ? "authentication"
+          : /HTTP 429/.test(detail) ? "rate_limit"
+            : /input budget/.test(detail) ? "input_budget"
+              : error instanceof SyntaxError || /invalid claim facts|structured output|truncated/.test(detail) ? "invalid_output" : "upstream";
     }
   } else {
     facts = deterministicFacts;
     warning = "llm_not_configured";
   }
 
+  const extractedSafety = assessClaimSafety(message, facts);
+  if (extractedSafety) return {
+    status: "unsupported", facts: { ...facts, riskContext: [...(currentFacts.riskContext ?? []), message.slice(0, 1500)].slice(-32) },
+    missingFields: [], question: null, extractionMode, safety: extractedSafety
+  };
   const missingFields = getMissingIntakeFields(facts);
+  if (process.env.NODE_ENV !== "test") console.info(JSON.stringify({
+    event: "intake_complete", requestId: crypto.randomUUID(), durationMs: Date.now() - started,
+    extractionMode, failureCategory, missingFieldCount: missingFields.length
+  }));
   return {
     status: missingFields.length === 0 ? "ready" : "needs_info",
     facts,
@@ -836,6 +840,7 @@ export async function processIntake(
         ? questionForMissingFields(missingFields, isChinese(message), facts)
         : null,
     extractionMode,
+    ...(failureCategory ? { failureCategory } : {}),
     ...(warning ? { warning } : {})
   };
 }

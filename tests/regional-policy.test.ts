@@ -230,9 +230,10 @@ describe("regional policy applicability", () => {
 
     expect(result.policyRegions).toEqual(["CA", "US"]);
     expect(result.legalRegimes).toContain("CA_APPR");
-    expect(result.suggestedAsks.standard).toContain(
-      "Rebooking or refund under the applicable APPR conditions"
-    );
+    const refund = result.remedies.find(item => item.id === "refund");
+    expect(refund?.status).toBe("needs_verification");
+    expect(refund?.sourceIds).toContain(result.officialBasis.find(item => item.legal_regime === "CA_APPR")?.policy_id);
+    expect(result.suggestedAsks.standard).toContain(refund?.request);
   });
 
   it("retrieves Australian consumer guarantees without inventing fixed compensation", () => {

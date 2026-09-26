@@ -88,6 +88,7 @@ const caseFields = [
   "source_url",
   "provider_type",
   "provider",
+  "carrier",
   "brand_or_airline",
   "issue_type",
   "location_country",
@@ -112,6 +113,14 @@ const communityUrls = new Set();
 for (const item of cases) {
   const label = `case ${item.case_id ?? "<unknown>"}`;
   requireFields(item, caseFields, label);
+  for (const field of ["provider", "carrier"]) {
+    if (item[field] !== null && (typeof item[field] !== "string" || !item[field].trim())) {
+      throw new Error(`${label}.${field} must be a non-empty string or null.`);
+    }
+  }
+  if (item.provider_type !== "airline" && item.carrier !== null) {
+    throw new Error(`${label}.carrier is only valid for airline cases.`);
+  }
   requireEnum(item.source_type, ["community_dp", "user_submitted", "synthetic_example"], label);
   requireEnum(item.provider_type, ["hotel", "airline", "credit_card", "ota"], label);
   requireEnum(item.booking_channel, ["direct", "ota", "portal", "unknown"], label);

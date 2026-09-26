@@ -251,19 +251,36 @@ export function rankCases(
   const queryHotelGroup =
     query.providerType === "hotel" ? canonicalHotelGroup(query.provider) : undefined;
   const candidates = cases.filter((item) => {
-    if (item.review_status !== "approved" || !aliases.has(item.issue_type)) {
+    if (item.review_status !== "approved" || item.source_type === "synthetic_example" || !aliases.has(item.issue_type)) {
       return false;
+    }
+    const candidateReason = [item.facts, item.actual_outcome].join(" ");
+    if (query.disruptionReason && query.disruptionReason !== "unknown") {
+      const opposite = query.disruptionReason === "weather" ? ["crew", "mechanical"] as const : ["weather"] as const;
+      if (opposite.some(reason => candidateHasDisruptionReason(reason, candidateReason)) && !candidateHasDisruptionReason(query.disruptionReason, candidateReason)) return false;
+    }
+    if (query.deniedBoardingKind && query.deniedBoardingKind !== "unknown") {
+      const kind = detectDeniedBoardingKind(candidateReason);
+      if (kind !== "unknown" && kind !== query.deniedBoardingKind) return false;
     }
     if (queryHotelGroup) {
       const caseHotelGroup =
         canonicalHotelGroup(item.provider) ?? canonicalHotelGroup(item.brand_or_airline);
       return item.provider_type === "hotel" && caseHotelGroup === queryHotelGroup;
     }
-    if (item.provider_type !== "airline" || query.policyRegions.length === 0) {
-      return true;
+    if (item.provider_type !== "airline") return true;
+    // Without route geography, a shared incident alone is too weak a basis
+    // for borrowing another airline's outcome from a different jurisdiction.
+    if (query.policyRegions.length === 0) {
+      return providersMatch(query.carrier, item.carrier) || providersMatch(query.ticketingProvider, item.provider);
     }
 
     const caseRegions = policyRegionsFromCountry(item.location_country);
+    // A newly imported case may not have normalized geography yet. Only a
+    // matching issuer/carrier pair can rescue it, as a conditional analogue.
+    if (caseRegions.length === 0) {
+      return providersMatch(query.carrier, item.carrier) && providersMatch(query.ticketingProvider, item.provider);
+    }
     return caseRegions.some((region) => query.policyRegions.includes(region));
   });
 
@@ -271,6 +288,7 @@ export function rankCases(
     const result: ScoredRetrievalItem<Case> = { item, score: 0, reasons: [] };
     const candidateText = [
       item.provider,
+      item.carrier,
       item.brand_or_airline,
       item.facts,
       item.actual_outcome,
@@ -279,7 +297,18 @@ export function rankCases(
     ].join(" ");
 
     addIssueScore(result, query, item.issue_type);
-    addProviderScore(result, query.provider, item.provider);
+    if (item.provider_type === "airline") {
+      const issuerMatches = providersMatch(query.ticketingProvider, item.provider);
+      const carrierMatches = providersMatch(query.carrier, item.carrier);
+      if (issuerMatches) addScore(result, 20, "ticketing_provider_match");
+      if (carrierMatches) addScore(result, 20, "carrier_match");
+      if (issuerMatches && carrierMatches) addScore(result, 10, "provider_carrier_pair_match");
+      if (query.policyRegions.length > 0 && policyRegionsFromCountry(item.location_country).length === 0) {
+        addScore(result, -10, "route_scope_unknown");
+      }
+    } else {
+      addProviderScore(result, query.provider, item.provider ?? "");
+    }
 
     if (query.providerType === item.provider_type) {
       addScore(result, 8, "provider_type_match");
@@ -394,6 +423,9 @@ export function rankScripts(
   scripts: Script[]
 ): ScoredRetrievalItem<Script>[] {
   const candidates = scripts.filter((script) => {
+    if (script.required_denied_boarding_kind && script.required_denied_boarding_kind !== query.deniedBoardingKind) return false;
+    // Escalation needs a previous provider response, which intake does not yet verify.
+    if (script.channel === "regulator_complaint") return false;
     const incidentMatches = script.incident_types.some(
       (incidentType) => incidentType === query.issueType
     );

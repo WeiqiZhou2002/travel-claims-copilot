@@ -1,5 +1,6 @@
+import { MAX_FACT_STRING_LENGTH, MAX_FACT_ARRAY_ITEMS } from "./inputLimits";
 import { enrichClaimJurisdiction } from "./jurisdiction";
-import { canonicalizeProviderName } from "./provider";
+import { canonicalizeProviderName, findProviderMatch } from "./provider";
 import type { MvpIssueType, PolicyRouteRegion } from "./types";
 
 export type ClaimIssueType = MvpIssueType | "unknown";
@@ -58,6 +59,8 @@ export type ClaimLocation = {
 };
 
 export type ClaimFacts = {
+  riskContext?: string[];
+  acceptedAlternative: boolean | null;
   issueType: ClaimIssueType;
   providerType: ClaimProviderType;
   provider: string | null;
@@ -181,7 +184,7 @@ const recoveryPriorities: ClaimRecoveryPriority[] = [
 const confidenceLevels: ClaimFacts["confidence"][] = ["low", "medium", "high"];
 
 const nullableStringSchema = {
-  anyOf: [{ type: "string" }, { type: "null" }]
+  anyOf: [{ type: "string", maxLength: MAX_FACT_STRING_LENGTH }, { type: "null" }]
 } as const;
 const locationSchema = {
   type: "object",
@@ -199,6 +202,7 @@ export const claimFactsJsonSchema = {
   type: "object",
   additionalProperties: false,
   properties: {
+    acceptedAlternative: { anyOf: [{ type: "boolean" }, { type: "null" }] },
     issueType: { type: "string", enum: issueTypes },
     providerType: { type: "string", enum: providerTypes },
     provider: nullableStringSchema,
@@ -229,17 +233,18 @@ export const claimFactsJsonSchema = {
       type: "array",
       items: { type: "string", enum: recoveryPriorities }
     },
-    preferredAlternatives: { type: "array", items: { type: "string" } },
+    preferredAlternatives: { type: "array", maxItems: MAX_FACT_ARRAY_ITEMS, items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH } },
     hasConnectionsOrReturnSegments: {
       anyOf: [{ type: "boolean" }, { type: "null" }]
     },
     loyaltyStatus: nullableStringSchema,
-    expenses: { type: "array", items: { type: "string" } },
-    evidence: { type: "array", items: { type: "string" } },
+    expenses: { type: "array", maxItems: MAX_FACT_ARRAY_ITEMS, items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH } },
+    evidence: { type: "array", maxItems: MAX_FACT_ARRAY_ITEMS, items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH } },
     userGoal: nullableStringSchema,
     confidence: { type: "string", enum: confidenceLevels }
   },
   required: [
+    "acceptedAlternative",
     "issueType",
     "providerType",
     "provider",
@@ -281,6 +286,7 @@ export function emptyClaimLocation(): ClaimLocation {
 
 export function emptyClaimFacts(): ClaimFacts {
   return {
+    acceptedAlternative: null,
     issueType: "unknown",
     providerType: "unknown",
     provider: null,
@@ -338,7 +344,7 @@ function parseNullableString(value: unknown, path: string, errors: string[]): st
   if (value === null) {
     return null;
   }
-  if (typeof value === "string") {
+  if (typeof value === "string" && value.length <= MAX_FACT_STRING_LENGTH) {
     const trimmed = value.trim();
     return trimmed || null;
   }
@@ -348,7 +354,7 @@ function parseNullableString(value: unknown, path: string, errors: string[]): st
 }
 
 function parseStringArray(value: unknown, path: string, errors: string[]): string[] {
-  if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
+  if (!Array.isArray(value) || value.length > MAX_FACT_ARRAY_ITEMS || value.some((item) => typeof item !== "string" || item.length > MAX_FACT_STRING_LENGTH)) {
     errors.push(`${path} must be an array of strings`);
     return [];
   }
@@ -387,7 +393,7 @@ function parseRecoveryPriorities(
   if (value === undefined) {
     return [];
   }
-  if (!Array.isArray(value)) {
+  if (!Array.isArray(value) || value.length > MAX_FACT_ARRAY_ITEMS) {
     errors.push("recoveryPriorities must be an array");
     return [];
   }
@@ -436,6 +442,8 @@ export function parseClaimFacts(value: unknown): ClaimFactsParseResult {
     : (errors.push("isOvernight must be a boolean or null"), null);
 
   const facts: ClaimFacts = {
+    riskContext: value.riskContext === undefined ? [] : parseStringArray(value.riskContext, "riskContext", errors),
+    acceptedAlternative: parseOptionalBoolean(value.acceptedAlternative, "acceptedAlternative", errors),
     issueType: parseEnum(value.issueType, issueTypes, "issueType", errors) ?? "unknown",
     providerType:
       parseEnum(value.providerType, providerTypes, "providerType", errors) ?? "unknown",
@@ -573,6 +581,7 @@ export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
     validatingCarrier: canonicalizeProviderName(normalized.validatingCarrier, "airline"),
     marketingCarrier: canonicalizeProviderName(normalized.marketingCarrier, "airline"),
     operatingCarrier: canonicalizeProviderName(normalized.operatingCarrier, "airline"),
+    operatingCarrierRegion: normalized.operatingCarrier ? findProviderMatch(normalized.operatingCarrier, "airline")?.operatingCarrierRegion ?? null : null,
     disruptingCarrier: canonicalizeProviderName(normalized.disruptingCarrier, "airline"),
     disruptionType,
     disruptionReasonStatus
@@ -607,7 +616,8 @@ export function getMissingClaimFields(facts: ClaimFacts): ClaimFactField[] {
     if (!hasLocation(normalized.destination)) {
       missing.push("destination");
     }
-    if (normalized.issueType === "airline_delay" && normalized.arrivalDelayMinutes === null) {
+    if (normalized.issueType === "airline_delay" && normalized.arrivalDelayMinutes === null &&
+        normalized.journeyStage === "completed") {
       missing.push("arrivalDelayMinutes");
     }
     if (
