@@ -1,4 +1,3 @@
-import { deterministicFactExtractor } from "./classifier";
 import { generateAnalysis } from "./generator";
 import { buildHandlingPlaybook } from "./handlingPlaybook";
 import { controllabilityFromReason } from "./policyScope";
@@ -6,22 +5,13 @@ import { retrieveKnowledge } from "./retrieval";
 import type { ClaimFacts } from "./claimFacts";
 import type {
   AnalysisResult,
-  AnalyzeOptions,
   Case,
   ExtractedFacts,
   PolicyRegion,
   Policy,
   Script
 } from "./types";
-import type { FactExtractor } from "./classifier";
 
-export {
-  classifyInput,
-  classifyIssue,
-  DeterministicFactExtractor,
-  deterministicFactExtractor
-} from "./classifier";
-export type { FactExtractor } from "./classifier";
 export { generateAnalysis } from "./generator";
 export {
   getIssueAliases,
@@ -79,25 +69,6 @@ export function claimFactsToExtractedFacts(
     signals: [],
     source: "llm"
   };
-}
-
-export type AnalysisDependencies = {
-  factExtractor?: FactExtractor;
-};
-
-export async function buildAnalysisResult(
-  description: string,
-  policies: Policy[],
-  cases: Case[],
-  scripts: Script[],
-  options: AnalyzeOptions = {},
-  dependencies: AnalysisDependencies = {}
-): Promise<AnalysisResult> {
-  const factExtractor = dependencies.factExtractor ?? deterministicFactExtractor;
-  const facts = await factExtractor.extract(description, options);
-  const retrieval = retrieveKnowledge(facts, policies, cases, scripts);
-
-  return generateAnalysis(retrieval.facts, retrieval);
 }
 
 export function buildAnalysisFromFacts(

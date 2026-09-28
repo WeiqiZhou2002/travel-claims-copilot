@@ -12,3 +12,5 @@ pnpm-debug.log*
 
 # Local review database; back up before moving machines.
 .local/
+
+.DS_Store

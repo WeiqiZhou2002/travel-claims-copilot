@@ -7,7 +7,8 @@ This repo implements Travel Claims Copilot: a travel disruption claims intellige
 Read these files before making product or architecture decisions:
 - PROJECT_BRIEF.md
 - DATA_SCHEMA.md
-- ROADMAP.md, if present
+- docs/ARCHITECTURE.md
+- docs/STATUS.md
 
 ## Product Goal
 
@@ -35,7 +36,7 @@ High-risk issues such as injury, litigation, large property loss, or complex ins
 
 ## Recommended Implementation Direction
 
-Prefer a simple deterministic workflow over a complex autonomous agent.
+Use LLM-only natural-language fact extraction; fail clearly without regex fallback. Keep deterministic schema checks, retrieval, eligibility conditions and safety boundaries.
 
 Initial workflow:
 1. Extract structured facts from user input.
@@ -71,10 +72,9 @@ Start with local JSON files if faster. Later migrate to Supabase Postgres and pg
 
 Only support these initial issue types:
 - hotel_walk
-- controllable_airline_delay
-- controllable_airline_cancellation
+- airline_delay
+- airline_cancellation
 - denied_boarding
-- eu261_delay_or_cancellation
 
 Do not build:
 - payments
@@ -93,7 +93,7 @@ Home page:
 
 Result page:
 - issue type
-- case strength
+- evidence coverage
 - official basis
 - similar cases
 - suggested asks

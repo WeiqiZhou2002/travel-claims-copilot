@@ -1,7 +1,7 @@
 [
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-513378-op",
+    "dp_id": "dp-8c6d426241fc96ccea1f",
     "event": {
       "description": "ANA里程出票的联程中，国航CA951取消。",
       "occurred_at": {
@@ -198,7 +198,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-485645-op",
+    "dp_id": "dp-1c92b0d611be2a425396",
     "event": {
       "description": "AS出票的AA航班取消，改签后旧航段仍显示且选座报错。",
       "occurred_at": {

@@ -165,6 +165,6 @@ AnalysisResult includes `remedies`; suggested requests and script filtering use 
 
 ## DP 人工审核与发布
 
-采集 DP v0.3 与产品检索用 Case 分开保存。审核记录保存 original、current、version、history 及 publication，状态为 pending / needs_evidence / approved / excluded。只有通过证据门槛并由人工确认的版本才生成 Case 发布快照；修改、撤回或排除立即移除快照。provider 与 carrier 分别保留，不相互回填。
+采集 DP v0.3 与产品检索用 Case 分开保存。审核记录保存 original、current、version、history 及 publication，状态为 pending / needs_evidence / approved / excluded。只有通过证据门槛并由人工确认的版本才生成 Case 发布快照；修改、撤回或排除立即移除本地快照；重新导出并部署后线上同步移除。provider 与 carrier 分别保留，不相互回填。
 
-本地持久化位于 `.local/dp-review/store.json`，产品通过 `loadCaseLibrary` 合并种子案例与已发布快照。具体契约、远程数据库边界和恢复流程见 [DP 审核工作台](docs/dp-review.md)。
+本地持久化位于 `.local/dp-review/store.json`，产品通过 `loadCaseLibrary` 静态合并种子案例与 `data/reviewed-cases.json` 发布快照，不读取本地审核存储。具体契约、远程数据库边界和恢复流程见 [DP 审核工作台](docs/dp-review.md)。

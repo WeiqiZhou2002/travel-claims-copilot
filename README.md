@@ -1,504 +1,60 @@
 # Travel Claims Copilot
 
-Travel Claims Copilot is a demo web app for exploring travel disruption claims and communication strategy.
+旅行异常事实整理、依据检索与沟通助手。当前支持酒店到店无房、航班延误、取消、拒载 / 自愿让座；事件类型与法律适用分开。
 
-The user describes a hotel or airline issue, and the app returns:
+应用不提供法律意见，不保证赔付，不发送投诉或提交索赔。官方法规、企业承诺、社区案例分别展示。伤害、诉讼、重大财产损失和复杂保险争议转专业帮助提示。
 
-- issue type
-- who to contact first and a conditional handling playbook
-- evidence coverage and unresolved applicability checks
-- relevant official policies or regulations
-- similar community datapoints
-- conservative / standard / aggressive asks
-- evidence checklist
-- reusable communication scripts
-- cautions and uncertainty
+## 运行
 
-The product does **not** provide legal advice, promise compensation, or submit claims for users. It helps users organize facts, find relevant references, and prepare reasonable requests.
-
-## Current Status
-
-This repo has a structured MVP plus a multi-turn operational-intent workflow.
-
-The app currently uses:
-
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- local JSON seed data
-- optional multi-turn LLM fact extraction through OpenAI Responses or DeepSeek Chat Completions
-- strict `ClaimFacts` JSON Schema validation with incident and jurisdiction kept separate
-- operational intent for trip stage, ticket ownership, award travel, rebooking, and recovery priorities
-- deterministic contact-first and handling-playbook generation
-- deterministic local extraction when no API key is configured or a model call fails
-- explainable weighted retrieval with deterministic Top-K results
-- approved-case filtering and deterministic response generation
-- pre-LLM safety routing for unsupported high-risk claims
-- bounded intake and analysis inputs
-- Vitest golden-scenario and quality-guard tests
-
-There is no database, login, payment, scraping, email sending, or claim submission. Conversation
-state currently stays in the browser and is not persisted.
-
-The current knowledge base contains 10 policies, 55 reviewed case records (35 approved for
-retrieval), and 14 reusable scripts. The first demo publishes four incident types:
-
-- `hotel_walk`
-- `airline_delay`
-- `airline_cancellation`
-- `denied_boarding`
-
-EU261, UK261, Canada APPR, US DOT, Australian Consumer Law, Chinese civil-aviation regulations,
-and provider commitments are policy scopes selected from route direction, operating carrier,
-provider, and controllability. They are not incident types.
-
-## How To Run
-
-Install dependencies:
+建议使用 Node.js 22 LTS 或 24 LTS。
 
 ```bash
-npm install
+npm ci
+cp .env.example .env.local
+# 在 .env.local 配置一个服务端 LLM provider 和 API key
+npm run dev -- --hostname 127.0.0.1
 ```
 
-Start the local dev server:
+打开 `http://127.0.0.1:3000`。可使用现有 OpenAI 或 DeepSeek 适配器，环境变量见 [.env.example](.env.example)。密钥不得使用 `NEXT_PUBLIC_` 前缀或提交进仓库。
+
+**自然语言事实抽取完全依赖 LLM。** 未配置、超时、限流或输出校验失败时返回明确错误，页面恢复输入供重试，不使用正则回退，也不以规则覆盖模型事实。已确认的结构化事实仍可直接重新分析。检索、适用条件检查、范围保护和模板生成保留确定性逻辑。
+
+## DP 审核与发布
+
+开发环境打开 `http://127.0.0.1:3000/review`。支持候选 JSON 导入、provider / carrier 分开编辑、来源核对、补证、审核通过、排除和撤回。生产环境不开放审核页面和接口。
+
+审核文件存于 `.local/dp-review/store.json`，不会提交。页面审核后，显式生成发布快照：
 
 ```bash
-npm run dev
+npm run publish:cases
+npm run validate:data
+# 检查 data/reviewed-cases.json 的 diff，再提交、推送和部署
 ```
 
-To enable LLM-assisted intake, copy `.env.example` to `.env.local` and configure one provider.
-For OpenAI:
+线上只读取版本管理中的 `data/cases.json` 和 `data/reviewed-cases.json`，不访问本地审核文件、不扫描 research。**审核通过不等于已经上线；修改或撤回后也必须重新导出并部署，旧部署才会更新。** 导出失败不覆盖上一份发布快照。
+
+`scripts/export-dp-cases.mjs` 仍然只生成未审核预览，不能代替 `publish:cases`。
+
+详情见 [审核操作与恢复](docs/dp-review.md)。推送分支不是部署，也不自动合并到 main。
+
+## 验证与格式
 
 ```bash
-LLM_PROVIDER=openai
-OPENAI_API_KEY=your_key_here
-OPENAI_INTAKE_MODEL=gpt-5.6-luna
-```
-
-For DeepSeek:
-
-```bash
-LLM_PROVIDER=deepseek
-DEEPSEEK_API_KEY=your_key_here
-DEEPSEEK_INTAKE_MODEL=deepseek-v4-flash
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-```
-
-For backward compatibility, a DeepSeek setup using `OPENAI_API_KEY`, a `deepseek-*` model, and
-`OPENAI_BASE_URL=https://api.deepseek.com/` is detected automatically. The obsolete bare model
-name `deepseek-v4` is normalized to `deepseek-v4-flash`. Without a configured key, the same UI
-uses the deterministic fallback and labels it as `Local`.
-
-Open:
-
-```text
-http://localhost:3000
-```
-
-Build for production:
-
-```bash
+npm test
+npm run validate:data
+npm run lint
+npm run format:check
 npm run build
 ```
 
-Validate the data and run the retrieval test suite:
+`npm run format` 统一格式。单元测试使用模型返回值 fixture 检查处理契约，不证明真实模型的语义准确率。运行 `npm run eval:intake` 会调用配置的外部模型并产生 API 用量；默认测试跳过这些在线评测。
 
-```bash
-npm run validate:data
-npm test
-```
+## 文档导航
 
-## Demo Test Inputs
+- [架构、边界和后续扩展](docs/ARCHITECTURE.md)
+- [当前状态与待办](docs/STATUS.md)
+- [数据契约](DATA_SCHEMA.md)
+- [领域词汇](CONTEXT.md)
+- [DP 审核工作台](docs/dp-review.md)
 
-Hotel walk:
-
-```text
-I had a confirmed Marriott Sheraton reservation booked directly, but when I arrived the front desk said the hotel was oversold and had no room. They moved me to a cheaper nearby hotel and did not offer compensation.
-```
-
-Airline cancellation with a controllable reason:
-
-```text
-United cancelled my flight because of a crew issue and rebooked me for tomorrow morning. The airport agent said they would not provide a hotel or meal voucher.
-```
-
-Airline delay with a controllable reason:
-
-```text
-My American Airlines flight was delayed overnight because of a mechanical problem.
-```
-
-Denied boarding / voluntary bump:
-
-```text
-Delta oversold my flight and the gate agent asked for volunteers to take a flight the next day.
-```
-
-EU-region cancellation:
-
-```text
-My Air France flight from Paris was cancelled and I arrived at my final destination four hours late.
-```
-
-## Project Structure
-
-```text
-app/
-  api/
-    intake/route.ts       Multi-turn structured fact intake API
-    analyze/route.ts      Deterministic structured analysis API
-    scenarios/route.ts    Scenario catalog API
-  page.tsx                Frontend demo page
-
-data/
-  policies.json           Official policy / regulation data
-  cases.json              Consolidated, quality-reviewed case data
-  scripts.json            Communication script data
-  README.md               Review rules and current quality summary
-
-lib/
-  claimFacts.ts           ClaimFacts types, JSON Schema, validation, and missing fields
-  jurisdiction.ts         Location, carrier, EU261, and UK261 route enrichment
-  policyScope.ts          Route applicability and controllability rules
-  intake.ts               Multi-turn extraction, fact merging, questions, and fallback
-  handlingPlaybook.ts     Contact-first, ask ladder, ticket checks, and escalation rules
-  llm.ts                  OpenAI and DeepSeek structured-output adapters
-  analyze.ts              Structured-facts and legacy-description orchestration
-  classifier.ts           Structured fact extraction and issue classification
-  retrieval.ts            Top-K local JSON policy/case/script retrieval
-  retrievalScoring.ts     Explainable, deterministic ranking rules
-  generator.ts            Deterministic AnalysisResult generation
-  scenarios.ts            Scenario summary builder
-  issueTaxonomy.ts        Issue labels, aliases, and normalization
-  types.ts                Shared TypeScript types
-
-tests/
-  claimFacts.test.ts      Schema, jurisdiction, and structured API tests
-  intake.test.ts          LLM client, fallback, and multi-turn API tests
-  intake-evals.test.ts    Colloquial and multi-turn evaluation conversations
-  handlingPlaybook.test.ts Operational workflow decision tests
-  retrieval.test.ts       Five golden scenarios plus classification/retrieval guards
-```
-
-## Current Pipeline
-
-The current product flow separates semantic intake from deterministic analysis:
-
-```text
-natural user message + prior ClaimFacts
-  -> POST /api/intake
-  -> provider-specific LLM structured output, or deterministic fallback
-  -> server validation + jurisdiction enrichment + missing-field calculation
-  -> targeted follow-up question until ready
-  -> POST /api/analyze with validated ClaimFacts
-  -> incident + jurisdiction facts and operational trip/ticket facts remain separate
-  -> deterministic contact-first and handling playbook
-  -> deterministic legal-regime applicability rules
-  -> scope-aware policy / case / script scoring
-  -> Top-K retrieval (3 policies / 3 cases / 2 scripts)
-  -> generateAnalysis()
-  -> AnalysisResult
-```
-
-Policy filtering first checks incident type, route direction, operating-carrier rules, provider
-scope, and required controllability. A policy's `legal_regime` is distinct from its geographic
-`applicable_regions`, and `applicability_rule` controls deterministic route matching. Case ranking
-then considers incident, region, provider, country, booking channel,
-loyalty status, disruption reason, text overlap, source authority, and confidence. Equal scores
-use stable IDs as a deterministic tie-breaker. Only cases with `review_status: "approved"` can
-be returned.
-
-### LLM boundaries
-
-The LLM is an interviewer and semantic parser, not the policy engine or retrieval database.
-It receives prior structured facts plus the latest user message and must return the strict
-four-incident `ClaimFacts` schema. The server recomputes missing fields, geographic regions,
-policy scope, controllability, and the deterministic handling playbook.
-
-For airline cases, intake also distinguishes the journey stage, advance schedule change versus
-close-in IRROPS, booking channel and provider, paid versus award ticket, airline roles, automatic
-rebooking, and user recovery priorities. Completed trips proceed to claims guidance; airport or
-en-route disruptions proceed without unnecessary ticket-owner questions; advance changes collect
-the facts needed to identify who controls the ticket.
-
-`disruptionReasonStatus` distinguishes a reason that has not been requested yet from a reason
-the user explicitly cannot obtain. An `unavailable` reason does not trigger another question;
-cause-dependent policies remain conditional instead.
-
-The OpenAI adapter requests strict JSON Schema output with `store: false`. The DeepSeek adapter
-uses Chat Completions JSON Output and includes the same schema in its system prompt. Both use a
-bounded timeout, runtime `ClaimFacts` validation, and a deterministic fallback. `/api/analyze`
-never relies on model memory for policies, cases, compensation amounts, or sources.
-
-The LLM should not invent policies, cases, compensation amounts, or sources.
-
-## APIs
-
-### `POST /api/intake`
-
-Start or continue a fact-gathering conversation:
-
-```json
-{
-  "message": "My Air France flight from Paris was cancelled and I arrived four hours late.",
-  "facts": null
-}
-```
-
-The response is either `needs_info` with the accumulated `facts`, `missingFields`, and one
-targeted `question`; `ready` with validated facts that can be sent to `/api/analyze`; or
-`unsupported` with a professional-help safety notice. High-risk screening happens before an
-LLM call. Intake messages are limited to 4,000 characters.
-
-### `GET /api/scenarios`
-
-Returns scenario summaries derived from local case data.
-
-Example response shape:
-
-```ts
-{
-  scenarios: Array<{
-    issueType: string;
-    label: string;
-    caseCount: number;
-    officialBasisCount: number;
-    scriptCount: number;
-    providers: string[];
-    sampleCase?: {
-      caseId: string;
-      provider: string;
-      brandOrAirline: string;
-      facts: string;
-    };
-  }>;
-}
-```
-
-### `POST /api/analyze`
-
-The preferred request uses the validated `facts` returned by `/api/intake`:
-
-```ts
-{
-  description: "Optional original conversation text",
-  facts: intakeResponse.facts
-}
-```
-
-The complete object must match `ClaimFacts`; incomplete valid facts receive HTTP `422` with
-`missingFields`. Descriptions are limited to 12,000 characters. High-risk descriptions receive
-HTTP `422` with a safety category and do not enter classification or retrieval. The following
-legacy inputs remain supported for compatibility.
-
-Analyze by free-text description:
-
-```json
-{
-  "description": "United cancelled my flight because of a crew issue and rebooked me tomorrow."
-}
-```
-
-Analyze by selected issue type:
-
-```json
-{
-  "issueType": "denied_boarding"
-}
-```
-
-Analyze by selected case:
-
-```json
-{
-  "caseId": "uscf_cx_ua_rebooking_mixed_carrier_2026_05"
-}
-```
-
-Returns:
-
-```ts
-{
-  issueType: string;
-  policyRegions: Array<"EU_EEA_CH" | "UK" | "US" | "CA" | "AU" | "CN" | "other" | "global">;
-  legalRegimes: Array<
-    | "provider_policy"
-    | "EU261"
-    | "UK261"
-    | "US_DOT_REFUND"
-    | "US_DOT_DENIED_BOARDING"
-    | "US_AIRLINE_COMMITMENT"
-    | "CA_APPR"
-    | "AU_ACL"
-    | "CN_FLIGHT_REGULATION"
-  >;
-  controllability: "controllable" | "uncontrollable" | "unknown";
-  evidenceCoverage: {
-    officialBasisStatus: "scope_confirmed" | "conditional" | "not_found";
-    officialSourceCount: number;
-    reportedCaseCount: number;
-    syntheticCaseCount: number;
-    unresolvedConditionCount: number;
-    unmetRemedyConditionCount: number;
-  };
-  summary: string;
-  officialBasis: Policy[];
-  policyAssessments: PolicyApplicabilityAssessment[];
-  similarCases: Case[];
-  suggestedAsks: {
-    conservative: string[];
-    standard: string[];
-    aggressive: string[];
-  };
-  evidenceChecklist: string[];
-  scripts: Script[];
-  cautions: string[];
-  handlingPlaybook?: {
-    status: "actionable" | "needs_context";
-    situation:
-      | "hotel_walk"
-      | "planned_schedule_change"
-      | "close_in_irrops"
-      | "completed_disruption"
-      | "unknown";
-    contactFirst: { role: string; name: string | null; reason: string };
-    askLadder: string[];
-    ticketingChecks: string[];
-    fallback: string[];
-    uncertainties: string[];
-    sources: HandlingGuidanceSource[];
-    notGuaranteed: true;
-  };
-}
-```
-
-## Data Files
-
-### `data/policies.json`
-
-Official policies, regulations, dashboards, or company commitments.
-
-Examples:
-
-- Marriott Ultimate Reservation Guarantee
-- DOT Airline Cancellation and Delay Dashboard
-- EU261 and UK261
-- Canada Air Passenger Protection Regulations
-- US DOT automatic refund rules
-- Australian Consumer Law travel guidance
-- Chinese flight-regularity and passenger-service regulations
-
-### `data/cases.json`
-
-Community datapoints, user-submitted cases, and synthetic demo examples.
-
-Important rule: community cases are reference datapoints, not official rules. Forum cases should be rewritten as summaries and should preserve source links without copying full posts or personal information.
-
-Each case has a `review_status`. Only `approved` cases are eligible for retrieval; `needs_review` and `excluded` records remain in the consolidated file for provenance. See `data/README.md` for the current review summary and rules.
-
-### `data/scripts.json`
-
-Reusable communication templates for channels such as:
-
-- front desk
-- airport counter
-- phone / chat
-- email
-- corporate escalation
-- regulator complaint
-
-## Product Boundaries
-
-The app should avoid:
-
-- promising compensation
-- presenting output as legal advice
-- fabricating policies, cases, URLs, or amounts
-- treating community datapoints as official rules
-- handling injury, major property loss, litigation, or complex insurance claims as normal cases
-
-The app should clearly separate:
-
-- official policy / regulation
-- company commitment
-- community datapoint
-- goodwill request
-- synthetic demo data
-
-## Roadmap
-
-### Phase 1: Structured MVP
-
-Completed:
-
-- consolidated, reviewed local JSON data
-- deterministic structured extraction for the four demo issue types
-- explainable structured filtering and Top-K ranking
-- approved-only case retrieval
-- replaceable async fact-extraction boundary
-- guided multi-turn frontend with visible LLM/local extraction mode
-- strict structured LLM intake with safe fallback
-- automated golden-scenario, schema, API, colloquial, and multi-turn tests
-
-Recommended next work:
-
-- expand the airport/country and operating-carrier reference tables
-- run the conversational evaluation set against a configured model and record latency/cost
-- add outcome feedback logging before expanding the taxonomy
-
-### Phase 2: LLM-Assisted Analysis
-
-Implemented:
-
-- server-only OpenAI configuration
-- server-only DeepSeek configuration
-- strict structured fact extraction within the four-type allowlist
-- multi-turn fact merging and targeted clarification
-- deterministic fallback, schema validation, timeouts, and evidence-only retrieval
-- trip-stage, booking-owner, ticket-type, airline-role, and recovery-preference extraction
-- conditional `contactFirst`, ask ladder, ticketing checks, fallback, and source provenance
-- explicit separation of industry guidance, community guidance, and required official-policy checks
-
-Recommended next steps:
-
-- add current official schedule-change policies for the first supported airlines
-- evaluate real configured-model conversations for accuracy, latency, and cost
-- add outcome feedback logging before any LLM-written final response
-
-Any later answer-generation model must use retrieved evidence only.
-
-### Phase 3: Database
-
-Move local JSON data into a database such as Supabase:
-
-- policies
-- cases
-- scripts
-- outcomes
-- scenario taxonomy
-
-### Phase 4: Semantic Retrieval
-
-Keep structured filters and add embeddings/vector search only when the reviewed corpus and
-evaluation set show that lexical ranking is the bottleneck:
-
-- preserve issue type, provider, route, location, booking channel, and review-status filters
-- search similar cases by embeddings
-- rank cases by relevance and outcome quality
-
-### Phase 5: Product Loop
-
-Let users submit outcomes:
-
-- what they asked for
-- what response they received
-- whether the script helped
-- final compensation or resolution
-
-This outcome data can later improve case ranking and script suggestions.
-
-## DP 审核工作台
-
-本地运行后访问 `/review`，读取研究批次并逐条核对、编辑、补证或批准入库。已批准版本即时进入新请求的案例检索；保存修改、撤回或排除会移除发布版本。
-
-存储、备份及后续远程 agent / 数据库接入说明见 [docs/dp-review.md](docs/dp-review.md)。当前审核接口仅适用于本机，不应直接暴露到公网。
+历史审查位于 `docs/archive/`，不作为当前实现说明。产品范围见简短的 [PROJECT_BRIEF.md](PROJECT_BRIEF.md)，开发约束见 [AGENTS.md](AGENTS.md)。

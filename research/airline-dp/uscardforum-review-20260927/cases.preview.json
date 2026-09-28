@@ -1,6 +1,6 @@
 [
   {
-    "case_id": "uscf-484406-dfw",
+    "case_id": "dp-b7aab60058b4de405f4b",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/484406",
@@ -22,7 +22,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-484406-dfw",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-b7aab60058b4de405f4b",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -33,13 +33,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-484406-dfw",
+      "dp_id": "dp-b7aab60058b4de405f4b",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-528095-alzuhod",
+    "case_id": "dp-7692981dddde90a01f32",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/528095",
@@ -61,7 +61,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-528095-alzuhod",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-7692981dddde90a01f32",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -71,13 +71,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-528095-alzuhod",
+      "dp_id": "dp-7692981dddde90a01f32",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-496402-jerry66",
+    "case_id": "dp-c140cdb2e84cd1f8ee9a",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/496402",
@@ -99,7 +99,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-496402-jerry66",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-c140cdb2e84cd1f8ee9a",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -110,13 +110,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-496402-jerry66",
+      "dp_id": "dp-c140cdb2e84cd1f8ee9a",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-477236-gcjy",
+    "case_id": "dp-e88d6c75e2e70860ab2b",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/477236",
@@ -138,7 +138,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-477236-gcjy",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-e88d6c75e2e70860ab2b",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -149,13 +149,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-477236-gcjy",
+      "dp_id": "dp-e88d6c75e2e70860ab2b",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-473103-mrmitchelldevis",
+    "case_id": "dp-7f5d1675d2d0b666cfb4",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/473103",
@@ -177,7 +177,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-473103-mrmitchelldevis",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-7f5d1675d2d0b666cfb4",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -187,13 +187,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-473103-mrmitchelldevis",
+      "dp_id": "dp-7f5d1675d2d0b666cfb4",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-493023-soulhom",
+    "case_id": "dp-c59d41dc339168248fe5",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/493023",
@@ -215,7 +215,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-493023-soulhom",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-c59d41dc339168248fe5",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -226,13 +226,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-493023-soulhom",
+      "dp_id": "dp-c59d41dc339168248fe5",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-493023-xiaodaobay",
+    "case_id": "dp-8ee4e6587ead4674f8aa",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/493023",
@@ -254,7 +254,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-493023-xiaodaobay",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-8ee4e6587ead4674f8aa",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -265,13 +265,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-493023-xiaodaobay",
+      "dp_id": "dp-8ee4e6587ead4674f8aa",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-493023-minalinsky",
+    "case_id": "dp-448e12b660defe54cb9b",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/493023",
@@ -293,7 +293,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-493023-minalinsky",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-448e12b660defe54cb9b",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -305,13 +305,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-493023-minalinsky",
+      "dp_id": "dp-448e12b660defe54cb9b",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-126649-frozenz0717-outbound",
+    "case_id": "dp-0a8c022c8b6a3f70f3d8",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/126649",
@@ -333,7 +333,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-126649-frozenz0717-outbound",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-0a8c022c8b6a3f70f3d8",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -344,13 +344,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-126649-frozenz0717-outbound",
+      "dp_id": "dp-0a8c022c8b6a3f70f3d8",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-126649-frozenz0717-return",
+    "case_id": "dp-31994db8b0739e4c151d",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/126649",
@@ -370,7 +370,7 @@
     "escalation_path": [],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-126649-frozenz0717-return",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-31994db8b0739e4c151d",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -381,13 +381,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-126649-frozenz0717-return",
+      "dp_id": "dp-31994db8b0739e4c151d",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-469439-qaz158aaa",
+    "case_id": "dp-ccc21be2bbe9e912de84",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/469439",
@@ -407,7 +407,7 @@
     "escalation_path": [],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-469439-qaz158aaa",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-ccc21be2bbe9e912de84",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -420,13 +420,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-469439-qaz158aaa",
+      "dp_id": "dp-ccc21be2bbe9e912de84",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-352934-xiaoerge",
+    "case_id": "dp-c73931d3beef0f050e9c",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/352934",
@@ -448,7 +448,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-352934-xiaoerge",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-c73931d3beef0f050e9c",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -460,13 +460,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-352934-xiaoerge",
+      "dp_id": "dp-c73931d3beef0f050e9c",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-407456-itworks",
+    "case_id": "dp-b709b74e59b36bc64df9",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/407456",
@@ -488,7 +488,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-407456-itworks",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-b709b74e59b36bc64df9",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -499,13 +499,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-407456-itworks",
+      "dp_id": "dp-b709b74e59b36bc64df9",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-467467-randomperson-ac",
+    "case_id": "dp-cca2b57b889d0d249819",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/467467",
@@ -527,7 +527,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-467467-randomperson-ac",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-cca2b57b889d0d249819",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -539,13 +539,13 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-467467-randomperson-ac",
+      "dp_id": "dp-cca2b57b889d0d249819",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }
   },
   {
-    "case_id": "uscf-103731-anon17276958",
+    "case_id": "dp-81200d1341565dd70cd1",
     "source_type": "community_dp",
     "source_name": "USCardForum / 美卡论坛",
     "source_url": "https://www.uscardforum.com/t/topic/103731",
@@ -567,7 +567,7 @@
     ],
     "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
     "confidence": "low",
-    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#uscf-103731-anon17276958",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-81200d1341565dd70cd1",
     "review_status": "needs_review",
     "review_notes": [
       "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
@@ -579,7 +579,7 @@
       "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
     ],
     "provenance": {
-      "dp_id": "uscf-103731-anon17276958",
+      "dp_id": "dp-81200d1341565dd70cd1",
       "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
       "schema_version": "0.3"
     }

@@ -5,7 +5,7 @@ import {
   MAX_INTAKE_MESSAGE_LENGTH,
   readBoundedJson
 } from "../../../lib/inputLimits";
-import { processIntake } from "../../../lib/intake";
+import { processIntake, IntakeError } from "../../../lib/intake";
 import { acquireIntakeCapacity } from "../../../lib/intakeCapacity";
 
 export async function POST(request: Request) {
@@ -41,5 +41,9 @@ export async function POST(request: Request) {
     { status: 429, headers: { "Retry-After": "60" } });
   try {
     return NextResponse.json(await processIntake(message, currentFacts));
+  } catch (error) {
+    if (error instanceof IntakeError) return NextResponse.json({ error: error.message, failureCategory: error.category }, { status: error.status });
+    console.error("Intake request failed");
+    return NextResponse.json({ error: "事实抽取失败，请稍后重试。" }, { status: 503 });
   } finally { release(); }
 }

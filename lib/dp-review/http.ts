@@ -5,7 +5,7 @@ import { ReviewError, type Principal } from "./types";
 // Replace this boundary with server-verified session / service identity for remote use.
 // No browser-supplied actor or role is ever trusted. This adapter is LOCAL ONLY.
 export function localReviewer(request: Request):Principal {
-  if(process.env.NODE_ENV!=="development" && process.env.DP_REVIEW_LOCAL!=="1") throw new ReviewError("审核工作台未在此环境开放",403);
+  if(process.env.NODE_ENV!=="development") throw new ReviewError("审核工作台未在此环境开放",403);
   const url=new URL(request.url), host=request.headers.get("host")??url.host;
   const localHosts=["localhost","127.0.0.1","[::1]"];
   let headerHost:URL;

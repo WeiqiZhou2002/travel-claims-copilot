@@ -113,7 +113,7 @@ const providerDefinitions: ProviderDefinition[] = [
       "westin",
       "bonvoy",
       "万豪旅享家",
-      "万豪",
+      "万豪", "万豪酒店",
       "喜来登",
       "威斯汀"
     ]
@@ -223,7 +223,7 @@ export function canonicalizeProviderName(
     return null;
   }
 
-  return airlineCodes[trimmed.toUpperCase()] ?? findProviderMatch(trimmed, providerType)?.provider ?? trimmed;
+  return airlineCodes[trimmed.toUpperCase()] ?? findExactProviderMatch(trimmed, providerType)?.provider ?? trimmed;
 }
 
 const airlineCodes: Record<string, string> = {
@@ -283,4 +283,12 @@ export function canonicalHotelGroup(value: string | null | undefined): string | 
   }
 
   return findProviderMatch(value, "hotel")?.provider;
+}
+
+// Normalization of a structured provider field is exact alias lookup, never free-text extraction.
+export function findExactProviderMatch(value: string, providerType?: KnownProviderType | "unknown"): ProviderMatch | undefined {
+  const normalized = normalizeProviderText(airlineCodes[value.trim().toUpperCase()] ?? value);
+  const definition = providerDefinitions.find(d => (!providerType || providerType === "unknown" || d.providerType === providerType) &&
+    [d.provider, ...d.terms].some(term => normalizeProviderText(term) === normalized));
+  return definition ? {provider: definition.provider, providerType: definition.providerType, operatingCarrierRegion: definition.operatingCarrierRegion} : undefined;
 }

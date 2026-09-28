@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { processIntake } from "../lib/intake";
 import { emptyClaimFacts } from "../lib/claimFacts";
 import { claimFactsToExtractedFacts } from "../lib/analyze";
@@ -12,8 +12,8 @@ const existing = raw as Case[];
 const base = existing.find(c => c.case_id === "uscf_aa127_mechanical_delay_overnight_2026_07")!;
 
 describe("ticketing provider and operating carrier", () => {
-  it("extracts AS-issued AA and preserves the pair through structured retrieval", async () => {
-    const intake = await processIntake("AS出AA的航班，从纽约到洛杉矶因天气取消，我在机场。", emptyClaimFacts(), { llmClient: null });
+  it("preserves an LLM-extracted AS-issued AA pair the pair through structured retrieval", async () => {
+    const intake = await processIntake("AS出AA的航班，从纽约到洛杉矶因天气取消，我在机场。", emptyClaimFacts(), { llmClient: {generate:vi.fn().mockResolvedValue({...emptyClaimFacts(),issueType:"airline_cancellation",providerType:"airline",bookingProvider:"Alaska Airlines",operatingCarrier:"American Airlines"})} });
     expect(intake.facts.bookingProvider).toBe("Alaska Airlines");
     expect(intake.facts.operatingCarrier).toBe("American Airlines");
     const q = buildRetrievalQuery(claimFactsToExtractedFacts(intake.facts));

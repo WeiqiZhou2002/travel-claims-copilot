@@ -2,6 +2,8 @@ import { mkdir, open, readFile, readdir, rename, rm } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import legacyCases from "../../data/cases.json";
+import { migrateRecordIds } from "./identity";
+import { acquireFileLock } from "./file-lock";
 import { importInto } from "./service";
 import { ReviewError, type ReviewRepository, type ReviewState } from "./types";
 
@@ -22,13 +24,13 @@ export class FileReviewRepository implements ReviewRepository {
     try {
       const state=JSON.parse(await readFile(path.join(this.directory,"store.json"),"utf8")) as ReviewState;
       if(state.schemaVersion!==1 || !Array.isArray(state.records)) throw new Error("Unsupported review store");
-      return state;
+      return migrateRecordIds(state);
     } catch(e) {if(missing(e)) return this.seed();throw e;}
   }
   async transact<T>(work:(state:ReviewState)=>T):Promise<T> {
     await mkdir(this.directory,{recursive:true});
     const lock=path.join(this.directory,"write.lock");
-    try {await mkdir(lock);} catch(e) {if((e as NodeJS.ErrnoException).code==="EEXIST") throw new ReviewError("另一个审核操作正在保存，请稍后重试。若进程异常退出，请按运维说明恢复锁。",409);throw e;}
+    const release = await acquireFileLock(lock);
     const temp=path.join(this.directory,`.store-${randomUUID()}.tmp`);
     try {
       const state=await this.read();
@@ -41,7 +43,7 @@ export class FileReviewRepository implements ReviewRepository {
       try {await file.writeFile(JSON.stringify(state,null,2)+"\n");await file.sync();} finally {await file.close();}
       await rename(temp,path.join(this.directory,"store.json"));
       return result;
-    } finally {await rm(temp,{force:true});await rm(lock,{recursive:true,force:true});}
+    } finally {await rm(temp,{force:true});await release();}
   }
 }
 export function getReviewRepository():ReviewRepository {

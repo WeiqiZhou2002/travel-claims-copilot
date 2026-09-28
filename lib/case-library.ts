@@ -1,6 +1,6 @@
 import seedCases from "../data/cases.json";
 import type { Case } from "./types";
-import { getReviewRepository } from "./dp-review/file-repository";
+import published from "../data/reviewed-cases.json";
 import type { ReviewState } from "./dp-review/types";
 
 export function mergeCaseLibrary(seed: Case[], state: ReviewState):Case[] {
@@ -9,5 +9,6 @@ export function mergeCaseLibrary(seed: Case[], state: ReviewState):Case[] {
   return [...seed.filter(c=>!managed.has(c.case_id)), ...state.records.flatMap(r=>r.status==="approved" && r.publication?.review_status==="approved"?[r.publication]:[])];
 }
 export async function loadCaseLibrary():Promise<Case[]> {
-  return mergeCaseLibrary(seedCases as Case[],await getReviewRepository().read());
+  // Bundled, versioned release data only. Public traffic never reads the review workspace.
+  return [...(seedCases as Case[]).filter(item => !(published.managedIds as string[]).includes(item.case_id)), ...(published.cases as Case[])];
 }

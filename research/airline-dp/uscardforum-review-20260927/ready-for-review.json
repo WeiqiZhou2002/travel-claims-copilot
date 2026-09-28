@@ -1,7 +1,7 @@
 [
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-484406-dfw",
+    "dp_id": "dp-b7aab60058b4de405f4b",
     "title": "AA 取消后重出票异常：7500 里程及食宿补偿",
     "reporter": "dfw",
     "source_type": "community_dp",
@@ -188,7 +188,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-528095-alzuhod",
+    "dp_id": "dp-7692981dddde90a01f32",
     "title": "AA 错失衔接：拒绝食宿，升级投诉后获小额补偿",
     "reporter": "Alzuhod",
     "source_type": "community_dp",
@@ -395,7 +395,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-496402-jerry66",
+    "dp_id": "dp-c140cdb2e84cd1f8ee9a",
     "title": "DL281 取消返家后，积分退款被拒",
     "reporter": "Jerry66",
     "source_type": "community_dp",
@@ -604,7 +604,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-477236-gcjy",
+    "dp_id": "dp-e88d6c75e2e70860ab2b",
     "title": "JL12 取消：拒绝降舱后在羽田完成改签",
     "reporter": "GCJY",
     "source_type": "community_dp",
@@ -825,7 +825,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-473103-mrmitchelldevis",
+    "dp_id": "dp-7f5d1675d2d0b666cfb4",
     "title": "VS 出 KLM 联程取消：多次改签后实际乘 BA 到 PIT",
     "reporter": "mrmitchelldevis",
     "source_type": "community_dp",
@@ -1044,7 +1044,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-493023-soulhom",
+    "dp_id": "dp-c59d41dc339168248fe5",
     "title": "AS 出 QR：先绕 ORD，后签转 TK",
     "reporter": "soulhom",
     "source_type": "community_dp",
@@ -1238,7 +1238,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-493023-xiaodaobay",
+    "dp_id": "dp-8ee4e6587ead4674f8aa",
     "title": "QR 取消 SFO 出发：改 SEA，选座收费另待确认",
     "reporter": "xiaodaobay",
     "source_type": "community_dp",
@@ -1398,7 +1398,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-493023-minalinsky",
+    "dp_id": "dp-448e12b660defe54cb9b",
     "title": "QR 取消 SFO 出发：仅提供 DFW 出发选项",
     "reporter": "minalinsky",
     "source_type": "community_dp",
@@ -1570,7 +1570,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-126649-frozenz0717-outbound",
+    "dp_id": "dp-0a8c022c8b6a3f70f3d8",
     "title": "Porter 延误错失衔接：住宿与代金券",
     "reporter": "FrozenZ0717",
     "source_type": "community_dp",
@@ -1757,7 +1757,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-126649-frozenz0717-return",
+    "dp_id": "dp-31994db8b0739e4c151d",
     "title": "AC 返程取消：拒赔并给折扣码",
     "reporter": "FrozenZ0717",
     "source_type": "community_dp",
@@ -1900,7 +1900,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-469439-qaz158aaa",
+    "dp_id": "dp-ccc21be2bbe9e912de84",
     "title": "AA 机组问题延误：安排次日衔接及食宿",
     "reporter": "qaz158aaa",
     "source_type": "community_dp",
@@ -2122,7 +2122,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-352934-xiaoerge",
+    "dp_id": "dp-c73931d3beef0f050e9c",
     "title": "Finnair 取消 LAX–HEL：改经伦敦",
     "reporter": "小二哥",
     "source_type": "community_dp",
@@ -2294,7 +2294,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-407456-itworks",
+    "dp_id": "dp-b709b74e59b36bc64df9",
     "title": "AA95 临时取消：官网换经伦敦行程",
     "reporter": "itworks",
     "source_type": "community_dp",
@@ -2431,7 +2431,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-467467-randomperson-ac",
+    "dp_id": "dp-cca2b57b889d0d249819",
     "title": "AC 取消：从三天后改签到次日",
     "reporter": "RandomPerson",
     "source_type": "community_dp",
@@ -2603,7 +2603,7 @@
   },
   {
     "schema_version": "0.3",
-    "dp_id": "uscf-103731-anon17276958",
+    "dp_id": "dp-81200d1341565dd70cd1",
     "title": "LH 让座改道：经日本抵美并提供现金卡",
     "reporter": "anon17276958",
     "source_type": "community_dp",

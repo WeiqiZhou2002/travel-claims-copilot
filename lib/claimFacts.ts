@@ -1,6 +1,6 @@
 import { MAX_FACT_STRING_LENGTH, MAX_FACT_ARRAY_ITEMS } from "./inputLimits";
 import { enrichClaimJurisdiction } from "./jurisdiction";
-import { canonicalizeProviderName, findProviderMatch } from "./provider";
+import { canonicalizeProviderName, findExactProviderMatch } from "./provider";
 import type { MvpIssueType, PolicyRouteRegion } from "./types";
 
 export type ClaimIssueType = MvpIssueType | "unknown";
@@ -581,7 +581,7 @@ export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
     validatingCarrier: canonicalizeProviderName(normalized.validatingCarrier, "airline"),
     marketingCarrier: canonicalizeProviderName(normalized.marketingCarrier, "airline"),
     operatingCarrier: canonicalizeProviderName(normalized.operatingCarrier, "airline"),
-    operatingCarrierRegion: normalized.operatingCarrier ? findProviderMatch(normalized.operatingCarrier, "airline")?.operatingCarrierRegion ?? null : null,
+    operatingCarrierRegion: normalized.operatingCarrier ? findExactProviderMatch(normalized.operatingCarrier, "airline")?.operatingCarrierRegion ?? normalized.operatingCarrierRegion : null,
     disruptingCarrier: canonicalizeProviderName(normalized.disruptingCarrier, "airline"),
     disruptionType,
     disruptionReasonStatus

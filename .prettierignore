@@ -1,0 +1,6 @@
+node_modules
+.next
+.local
+research
+data
+package-lock.json

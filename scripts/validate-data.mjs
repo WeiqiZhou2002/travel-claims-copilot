@@ -80,6 +80,14 @@ const [cases, policies, scripts] = await Promise.all([
   readJson("data/policies.json"),
   readJson("data/scripts.json")
 ]);
+const release = JSON.parse(await readFile(resolve(projectRoot,"data/reviewed-cases.json"),"utf8"));
+if(release.schemaVersion !== 1 || !Array.isArray(release.cases) || !Array.isArray(release.managedIds) || new Set(release.managedIds).size !== release.managedIds.length || release.managedIds.some(id=>typeof id !== "string" || !/^[a-zA-Z0-9_-]{1,140}$/.test(id))) throw new Error("Invalid reviewed release manifest");
+for(const item of release.cases) {
+  if(item.review_status !== "approved" || item.source_type !== "community_dp" || !Number.isInteger(item.reviewed_version) || item.reviewed_version < 2 || !release.managedIds.includes(item.case_id)) throw new Error("Invalid reviewed publication");
+}
+if(cases.some(item=>release.managedIds.includes(item.case_id))) throw new Error("Published DP conflicts with seed ID");
+cases.push(...release.cases);
+
 
 const caseFields = [
   "case_id",

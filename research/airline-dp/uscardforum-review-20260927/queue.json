@@ -5,9 +5,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-103731-anon17276958: reported",
+    "resume_locator": "dp-81200d1341565dd70cd1: reported",
     "linked_dp_ids": [
-      "uscf-103731-anon17276958"
+      "dp-81200d1341565dd70cd1"
     ]
   },
   {
@@ -16,10 +16,10 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-126649-frozenz0717-outbound: reported；uscf-126649-frozenz0717-return: not_reported",
+    "resume_locator": "dp-0a8c022c8b6a3f70f3d8: reported；dp-31994db8b0739e4c151d: not_reported",
     "linked_dp_ids": [
-      "uscf-126649-frozenz0717-outbound",
-      "uscf-126649-frozenz0717-return"
+      "dp-0a8c022c8b6a3f70f3d8",
+      "dp-31994db8b0739e4c151d"
     ]
   },
   {
@@ -28,9 +28,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-216182-fureddo: pending",
+    "resume_locator": "dp-3577399b3de7991164d4: pending",
     "linked_dp_ids": [
-      "uscf-216182-fureddo"
+      "dp-3577399b3de7991164d4"
     ]
   },
   {
@@ -39,9 +39,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-216182-fureddo: pending",
+    "resume_locator": "dp-3577399b3de7991164d4: pending",
     "linked_dp_ids": [
-      "uscf-216182-fureddo"
+      "dp-3577399b3de7991164d4"
     ]
   },
   {
@@ -50,9 +50,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-331713-7700: pending",
+    "resume_locator": "dp-0b1832a61515cd0bbb36: pending",
     "linked_dp_ids": [
-      "uscf-331713-7700"
+      "dp-0b1832a61515cd0bbb36"
     ]
   },
   {
@@ -61,9 +61,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-352934-xiaoerge: not_reported",
+    "resume_locator": "dp-c73931d3beef0f050e9c: not_reported",
     "linked_dp_ids": [
-      "uscf-352934-xiaoerge"
+      "dp-c73931d3beef0f050e9c"
     ]
   },
   {
@@ -72,9 +72,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-407456-itworks: not_reported",
+    "resume_locator": "dp-b709b74e59b36bc64df9: not_reported",
     "linked_dp_ids": [
-      "uscf-407456-itworks"
+      "dp-b709b74e59b36bc64df9"
     ]
   },
   {
@@ -83,9 +83,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-467467-randomperson-ac: reported",
+    "resume_locator": "dp-cca2b57b889d0d249819: reported",
     "linked_dp_ids": [
-      "uscf-467467-randomperson-ac"
+      "dp-cca2b57b889d0d249819"
     ]
   },
   {
@@ -94,9 +94,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-469439-qaz158aaa: reported",
+    "resume_locator": "dp-ccc21be2bbe9e912de84: reported",
     "linked_dp_ids": [
-      "uscf-469439-qaz158aaa"
+      "dp-ccc21be2bbe9e912de84"
     ]
   },
   {
@@ -105,9 +105,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-473103-mrmitchelldevis: reported",
+    "resume_locator": "dp-7f5d1675d2d0b666cfb4: reported",
     "linked_dp_ids": [
-      "uscf-473103-mrmitchelldevis"
+      "dp-7f5d1675d2d0b666cfb4"
     ]
   },
   {
@@ -116,9 +116,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-477236-gcjy: reported",
+    "resume_locator": "dp-e88d6c75e2e70860ab2b: reported",
     "linked_dp_ids": [
-      "uscf-477236-gcjy"
+      "dp-e88d6c75e2e70860ab2b"
     ]
   },
   {
@@ -127,9 +127,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-469439-qaz158aaa: reported",
+    "resume_locator": "dp-ccc21be2bbe9e912de84: reported",
     "linked_dp_ids": [
-      "uscf-469439-qaz158aaa"
+      "dp-ccc21be2bbe9e912de84"
     ]
   },
   {
@@ -138,9 +138,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-484406-dfw: reported",
+    "resume_locator": "dp-b7aab60058b4de405f4b: reported",
     "linked_dp_ids": [
-      "uscf-484406-dfw"
+      "dp-b7aab60058b4de405f4b"
     ]
   },
   {
@@ -149,11 +149,11 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-493023-soulhom: reported；uscf-493023-xiaodaobay: not_reported；uscf-493023-minalinsky: not_reported",
+    "resume_locator": "dp-c59d41dc339168248fe5: reported；dp-8ee4e6587ead4674f8aa: not_reported；dp-448e12b660defe54cb9b: not_reported",
     "linked_dp_ids": [
-      "uscf-493023-soulhom",
-      "uscf-493023-xiaodaobay",
-      "uscf-493023-minalinsky"
+      "dp-c59d41dc339168248fe5",
+      "dp-8ee4e6587ead4674f8aa",
+      "dp-448e12b660defe54cb9b"
     ]
   },
   {
@@ -162,11 +162,11 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-493023-soulhom: reported；uscf-493023-xiaodaobay: not_reported；uscf-493023-minalinsky: not_reported",
+    "resume_locator": "dp-c59d41dc339168248fe5: reported；dp-8ee4e6587ead4674f8aa: not_reported；dp-448e12b660defe54cb9b: not_reported",
     "linked_dp_ids": [
-      "uscf-493023-soulhom",
-      "uscf-493023-xiaodaobay",
-      "uscf-493023-minalinsky"
+      "dp-c59d41dc339168248fe5",
+      "dp-8ee4e6587ead4674f8aa",
+      "dp-448e12b660defe54cb9b"
     ]
   },
   {
@@ -175,9 +175,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-496402-jerry66: not_reported",
+    "resume_locator": "dp-c140cdb2e84cd1f8ee9a: not_reported",
     "linked_dp_ids": [
-      "uscf-496402-jerry66"
+      "dp-c140cdb2e84cd1f8ee9a"
     ]
   },
   {
@@ -186,9 +186,9 @@
     "state": "extracted",
     "reason": "已整理作者自述；待人工审核",
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
-    "resume_locator": "uscf-528095-alzuhod: reported",
+    "resume_locator": "dp-7692981dddde90a01f32: reported",
     "linked_dp_ids": [
-      "uscf-528095-alzuhod"
+      "dp-7692981dddde90a01f32"
     ]
   },
   {
@@ -280,7 +280,7 @@
     "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
     "resume_locator": "原页可访问后再读；不据搜索结果补写事实",
     "linked_dp_ids": [
-      "uscf-352934-xiaoerge"
+      "dp-c73931d3beef0f050e9c"
     ]
   },
   {

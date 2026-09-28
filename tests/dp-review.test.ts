@@ -102,7 +102,7 @@ describe("review HTTP workflow",()=>{
   const detail=await detailRoute(new Request("http://localhost:3000/api/review/records/isolated-http-test"),context);
   expect((await detail.json()).record.status).toBe("pending");
   expect((await reviewRoute(request("/api/review/records/isolated-http-test",approve),context)).status).toBe(200);
-  expect((await loadCaseLibrary()).some(c=>c.case_id===dp.dp_id)).toBe(true);
+  expect((await loadCaseLibrary()).some(c=>c.case_id===dp.dp_id)).toBe(false); // Local approval is not a production release.
   expect((await reviewRoute(request("/api/review/records/isolated-http-test",{action:"revoke",expectedVersion:2,note:"测试撤回"}),context)).status).toBe(200);
   expect((await loadCaseLibrary()).some(c=>c.case_id===dp.dp_id)).toBe(false);
  });

@@ -4,7 +4,7 @@ import {
   isEuOperatingCarrier,
   isUkOrEuOperatingCarrier
 } from "./jurisdiction";
-import { findProviderMatch, providersMatch } from "./provider";
+import { findExactProviderMatch, providersMatch } from "./provider";
 import type {
   ApplicabilityStatus,
   Controllability,
@@ -211,7 +211,7 @@ function evaluateRouteScope(
   const carrier = query.operatingCarrier;
   const carrierRegion =
     query.operatingCarrierRegion ??
-    (carrier ? findProviderMatch(carrier, "airline")?.operatingCarrierRegion : undefined);
+    (carrier ? findExactProviderMatch(carrier, "airline")?.operatingCarrierRegion : undefined);
   const originMatches = includesRouteRegion(regions, origin);
   const destinationMatches = includesRouteRegion(regions, destination);
 

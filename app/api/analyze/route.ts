@@ -3,13 +3,14 @@ import { NextResponse } from "next/server";
 import { loadCaseLibrary } from "../../../lib/case-library";
 import policies from "../../../data/policies.json";
 import scripts from "../../../data/scripts.json";
-import { buildAnalysisFromFacts, buildAnalysisResult } from "../../../lib/analyze";
+import { buildAnalysisFromFacts } from "../../../lib/analyze";
 import { getMissingClaimFields, parseClaimFacts } from "../../../lib/claimFacts";
 import {
   MAX_ANALYZE_DESCRIPTION_LENGTH,
   readBoundedJson
 } from "../../../lib/inputLimits";
-import { normalizeIssueType } from "../../../lib/issueTaxonomy";
+import { processIntake, IntakeError } from "../../../lib/intake";
+import { acquireIntakeCapacity } from "../../../lib/intakeCapacity";
 import { assessClaimSafety, assessHighRiskClaim } from "../../../lib/safety";
 import type { Policy, Script } from "../../../lib/types";
 
@@ -18,8 +19,6 @@ export async function POST(request: Request) {
   if (!parsedBody.ok) return NextResponse.json({ error: parsedBody.error }, { status: parsedBody.status });
   const body = parsedBody.value;
   const description = typeof body?.description === "string" ? body.description.trim() : "";
-  const caseId = typeof body?.caseId === "string" ? body.caseId.trim() : "";
-  const issueType = normalizeIssueType(body?.issueType ?? body?.selectedIssueType);
 
   if (description.length > MAX_ANALYZE_DESCRIPTION_LENGTH) {
     return NextResponse.json(
@@ -72,20 +71,16 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!description && !issueType && !caseId) {
-    return NextResponse.json(
-      { error: "Please provide a travel dispute description, issueType, or caseId." },
-      { status: 400 }
-    );
-  }
-
-  const result = await buildAnalysisResult(
-    description,
-    policies as Policy[],
-    await loadCaseLibrary(),
-    scripts as Script[],
-    { caseId: caseId || undefined, issueType }
-  );
-
-  return NextResponse.json(result);
+  if (!description) return NextResponse.json({error:"Please provide structured facts or describe your situation."},{status:400});
+  const release = acquireIntakeCapacity();
+  if (!release) return NextResponse.json({error:"Intake is busy. Please retry shortly."},{status:429,headers:{"Retry-After":"60"}});
+  try {
+    const intake = await processIntake(description);
+    if (intake.status !== "ready") return NextResponse.json({error:intake.safety?.message ?? "More facts are needed.", ...intake},{status:422});
+    return NextResponse.json(buildAnalysisFromFacts(intake.facts, policies as Policy[], await loadCaseLibrary(), scripts as Script[], description));
+  } catch(error) {
+    if(error instanceof IntakeError) return NextResponse.json({error:error.message,failureCategory:error.category},{status:error.status});
+    console.error("Analysis request failed");
+    return NextResponse.json({error:"分析暂时失败，请稍后重试。"},{status:503});
+  } finally {release();}
 }
