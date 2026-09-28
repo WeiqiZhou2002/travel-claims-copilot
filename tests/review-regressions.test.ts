@@ -191,7 +191,7 @@ describe.runIf(process.env.RUN_LIVE_LLM_EVALS === "1")(
         emptyClaimFacts(),
         {},
       );
-      expect(result.facts.disruptionReason).toBe("unknown");
+      expect(result.facts.disruptionReason).toBe("passenger_side");
     });
     it("distinguishes the operating carrier from the marketed airline", async () => {
       const result = await processIntake(
