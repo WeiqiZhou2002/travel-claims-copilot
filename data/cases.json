@@ -5,7 +5,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/504904",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": null,
     "brand_or_airline": "American Airlines",
     "issue_type": "airline_baggage_not_checked",
     "location_country": "US",
@@ -24,16 +24,16 @@
       "Timeline of document verification delay",
       "Receipts for necessary purchases at destination"
     ],
-    "escalation_path": [
-      "AA customer relations",
-      "Employer travel reimbursement if business trip"
-    ],
+    "escalation_path": ["AA customer relations", "Employer travel reimbursement if business trip"],
     "reusable_lesson": "If airline check-in processing prevents baggage acceptance, ask for written documentation immediately. Without a bag tag or property irregularity report, the claim is weaker and should be framed as a customer-service failure rather than a standard baggage delay claim. Consider asking the agent to hand-carry the bag to the gate or arrange for checked bag delivery to the destination separately.",
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Very clear facts. Good example of the 'baggage not checked' issue type.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -42,7 +42,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/269310",
     "provider_type": "airline",
-    "provider": "American Airlines / Amex",
+    "provider": null,
     "brand_or_airline": "American Airlines",
     "issue_type": "airline_delay_trip_insurance",
     "location_country": "US",
@@ -72,7 +72,12 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "American Airlines / Amex",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_amex_trip_delay_delay_trip_insu_unknown",
@@ -111,7 +116,8 @@
     "review_status": "needs_review",
     "review_notes": [
       "Card-benefit terms and eligible expenses require current official verification before use."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_ua_explorer_delay_delay_trip_insu_unknown",
@@ -119,7 +125,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/478937",
     "provider_type": "airline",
-    "provider": "United Airlines",
+    "provider": "United",
     "brand_or_airline": "United Airlines",
     "issue_type": "airline_delay_trip_insurance",
     "location_country": "US",
@@ -147,6 +153,11 @@
     "review_status": "needs_review",
     "review_notes": [
       "Card-benefit terms and eligible expenses require current official verification before use."
+    ],
+    "legacy_provider": "United Airlines",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -155,7 +166,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/504658",
     "provider_type": "airline",
-    "provider": "Cathay Pacific / United",
+    "provider": "Chase Travel",
     "brand_or_airline": "Cathay Pacific → United Airlines",
     "issue_type": "airline_rebooking_mixed_carrier_delay",
     "location_country": "US",
@@ -163,23 +174,24 @@
     "loyalty_status": "Unknown",
     "reservation_type": "paid",
     "facts": "Passenger booked CX837/CX340 (SFO-HKG-PEK) via Chase Travel, paid with Chase Freedom Flex (CFF). At the gate, mechanical issues delayed the flight repeatedly until 3:30am when it was canceled. Cathay Pacific auto-rebooked the passenger onto UA888 (SFO-PEK) departing at 10:20am. After the overnight ordeal, UA888 also had mechanical delays that kept passengers on the plane before being deplaned. UA ground staff said it was not a cancellation so they could not rebook. The passenger was stuck between CX (original carrier) and UA (rebooked carrier) both pointing at each other.",
-    "requested_compensation": [
-      "10,000 Asia Miles"
-    ],
+    "requested_compensation": ["10,000 Asia Miles"],
     "actual_outcome": "The passenger requested and received 10,000 Asia Miles from Cathay Pacific as compensation for the cancellation and rebooking ordeal. Another passenger on the same CX873 flight (different date) was rebooked to a next-day flight and was also seeking compensation.",
     "evidence_used": [
       "Flight cancellation notice",
       "Rebooking confirmation",
       "UA delay documentation"
     ],
-    "escalation_path": [
-      "Cathay Pacific customer service (original carrier)"
-    ],
+    "escalation_path": ["Cathay Pacific customer service (original carrier)"],
     "reusable_lesson": "Treat each disruption separately: ask Cathay about the original cancellation and United about the later operating delay. Preserve both airlines' notices and confirm current card benefits before relying on travel insurance.",
     "confidence": "high",
     "notes": "CX837 (SFO-HKG, not CX837 to YVR as one commenter confused). Chase Freedom Flex has limited travel insurance. CX873 was another flight from the same night with similar issues.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Cathay Pacific / United",
+    "carrier": "Cathay Pacific",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_aa_damaged_luggage_missing_items_2026_03",
@@ -187,7 +199,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/491435",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": "Alaska Airlines",
     "brand_or_airline": "American Airlines",
     "issue_type": "baggage_delay",
     "location_country": "US",
@@ -216,8 +228,11 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Very complete DP with reported outcome and lessons learned.",
     "review_status": "excluded",
-    "review_notes": [
-      "Baggage damage/loss was misclassified as baggage delay."
+    "review_notes": ["Baggage damage/loss was misclassified as baggage delay."],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -226,7 +241,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/491624",
     "provider_type": "airline",
-    "provider": "ANA / United Airlines",
+    "provider": "ANA",
     "brand_or_airline": "ANA (domestic US leg by United)",
     "issue_type": "baggage_delay",
     "location_country": "JP",
@@ -240,19 +255,20 @@
       "Guest wondered if more could be obtained"
     ],
     "actual_outcome": "Baggage delay: 10,000 JPY per person cash (accepted). Missed connection compensation: 18,000 JPY per person for ground transport (accepted). The passenger wondered if additional compensation was possible but the thread indicated the cash offers were likely the maximum.",
-    "evidence_used": [
-      "Baggage delay report filed at NRT",
-      "Ticket and itinerary records"
-    ],
-    "escalation_path": [
-      "ANA baggage services at NRT airport"
-    ],
+    "evidence_used": ["Baggage delay report filed at NRT", "Ticket and itinerary records"],
+    "escalation_path": ["ANA baggage services at NRT airport"],
     "reusable_lesson": "For delayed bags on international itineraries, airlines often offer immediate cash compensation at the airport — this is usually the maximum they will give on the spot without a formal claim. Amex Platinum's trip delay insurance only covers round-trip tickets (not one-way award tickets), so check your card's specific terms. Accepting an immediate cash offer does not necessarily prevent a future claim for additional expenses.",
     "confidence": "high",
     "notes": "Amex Platinum paid taxes on an ANA mileage award. The thread noted that Amex's trip delay insurance does not cover one-way tickets. This was a multi-segment itinerary with mixed carriers (UA domestic + ANA international).",
     "review_status": "excluded",
     "review_notes": [
       "Low-signal thread centered on insurance eligibility rather than a clear disruption outcome."
+    ],
+    "legacy_provider": "ANA / United Airlines",
+    "carrier": null,
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。",
+      "受影响航段实际承运角色无法唯一确定，保留未知。"
     ]
   },
   {
@@ -261,7 +277,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/495742",
     "provider_type": "airline",
-    "provider": "Delta Air Lines",
+    "provider": null,
     "brand_or_airline": "Delta",
     "issue_type": "baggage_delay",
     "location_country": "USA",
@@ -269,10 +285,7 @@
     "loyalty_status": "none",
     "reservation_type": "paid",
     "facts": "DL flight diverted to ATL due to weather, rebooked to MCO. Bags didn't arrive. BSO wouldn't give claim reference because it was after 6 hours. Spent $127 on replacement items. DL initially rejected reimbursement. Filed DOT and BBB complaints, emailed executives.",
-    "requested_compensation": [
-      "$127 reimbursement",
-      "baggage delay compensation"
-    ],
+    "requested_compensation": ["$127 reimbursement", "baggage delay compensation"],
     "actual_outcome": "$127 reimbursement + 12,500 SkyMiles. Paid within 2 hours of emailing executive team.",
     "evidence_used": [
       "baggage tag (crucial)",
@@ -289,7 +302,12 @@
     "confidence": "high",
     "notes": "The source reports that this passenger was told about a six-hour airport deadline; verify the carrier's current written deadline rather than treating that statement as a universal rule.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Delta Air Lines",
+    "carrier": "Delta",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_iberia_checked_baggage_delay_2025_04",
@@ -297,7 +315,7 @@
     "source_name": "USCardForum thread summary",
     "source_url": "https://www.uscardforum.com/t/topic/379591",
     "provider_type": "airline",
-    "provider": "Iberia",
+    "provider": null,
     "brand_or_airline": "Iberia",
     "issue_type": "baggage_delay",
     "location_country": "EU",
@@ -318,16 +336,16 @@
       "Receipts for emergency purchases",
       "Credit card benefits guide"
     ],
-    "escalation_path": [
-      "Iberia baggage claim",
-      "Credit card benefits administrator"
-    ],
+    "escalation_path": ["Iberia baggage claim", "Credit card benefits administrator"],
     "reusable_lesson": "Delayed baggage claims usually reimburse reasonable necessary purchases rather than paying an automatic lump sum; keep receipts and clarify whether airline reimbursement affects card coverage.",
     "confidence": "medium",
     "notes": "Summarized and rewritten from a USCardForum '怎么撕？' tagged thread. Verify legal limits and current carrier rules before public launch.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "legacy_provider": "Iberia",
+    "carrier": "Iberia",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -336,7 +354,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/345212",
     "provider_type": "airline",
-    "provider": "Southwest",
+    "provider": null,
     "brand_or_airline": "Southwest",
     "issue_type": "baggage_delay",
     "location_country": "US",
@@ -354,15 +372,17 @@
       "Airport baggage report",
       "Receipts for necessary purchases"
     ],
-    "escalation_path": [
-      "Southwest baggage office",
-      "Southwest claims department"
-    ],
+    "escalation_path": ["Southwest baggage office", "Southwest claims department"],
     "reusable_lesson": "File a baggage report promptly, obtain a claim number, and keep receipts for reasonable necessary purchases. Check the airline's current claim procedure and applicable DOT guidance before assuming a particular expense will be reimbursed.",
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Good DP on Southwest baggage delay procedures.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Southwest",
+    "carrier": "Southwest",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_southwest_gate_check_baggage_delay_2025_03",
@@ -370,7 +390,7 @@
     "source_name": "USCardForum thread summary",
     "source_url": "https://www.uscardforum.com/t/topic/362877",
     "provider_type": "airline",
-    "provider": "Southwest",
+    "provider": null,
     "brand_or_airline": "Southwest",
     "issue_type": "baggage_delay",
     "location_country": "US",
@@ -399,8 +419,11 @@
     "confidence": "medium",
     "notes": "Summarized and rewritten from a USCardForum '怎么撕？' tagged thread. Verify source details before public launch.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "legacy_provider": "Southwest",
+    "carrier": "Southwest",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -409,7 +432,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/512557",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": null,
     "brand_or_airline": "American Airlines",
     "issue_type": "airline_cancellation",
     "location_country": "US",
@@ -429,16 +452,18 @@
       "Southwest ticket purchase receipt",
       "Evidence of other flights operating during the same period"
     ],
-    "escalation_path": [
-      "AA customer relations",
-      "DOT complaint if AA denies responsibility"
-    ],
+    "escalation_path": ["AA customer relations", "DOT complaint if AA denies responsibility"],
     "reusable_lesson": "When an airline cites weather but competing flights are operating, document the evidence and challenge the weather claim through DOT. Always book airfare with a card that provides trip delay/cancellation insurance. For last-minute self-rebookings, ask the original airline to endorse the ticket to another carrier before buying a new ticket.",
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Weather claim disputed by passenger with observable evidence. Outcome not yet reported.",
     "review_status": "needs_review",
     "review_notes": [
       "Airline cited weather; other operating flights do not by themselves prove controllability."
+    ],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -447,7 +472,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/508856",
     "provider_type": "airline",
-    "provider": "China Eastern Airlines",
+    "provider": null,
     "brand_or_airline": "China Eastern",
     "issue_type": "airline_cancellation",
     "location_country": "China",
@@ -455,17 +480,9 @@
     "loyalty_status": "none",
     "reservation_type": "paid",
     "facts": "China Eastern cancelled the flight two days before departure, citing a 'company plan.' The passenger suspected low demand but did not independently establish the operational reason. They rebooked to the same flight the next day, creating a 24-hour delay, and claimed accommodation expenses.",
-    "requested_compensation": [
-      "hotel reimbursement",
-      "meal expenses",
-      "transport costs"
-    ],
+    "requested_compensation": ["hotel reimbursement", "meal expenses", "transport costs"],
     "actual_outcome": "Hotel fully reimbursed (based on actual invoices). ~200 RMB fixed compensation for meals/transport. Cash via bank transfer after OP rejected voucher offers.",
-    "evidence_used": [
-      "hotel invoice",
-      "cancellation SMS notification",
-      "bank account details"
-    ],
+    "evidence_used": ["hotel invoice", "cancellation SMS notification", "bank account details"],
     "escalation_path": [
       "95530 customer service",
       "dedicated claims specialist",
@@ -477,7 +494,12 @@
     "confidence": "high",
     "notes": "Insightful DP on Chinese airline practices vs US carriers. Process took 2-3 weeks.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "China Eastern Airlines",
+    "carrier": "China Eastern Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_delta_six_hours_cancel_sfo_lax_2026_02",
@@ -485,7 +507,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/483836",
     "provider_type": "airline",
-    "provider": "Delta",
+    "provider": null,
     "brand_or_airline": "Delta",
     "issue_type": "airline_cancellation",
     "location_country": "US",
@@ -498,10 +520,7 @@
       "Delta goodwill compensation"
     ],
     "actual_outcome": "Outcome not reported. Forum advice noted Delta can endorse tickets to Alaska under interline agreements if asked before buying a separate ticket, but self-booking a new ticket is generally the passenger's own expense.",
-    "evidence_used": [
-      "Delta cancellation notice",
-      "Alaska Airlines ticket receipt (25k miles)"
-    ],
+    "evidence_used": ["Delta cancellation notice", "Alaska Airlines ticket receipt (25k miles)"],
     "escalation_path": [
       "Delta customer service (ask for interline endorsement first)",
       "Delta customer relations (goodwill after the fact)"
@@ -510,8 +529,11 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Clear situation but outcome not reported. Good lesson about interline rebooking.",
     "review_status": "needs_review",
-    "review_notes": [
-      "Disruption cause is missing, so controllable classification is unverified."
+    "review_notes": ["Disruption cause is missing, so controllable classification is unverified."],
+    "legacy_provider": "Delta",
+    "carrier": "Delta",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -520,7 +542,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/479581",
     "provider_type": "airline",
-    "provider": "United",
+    "provider": null,
     "brand_or_airline": "United",
     "issue_type": "airline_cancellation",
     "location_country": "US",
@@ -547,8 +569,11 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Facts clear but outcome of compensation request not reported.",
     "review_status": "needs_review",
-    "review_notes": [
-      "Disruption cause is missing, so controllable classification is unverified."
+    "review_notes": ["Disruption cause is missing, so controllable classification is unverified."],
+    "legacy_provider": "United",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -557,7 +582,7 @@
     "source_name": "Synthetic demo case",
     "source_url": "",
     "provider_type": "airline",
-    "provider": "United",
+    "provider": null,
     "brand_or_airline": "United",
     "issue_type": "airline_cancellation",
     "location_country": "US",
@@ -565,28 +590,19 @@
     "loyalty_status": "None",
     "reservation_type": "paid",
     "facts": "Flight was cancelled due to crew availability. Passenger was rebooked to the next morning and needed overnight accommodation.",
-    "requested_compensation": [
-      "Hotel",
-      "Meal voucher",
-      "Ground transportation",
-      "Rebooking"
-    ],
+    "requested_compensation": ["Hotel", "Meal voucher", "Ground transportation", "Rebooking"],
     "actual_outcome": "Demo example: passenger received hotel and meal voucher after asking whether cancellation was controllable.",
-    "evidence_used": [
-      "Cancellation email",
-      "App notification",
-      "Boarding pass"
-    ],
-    "escalation_path": [
-      "Airport customer service",
-      "Customer relations"
-    ],
+    "evidence_used": ["Cancellation email", "App notification", "Boarding pass"],
+    "escalation_path": ["Airport customer service", "Customer relations"],
     "reusable_lesson": "Ask the airline to confirm whether the cancellation was within airline control and reference the airline's DOT-listed customer commitment.",
     "confidence": "medium",
     "notes": "Synthetic example for demo only.",
     "review_status": "approved",
-    "review_notes": [
-      "Synthetic demo example; never present as a community outcome."
+    "review_notes": ["Synthetic demo example; never present as a community outcome."],
+    "legacy_provider": "United",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -595,7 +611,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/516057",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": "Alaska Airlines",
     "brand_or_airline": "American Airlines",
     "issue_type": "airline_delay",
     "location_country": "US",
@@ -624,7 +640,12 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Clear facts: AC mechanical, crew timeout, overnight delay, rebooked next day.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_ac_syd_yvr_delay_missed_connection_2026_02",
@@ -632,7 +653,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/483768",
     "provider_type": "airline",
-    "provider": "Air Canada",
+    "provider": "BOA Premium Rewards travel portal",
     "brand_or_airline": "Air Canada",
     "issue_type": "airline_delay",
     "location_country": "CA",
@@ -659,8 +680,11 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Facts clear but outcome not reported.",
     "review_status": "needs_review",
-    "review_notes": [
-      "Disruption cause is missing, so controllable classification is unverified."
+    "review_notes": ["Disruption cause is missing, so controllable classification is unverified."],
+    "legacy_provider": "Air Canada",
+    "carrier": "Air Canada",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -669,7 +693,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/516805",
     "provider_type": "airline",
-    "provider": "Alaska Airlines",
+    "provider": null,
     "brand_or_airline": "Alaska Airlines",
     "issue_type": "airline_delay",
     "location_country": "US",
@@ -698,8 +722,11 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Weather + equipment chain makes it a mixed case, classified as controllable delay because the eventual cancellation reason was equipment-related.",
     "review_status": "needs_review",
-    "review_notes": [
-      "Mixed weather and equipment chain; controllability is not established."
+    "review_notes": ["Mixed weather and equipment chain; controllability is not established."],
+    "legacy_provider": "Alaska Airlines",
+    "carrier": "Alaska Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -708,7 +735,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/513323",
     "provider_type": "airline",
-    "provider": "United Airlines",
+    "provider": null,
     "brand_or_airline": "United Airlines",
     "issue_type": "airline_delay",
     "location_country": "US",
@@ -720,18 +747,19 @@
       "Travel certificate or miles (guest was seeking advice on what to ask)"
     ],
     "actual_outcome": "Outcome not reported — the passenger ultimately made the flight. Thread contributors noted that schedule changes of this nature rarely result in compensation if the passenger still travels.",
-    "evidence_used": [
-      "Text message from United showing the schedule change"
-    ],
-    "escalation_path": [
-      "United Airlines customer service"
-    ],
+    "evidence_used": ["Text message from United showing the schedule change"],
+    "escalation_path": ["United Airlines customer service"],
     "reusable_lesson": "If a schedule change would cause hardship, call the airline to request re-accommodation before accepting the change. If you still travel, compensation is unlikely. One commenter reported receiving $50-200 travel certificates plus mileage for delays of 2.5-4 hours.",
     "confidence": "low",
     "notes": "Weak case — the passenger made the flight and no compensation was formally requested.",
     "review_status": "excluded",
     "review_notes": [
       "Passenger made the flight; no compensable disruption or reported claim outcome."
+    ],
+    "legacy_provider": "United Airlines",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -740,7 +768,7 @@
     "source_name": "Synthetic demo case",
     "source_url": "",
     "provider_type": "airline",
-    "provider": "United",
+    "provider": null,
     "brand_or_airline": "United",
     "issue_type": "airline_delay",
     "location_country": "US",
@@ -755,23 +783,17 @@
       "Rebooking on the next available flight"
     ],
     "actual_outcome": "Airline provided hotel and meal vouchers at the airport service desk.",
-    "evidence_used": [
-      "Delay notification",
-      "Boarding passes",
-      "Hotel receipt",
-      "Meal receipt"
-    ],
-    "escalation_path": [
-      "Airport customer service",
-      "Airline chat",
-      "DOT complaint if denied"
-    ],
+    "evidence_used": ["Delay notification", "Boarding passes", "Hotel receipt", "Meal receipt"],
+    "escalation_path": ["Airport customer service", "Airline chat", "DOT complaint if denied"],
     "reusable_lesson": "For controllable disruptions, use the airline's DOT dashboard commitments and ask for care before paying out of pocket.",
     "confidence": "medium",
     "notes": "Synthetic example for the first demo.",
     "review_status": "approved",
-    "review_notes": [
-      "Synthetic demo example; never present as a community outcome."
+    "review_notes": ["Synthetic demo example; never present as a community outcome."],
+    "legacy_provider": "United",
+    "carrier": "United",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -780,7 +802,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/480105",
     "provider_type": "airline",
-    "provider": "American Airlines",
+    "provider": null,
     "brand_or_airline": "American Airlines",
     "issue_type": "denied_boarding",
     "location_country": "US",
@@ -798,17 +820,18 @@
       "EVUS confirmation",
       "Passport and visa documentation"
     ],
-    "escalation_path": [
-      "AA check-in counter",
-      "AA customer relations",
-      "CBP/EVUS help desk"
-    ],
+    "escalation_path": ["AA check-in counter", "AA customer relations", "CBP/EVUS help desk"],
     "reusable_lesson": "Verify required travel authorizations before departure and leave extra time for document checks and checked-baggage cutoffs. This source does not support treating the event as oversales denied boarding.",
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. More of an informational thread about CBP check-in systems.",
     "review_status": "excluded",
     "review_notes": [
       "Not an overbooking or involuntary denied-boarding case; the source says the passenger had an EVUS issue and reported no actual loss."
+    ],
+    "legacy_provider": "American Airlines",
+    "carrier": "American Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -817,7 +840,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/476427",
     "provider_type": "airline",
-    "provider": "Delta Air Lines",
+    "provider": null,
     "brand_or_airline": "Delta Air Lines",
     "issue_type": "denied_boarding",
     "location_country": "US",
@@ -825,22 +848,20 @@
     "loyalty_status": "unknown",
     "reservation_type": "award",
     "facts": "Delta Air Lines called a passenger to volunteer for denied boarding on an oversold flight from Florida to the Northeast US. The initial offer was 400 credits or 40,000 miles. The passenger negotiated to 50,000 miles per person and took the offer for themselves and a companion, totaling 100,000 Delta miles. They were rebooked on a next-morning flight via Atlanta. The original ticket was a low-value award booking (3,000 miles). The miles posted to the account as expected.",
-    "requested_compensation": [
-      "100,000 Delta SkyMiles total (50k per person for 2 travelers)"
-    ],
+    "requested_compensation": ["100,000 Delta SkyMiles total (50k per person for 2 travelers)"],
     "actual_outcome": "Delta offered 400 credits / 40k miles initially, negotiated up to 50k miles per person. The 100,000 miles were received. The passenger was satisfied with the outcome.",
-    "evidence_used": [
-      "Notes of the offer and rebooking conversation",
-      "Mileage account activity"
-    ],
-    "escalation_path": [
-      "Delta phone call (volunteer solicitation) → Offer negotiation"
-    ],
+    "evidence_used": ["Notes of the offer and rebooking conversation", "Mileage account activity"],
+    "escalation_path": ["Delta phone call (volunteer solicitation) → Offer negotiation"],
     "reusable_lesson": "A voluntary-bump offer may be negotiable. Before accepting, compare miles and credits based on how you will use them, confirm the replacement itinerary in writing, and check whether volunteering changes eligibility for hotel support or card benefits.",
     "confidence": "high",
     "notes": "Original ticket was ~3,000 miles (basic economy). Rebooked next morning via ATL with an overnight stay. The passenger noted they would use Hilton points for the hotel.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Delta Air Lines",
+    "carrier": "Delta",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "synthetic_us_involuntary_denied_boarding_001",
@@ -848,7 +869,7 @@
     "source_name": "Synthetic demo case",
     "source_url": "",
     "provider_type": "airline",
-    "provider": "Generic US airline",
+    "provider": null,
     "brand_or_airline": "US airline",
     "issue_type": "denied_boarding",
     "location_country": "US",
@@ -878,8 +899,12 @@
     "confidence": "medium",
     "notes": "Synthetic example for testing the distinction between voluntary and involuntary denied boarding. It is not a reported community outcome.",
     "review_status": "approved",
-    "review_notes": [
-      "Synthetic demo example; never present as a community outcome."
+    "review_notes": ["Synthetic demo example; never present as a community outcome."],
+    "legacy_provider": "Generic US airline",
+    "carrier": null,
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。",
+      "受影响航段实际承运角色无法唯一确定，保留未知。"
     ]
   },
   {
@@ -888,7 +913,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/472168",
     "provider_type": "airline",
-    "provider": "Air France",
+    "provider": null,
     "brand_or_airline": "Air France",
     "issue_type": "airline_cancellation",
     "location_country": "France",
@@ -918,7 +943,12 @@
     "confidence": "medium",
     "notes": "The payment outcome is reported by the source. The legal basis for fixed compensation was not explained, so do not generalize it to other weather cancellations.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Air France",
+    "carrier": "Air France",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "uscf_lh_eu261_claim_2022_05",
@@ -926,7 +956,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/83404",
     "provider_type": "airline",
-    "provider": "Lufthansa",
+    "provider": "Air Canada",
     "brand_or_airline": "Lufthansa",
     "issue_type": "airline_delay",
     "location_country": "Germany",
@@ -934,9 +964,7 @@
     "loyalty_status": "none",
     "reservation_type": "award",
     "facts": "Booked LH first class IST-FRA-SFO via Aeroplan. LH notified of delay at 3am in Istanbul, causing missed connection in FRA. LH offered UA business same day or LH first next day. OP chose next day. Arrived SFO ~24 hours late. Filed EU261 claim for €600.",
-    "requested_compensation": [
-      "€600 EU261 compensation per passenger"
-    ],
+    "requested_compensation": ["€600 EU261 compensation per passenger"],
     "actual_outcome": "LH initially denied claiming 'flight irregularities'. OP complained to German LBA. After 6 months, LH paid €600 (~$700).",
     "evidence_used": [
       "boarding passes (original and reissued)",
@@ -954,7 +982,12 @@
     "confidence": "high",
     "notes": "Excellent step-by-step DP with timeline. 6-month process but paid after regulatory pressure.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "legacy_provider": "Lufthansa",
+    "carrier": "Lufthansa",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
+    ]
   },
   {
     "case_id": "case_eu261_three_hour_arrival_delay",
@@ -962,7 +995,7 @@
     "source_name": "Synthetic demo case",
     "source_url": "",
     "provider_type": "airline",
-    "provider": "European Union",
+    "provider": null,
     "brand_or_airline": "EU carrier",
     "issue_type": "airline_delay",
     "location_country": "EU",
@@ -982,16 +1015,17 @@
       "Airline delay reason",
       "Expense receipts"
     ],
-    "escalation_path": [
-      "Airline claim form",
-      "National enforcement body"
-    ],
+    "escalation_path": ["Airline claim form", "National enforcement body"],
     "reusable_lesson": "Anchor the request on actual arrival delay, route eligibility, and whether extraordinary circumstances apply.",
     "confidence": "medium",
     "notes": "Synthetic example for the first demo.",
     "review_status": "approved",
-    "review_notes": [
-      "Synthetic demo example; never present as a community outcome."
+    "review_notes": ["Synthetic demo example; never present as a community outcome."],
+    "legacy_provider": "European Union",
+    "carrier": null,
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。",
+      "受影响航段实际承运角色无法唯一确定，保留未知。"
     ]
   },
   {
@@ -1013,22 +1047,14 @@
       "Written folio or explanation of the charge"
     ],
     "actual_outcome": "Outcome not reported beyond forum advice. Other users recommended contacting or emailing the hotel first because the charge might be a billing error or pending adjustment.",
-    "evidence_used": [
-      "Credit card transaction",
-      "Hotel folio",
-      "Booking confirmation"
-    ],
-    "escalation_path": [
-      "Hotel billing department",
-      "Card issuer dispute if unresolved"
-    ],
+    "evidence_used": ["Credit card transaction", "Hotel folio", "Booking confirmation"],
+    "escalation_path": ["Hotel billing department", "Card issuer dispute if unresolved"],
     "reusable_lesson": "For unexplained hotel charges, request the folio and a written billing correction from the property before escalating to a card dispute.",
     "confidence": "medium",
     "notes": "Summarized and rewritten from a USCardForum '怎么撕？' tagged thread.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_regency_maui_club_closed_2026_02",
@@ -1064,7 +1090,8 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic read via Nitan.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_marriott_renaissance_nyc_breakfast_denied_2026_03",
@@ -1090,17 +1117,13 @@
       "Hotel folio showing breakfast charges",
       "Marriott elite benefit terms"
     ],
-    "escalation_path": [
-      "Front desk manager",
-      "Marriott Bonvoy customer care"
-    ],
+    "escalation_path": ["Front desk manager", "Marriott Bonvoy customer care"],
     "reusable_lesson": "Not all Marriott properties honor elite breakfast benefits consistently. Check property-specific policies on FlyerTalk before booking, and consider choosing properties with confirmed breakfast benefits for Platinum+ members.",
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Facts clear but outcome incomplete. Property may not participate in the breakfast benefit program.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "carrier": null
   },
   {
     "case_id": "uscf_conrad_shampoo_property_loss_2026_01",
@@ -1135,7 +1158,8 @@
     "review_status": "excluded",
     "review_notes": [
       "Possible chemical ingestion is a health/safety case requiring professional help, outside the product boundary."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_personal_towel_removed_2023_10",
@@ -1172,9 +1196,8 @@
     "confidence": "medium",
     "notes": "Summarized and rewritten from a USCardForum '怎么撕？' tagged thread.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_rome_central_relocation_hgi_2026_04",
@@ -1212,9 +1235,8 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Clear ongoing situation with multiple guest data points.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "carrier": null
   },
   {
     "case_id": "uscf_conrad_borabora_paid_upgrade_denied_2026_07",
@@ -1251,9 +1273,8 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Very clear facts with written confirmation and documented bait-and-switch.",
     "review_status": "needs_review",
-    "review_notes": [
-      "Claim/refund outcome is not reported after the guest cancelled."
-    ]
+    "review_notes": ["Claim/refund outcome is not reported after the guest cancelled."],
+    "carrier": null
   },
   {
     "case_id": "uscf_fairmont_banff_springs_fhr_room_misrepresentation_2026_06",
@@ -1289,7 +1310,8 @@
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Very complete DP with clear outcome and actionable lessons.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_andaz_5th_suite_amenity_mismatch_2026_05",
@@ -1328,7 +1350,8 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hampton_in_hotel_qr_restaurant_closed_2023_12",
@@ -1366,9 +1389,8 @@
     "confidence": "medium",
     "notes": "Summarized and rewritten from a USCardForum '怎么撕？' tagged thread.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "carrier": null
   },
   {
     "case_id": "uscf_hgv_hawaii_service_issue_2026_01",
@@ -1384,21 +1406,16 @@
     "loyalty_status": "unknown",
     "reservation_type": "paid",
     "facts": "Guest checked into an HGV property in Hawaii (Big Island) and found the wifi was completely non-functional in their double-bed room. An engineer tried to fix it without success. The manager said it was the only double-bed room available and could not upgrade to a 1BR/2BR suite, but offered a king room with a rollaway bed — which also had no working wifi. The guest returned to the original room. The manager offered compensation (points, resort fee waiver, or parking) but the guest felt it was trivial compared to the room cost. The next morning, the wifi was intermittent. The guest negotiated successfully.",
-    "requested_compensation": [
-      "Compensation for unusable wifi (points / resort fee /)"
-    ],
+    "requested_compensation": ["Compensation for unusable wifi (points / resort fee /)"],
     "actual_outcome": "After speaking to the manager the next morning, the hotel waived two nights of parking and resort fees plus applicable taxes, totaling approximately $190 USD. The guest considered this fair and did not pursue further compensation.",
-    "evidence_used": [
-      "Demonstration of non-functional wifi to engineer and manager"
-    ],
-    "escalation_path": [
-      "Front desk engineer → Front desk manager"
-    ],
+    "evidence_used": ["Demonstration of non-functional wifi to engineer and manager"],
+    "escalation_path": ["Front desk engineer → Front desk manager"],
     "reusable_lesson": "Document the failed amenity and any attempted repair. In this case, asking a manager for specific fee waivers produced a mutually acceptable result; it does not establish a standard compensation amount.",
     "confidence": "high",
     "notes": "Located in Hawaii (Big Island). The $190 in waived fees roughly matched the guest's on-property spending for the day.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hilton_home2_amenities_missing_diamond_2026_07",
@@ -1438,7 +1455,8 @@
     "review_status": "needs_review",
     "review_notes": [
       "Reclassified from hotel_walk to hotel_service_issue; source outcome is not reported."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hilton_room_service_issue_2026_06",
@@ -1454,9 +1472,7 @@
     "loyalty_status": "none",
     "reservation_type": "paid",
     "facts": "Booked 3 nights via Chase Travel (CSR) for $1,800. Multiple issues: bathroom ceiling panel fell off, sofa bed had stink bug corpse, unwashed sheets with dirt, live stink bug on wall. All issues photographed.",
-    "requested_compensation": [
-      "full refund of $1,800"
-    ],
+    "requested_compensation": ["full refund of $1,800"],
     "actual_outcome": "Front desk manager offered 1 night refund ($600). OP accepted. Hilton Twitter team facilitated resolution.",
     "evidence_used": [
       "photos of ceiling damage",
@@ -1473,7 +1489,8 @@
     "confidence": "high",
     "notes": "Multiple serious hygiene/safety issues documented. OP accepted 1-night refund without further push.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hotel_false_fire_alarm_ascott_penang_2026_03",
@@ -1509,7 +1526,8 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. OTA booking complicates resolution. Forum consensus was that a false alarm alone is hard to claim compensation for.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hotel_water_outage_hampton_fn_2026_06",
@@ -1535,15 +1553,13 @@
       "Photos or documentation of water outage",
       "Front desk interaction notes"
     ],
-    "escalation_path": [
-      "Front desk manager",
-      "Hilton customer care"
-    ],
+    "escalation_path": ["Front desk manager", "Hilton customer care"],
     "reusable_lesson": "Report a loss of essential services while it is happening and keep the property's response. For an award booking, ask the loyalty program what form of refund or goodwill it can provide; the amount in this source remained unresolved.",
     "confidence": "high",
     "notes": "Summarized from USCardForum topic. Clear facts and reported partial outcome (refund offered, points compensation pending).",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_centric_ny_service_issue_2026_06",
@@ -1563,19 +1579,16 @@
       "Compensation for stress and safety concern (guest was asking if it was worth pursuing)"
     ],
     "actual_outcome": "Outcome not reported in the captured thread. Commenters advised writing a complaint to Hyatt corporate citing safety concerns, with one reporting a prior successful claim of 25,000 points for a similar issue at another hotel.",
-    "evidence_used": [
-      "Personal recollection of events and timing"
-    ],
-    "escalation_path": [
-      "Hotel front desk → Hyatt corporate customer service (advised)"
-    ],
+    "evidence_used": ["Personal recollection of events and timing"],
+    "escalation_path": ["Hotel front desk → Hyatt corporate customer service (advised)"],
     "reusable_lesson": "Safety-related complaints (fire alarm mismanagement) carry more weight than amenity complaints. Write to corporate customer service rather than the hotel directly for safety issues. Multiple consecutive alarms without communication is a genuine safety hazard worth escalating.",
     "confidence": "medium",
     "notes": "Guest was on a high floor (40+). Elevators were disabled during the alarm. The alarm was triggered by the rooftop bar.",
     "review_status": "needs_review",
     "review_notes": [
       "No reported resolution; useful only as an issue narrative, not an outcome datapoint."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_naked_intruder_unauthorized_entry_2026_06",
@@ -1610,9 +1623,8 @@
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Privacy/security issue. Outcome not reported.",
     "review_status": "needs_review",
-    "review_notes": [
-      "Privacy/safety incident with disputed facts and no reported outcome."
-    ]
+    "review_notes": ["Privacy/safety incident with disputed facts and no reported outcome."],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_place_reno_service_issue_2025_12",
@@ -1628,23 +1640,18 @@
     "loyalty_status": "Explorist (水球 - low-tier status)",
     "reservation_type": "paid",
     "facts": "Guest arrived at a Reno Hyatt Place at 2am after highway delays (I-80). They had checked in via the app with a room number assigned, but the front desk gave a different room — a suite. The suite was actually intended for another guest with a similar name (mix-up). After correcting the error, the guest was given their actual room where the pillows had hair, the duvet had dog hair, and there was an eyelash on the sheets. The front desk phone was unreachable, so the guest had to go downstairs to request a room change. The hotel offered no upgrade or compensation — just a casual apology. The guest suspected the hotel had suites available but declined to upgrade them despite their Explorist status and explicit request.",
-    "requested_compensation": [
-      "Compensation in points (guest was seeking advice)"
-    ],
+    "requested_compensation": ["Compensation in points (guest was seeking advice)"],
     "actual_outcome": "Outcome not reported in the captured thread. The guest was advised by ChatGPT and commenters to email management requesting points compensation.",
-    "evidence_used": [
-      "Observations of dirty bedding (hair, dog hair, eyelash)"
-    ],
-    "escalation_path": [
-      "Front desk (in-person room change) → Hotel management email (advised)"
-    ],
+    "evidence_used": ["Observations of dirty bedding (hair, dog hair, eyelash)"],
+    "escalation_path": ["Front desk (in-person room change) → Hotel management email (advised)"],
     "reusable_lesson": "Hyatt Place properties are excluded from Globalist suite upgrade benefits. Document cleanliness issues with photos and contact hotel management directly rather than the front desk. Use AI to draft complaint emails.",
     "confidence": "medium",
     "notes": "Guest was an Explorist (水球 - low-tier). Hotel was full (peak season for Reno Air Races). The hotel mix-up revealed that suites were available but not offered.",
     "review_status": "needs_review",
     "review_notes": [
       "No reported resolution; useful only as an issue narrative, not an outcome datapoint."
-    ]
+    ],
+    "carrier": null
   },
   {
     "case_id": "uscf_lxr_honolulu_power_outage_2026_03",
@@ -1665,22 +1672,14 @@
       "Points or refund for the unusable portion of the stay"
     ],
     "actual_outcome": "Outcome not reported. Forum shared experiences from other power outages where hotels provided apologies but minimal compensation.",
-    "evidence_used": [
-      "Photos of power outage conditions",
-      "Front desk communication notes"
-    ],
-    "escalation_path": [
-      "Front desk manager",
-      "Hotel general manager",
-      "Hilton customer care"
-    ],
+    "evidence_used": ["Photos of power outage conditions", "Front desk communication notes"],
+    "escalation_path": ["Front desk manager", "Hotel general manager", "Hilton customer care"],
     "reusable_lesson": "During a power outage, ask whether the hotel has a relocation policy for guests whose rooms are unusable. If the backup generator also fails, the room is effectively uninhabitable and the hotel should offer a solution. Points bookings may have different compensation than cash bookings.",
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Facts clear but outcome not reported.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "carrier": null
   },
   {
     "case_id": "uscf_marriott_nanjing_mouse_pest_issue_2026_06",
@@ -1707,18 +1706,13 @@
       "Room change record",
       "Manager's written compensation offer"
     ],
-    "escalation_path": [
-      "Front desk",
-      "Hotel manager",
-      "Marriott Bonvoy customer care"
-    ],
+    "escalation_path": ["Front desk", "Hotel manager", "Marriott Bonvoy customer care"],
     "reusable_lesson": "For pest-related hotel issues, provide clear photographic evidence and escalate to corporate customer care if the property's offer seems inadequate. Consider whether accepting a partial compensation (points) is better than a full refund that forfeits flash promo bonuses. Request written confirmation of any agreed compensation.",
     "confidence": "medium",
     "notes": "Summarized from USCardForum topic. Pest/sanitation issue at a Chinese Marriott property.",
     "review_status": "approved",
-    "review_notes": [
-      "Outcome is incomplete; do not use as a compensation benchmark."
-    ]
+    "review_notes": ["Outcome is incomplete; do not use as a compensation benchmark."],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_figueroa_walk_2023_06",
@@ -1740,19 +1734,14 @@
       "additional points for lost benefits"
     ],
     "actual_outcome": "20k points refunded (full), 5k additional goodwill points, parking and breakfast differential refunded. Effectively free night at comparable hotel + 5k bonus points.",
-    "evidence_used": [
-      "phone call record",
-      "reservation confirmation"
-    ],
-    "escalation_path": [
-      "hotel front desk (pre-arrival call)",
-      "Hyatt customer service"
-    ],
+    "evidence_used": ["phone call record", "reservation confirmation"],
+    "escalation_path": ["hotel front desk (pre-arrival call)", "Hyatt customer service"],
     "reusable_lesson": "When contacted before arrival, confirm the substitute hotel and treatment of points, parking, breakfast, and transport before accepting. The extra 5,000 points were this case's goodwill outcome, not a standard benchmark.",
     "confidence": "medium",
     "notes": "OP was proactive and negotiated before arrival. Outcome was positive.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_kyoto_walk_2025_05",
@@ -1768,24 +1757,16 @@
     "loyalty_status": "Globalist",
     "reservation_type": "paid",
     "facts": "Arrived at Hyatt Place Kyoto after mobile check-in, only to be told hotel was oversold. Walked to Hyatt Regency Kyoto with hotel covering taxi fare. OP had already mailed luggage to HP and had to buy replacement toiletries.",
-    "requested_compensation": [
-      "additional points compensation",
-      "luggage transfer assistance"
-    ],
+    "requested_compensation": ["additional points compensation", "luggage transfer assistance"],
     "actual_outcome": "Taxi fare covered by hotel. Free drinks, 2pm late checkout, free breakfast at Regency. No additional points. Most forum members felt compensation was reasonable.",
-    "evidence_used": [
-      "mobile check-in confirmation",
-      "luggage receipt"
-    ],
-    "escalation_path": [
-      "front desk",
-      "Hyatt concierge line (considered but not used)"
-    ],
+    "evidence_used": ["mobile check-in confirmation", "luggage receipt"],
+    "escalation_path": ["front desk", "Hyatt concierge line (considered but not used)"],
     "reusable_lesson": "Mobile check-in does not guarantee a room. If walk involves moving to a different area, insist on luggage transfer assistance.",
     "confidence": "medium",
     "notes": "Limited compensation because walk was to a higher-category hotel. Japanese hotel practices differ from North America.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_hyatt_suncadia_walk_2025_10",
@@ -1801,27 +1782,20 @@
     "loyalty_status": "Explorist",
     "reservation_type": "points",
     "facts": "Booked two studios (17k points/night each) at Suncadia Resort. Hotel called before arrival offering to merge into 2BR suite for $100/night extra; OP refused. Upon arrival, hotel claimed no rooms available and offered a house in an annex building (no pool access, 10-min walk in 5°C weather). OP had called twice beforehand to confirm not being moved, but hotel denied knowledge. Negotiation lasted 15 minutes with OP recording video, insisting on original booking. Eventually hotel found two upgraded rooms in main building.",
-    "requested_compensation": [
-      "68k points refund",
-      "same building rooms",
-      "dining credit"
-    ],
+    "requested_compensation": ["68k points refund", "same building rooms", "dining credit"],
     "actual_outcome": "Both rooms were ultimately provided in the main lodge and the promised $500 dining credit was honored. A 68,000-point refund was discussed, but the source's final update said it apparently had not posted.",
     "evidence_used": [
       "video recording of front desk conversation",
       "phone call notes",
       "app screenshots showing booking details"
     ],
-    "escalation_path": [
-      "front desk manager",
-      "shift manager phone call",
-      "third front desk agent"
-    ],
+    "escalation_path": ["front desk manager", "shift manager phone call", "third front desk agent"],
     "reusable_lesson": "Confirm any relocation or room change before accepting it, and document the agreed room, credits, and refund separately. A verbal promise is not a completed points refund; follow up until each item is posted.",
     "confidence": "medium",
     "notes": "Source-checked: the rooms and dining credit were confirmed, but the initially promised 68,000-point refund was not confirmed in the final update.",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "uscf_ihg_crowne_plaza_walk_2024_09",
@@ -1843,21 +1817,14 @@
       "First-night lodging cost under the applicable reservation guarantee"
     ],
     "actual_outcome": "Outcome was not reported in the captured source. Replies suggested escalating because the property had not arranged a comparable alternate hotel.",
-    "evidence_used": [
-      "reservation email",
-      "ChatGPT-drafted complaint letter"
-    ],
-    "escalation_path": [
-      "front desk",
-      "IHG customer service / corporate complaint"
-    ],
+    "evidence_used": ["reservation email", "ChatGPT-drafted complaint letter"],
+    "escalation_path": ["front desk", "IHG customer service / corporate complaint"],
     "reusable_lesson": "For a qualifying direct reservation secured by credit card, compare the property's response with IHG's current Online Reservation Guarantee and ask the property or customer care to arrange the stated alternate lodging and transport.",
     "confidence": "medium",
     "notes": "The source documents the walk but no final resolution. The earlier 15,000-point outcome was unsupported and has been removed.",
     "review_status": "needs_review",
-    "review_notes": [
-      "The captured source does not report the claimed 15,000-point outcome."
-    ]
+    "review_notes": ["The captured source does not report the claimed 15,000-point outcome."],
+    "carrier": null
   },
   {
     "case_id": "uscf_ihg_holidayinn_springfield_walk_2023_09",
@@ -1873,24 +1840,16 @@
     "loyalty_status": "none specified",
     "reservation_type": "points",
     "facts": "Booked Holiday Inn Springfield for 2 nights (17k + 22k points). Arrived 10:30pm, told hotel was full. Handwritten note sent to adjacent Crown Plaza. Crown Plaza hadn't been notified. No bottled water provided despite 3 requests. OP later discovered IHG had refunded all points.",
-    "requested_compensation": [
-      "bottled water (unfulfilled 3 times)"
-    ],
+    "requested_compensation": ["bottled water (unfulfilled 3 times)"],
     "actual_outcome": "Full points refunded (39k points) - both nights comped. No additional compensation.",
-    "evidence_used": [
-      "handwritten note from Holiday Inn front desk",
-      "reservation confirmation"
-    ],
-    "escalation_path": [
-      "front desk (Holiday Inn)",
-      "front desk (Crown Plaza)",
-      "IHG app review"
-    ],
+    "evidence_used": ["handwritten note from Holiday Inn front desk", "reservation confirmation"],
+    "escalation_path": ["front desk (Holiday Inn)", "front desk (Crown Plaza)", "IHG app review"],
     "reusable_lesson": "Verify that the receiving hotel has the relocation details and check whether points were returned. The source reports a full points refund, while IHG's current Online Reservation Guarantee separately describes alternate lodging and transportation for eligible reservations.",
     "confidence": "high",
     "notes": "Full points refund without even asking. Walk was handled poorly (handwritten note, no notification to receiving hotel).",
     "review_status": "approved",
-    "review_notes": []
+    "review_notes": [],
+    "carrier": null
   },
   {
     "case_id": "marriott_walk_synthetic_001",
@@ -1913,23 +1872,14 @@
       "Goodwill points"
     ],
     "actual_outcome": "Demo example: hotel covered relocation and added points after escalation.",
-    "evidence_used": [
-      "Confirmation email",
-      "App screenshot",
-      "Front desk statement"
-    ],
-    "escalation_path": [
-      "Front desk",
-      "Duty manager",
-      "Corporate customer care"
-    ],
+    "evidence_used": ["Confirmation email", "App screenshot", "Front desk statement"],
+    "escalation_path": ["Front desk", "Duty manager", "Corporate customer care"],
     "reusable_lesson": "Emphasize confirmed reservation, Bonvoy number attached, and ask for the Ultimate Reservation Guarantee to be applied in writing.",
     "confidence": "medium",
     "notes": "Synthetic example for demo only. Replace with real summarized DP before public launch.",
     "review_status": "approved",
-    "review_notes": [
-      "Synthetic demo example; never present as a community outcome."
-    ]
+    "review_notes": ["Synthetic demo example; never present as a community outcome."],
+    "carrier": null
   },
   {
     "case_id": "uscf_cathay_business_seat_unknown_unknown",
@@ -1937,7 +1887,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/470340",
     "provider_type": "airline",
-    "provider": "Cathay Pacific",
+    "provider": null,
     "brand_or_airline": "Cathay Pacific (CX870, HKG-SFO)",
     "issue_type": "unknown",
     "location_country": "US",
@@ -1954,15 +1904,16 @@
       "Crew logged the seat malfunction in aircraft maintenance log",
       "Written complaint filed with Cathay Pacific"
     ],
-    "escalation_path": [
-      "In-flight crew → Cathay Pacific customer service (written complaint)"
-    ],
+    "escalation_path": ["In-flight crew → Cathay Pacific customer service (written complaint)"],
     "reusable_lesson": "Always ask the crew to log equipment malfunctions in the aircraft maintenance log (with no reference number needed). Cathay Pacific has a standardized compensation table based on flight distance — knowing the maximum for your route helps set expectations. One commenter suggested Delta gave ~100k miles for similar issues, but non-US carriers tend to have stricter caps.",
     "confidence": "high",
     "notes": "CX870 is HKG-SFO. The initial Gemini AI estimate was 15k-30k miles; CX offered the top of that range on first response.",
     "review_status": "excluded",
-    "review_notes": [
-      "Unknown issue type is not eligible for retrieval."
+    "review_notes": ["Unknown issue type is not eligible for retrieval."],
+    "legacy_provider": "Cathay Pacific",
+    "carrier": "Cathay Pacific",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   },
   {
@@ -1971,7 +1922,7 @@
     "source_name": "USCardForum thread summary via Nitan",
     "source_url": "https://www.uscardforum.com/t/topic/508950",
     "provider_type": "airline",
-    "provider": "Japan Airlines",
+    "provider": null,
     "brand_or_airline": "Japan Airlines / British Airways / Air France",
     "issue_type": "unknown",
     "location_country": "FR",
@@ -1979,9 +1930,7 @@
     "loyalty_status": "unknown",
     "reservation_type": "award",
     "facts": "Passenger traveling LHR-CDG-HND on a British Airways to Japan Airlines (First Class) itinerary. At CDG, the passenger tried to access the Air France lounge (used by JAL). The lounge front desk staff refused entry, claiming JAL flights can only enter 3 hours before departure, contradicting JAL's published policy (which allows entry from 7am onward regardless of flight time). The staff said they 'didn't recognize BA' and only accept SkyTeam partners. The passenger called JAL customer service who tried to call the lounge but the lounge staff refused to accept the phone call. JAL had no ground agent at CDG to assist. The passenger was denied lounge access despite holding a JAL First Class ticket.",
-    "requested_compensation": [
-      "Compensation for denied lounge access (guest was seeking advice)"
-    ],
+    "requested_compensation": ["Compensation for denied lounge access (guest was seeking advice)"],
     "actual_outcome": "JAL customer service apologized but had no ground staff at CDG to resolve the issue. The passenger was unable to access the lounge. The thread suggested filing complaints with both Air France and Japan Airlines.",
     "evidence_used": [
       "Screenshot of JAL lounge access policy showing entry permitted from 7am",
@@ -1995,8 +1944,11 @@
     "confidence": "high",
     "notes": "Passenger was holding a JAL First Class ticket issued via BA Avios. Air France lounge at CDG Terminal 2.",
     "review_status": "excluded",
-    "review_notes": [
-      "Unknown issue type is not eligible for retrieval."
+    "review_notes": ["Unknown issue type is not eligible for retrieval."],
+    "legacy_provider": "Japan Airlines",
+    "carrier": "Japan Airlines",
+    "role_notes": [
+      "角色按已有案例叙述迁移，本轮未重新核验原帖。出票方只在既有事实明确时填写；原标签保存在 legacy_provider，不参与角色匹配。"
     ]
   }
 ]

@@ -7,3 +7,5 @@ artifacts
 package-lock.json
 **/*.md
 data/*.json
+.local
+research

@@ -11,7 +11,10 @@ export function validateKnowledgeData(raw: RawKnowledgeSnapshot, asOf: string) {
 }
 
 async function main(): Promise<void> {
-  const snapshot = await loadKnowledgeSnapshot();
+  const staleSources: string[] = [];
+  const snapshot = await loadKnowledgeSnapshot({
+    onStaleSource: (message) => staleSources.push(message)
+  });
   const statusCounts = Object.fromEntries(
     ["approved", "needs_review", "excluded"].map((status) => [
       status,
@@ -27,6 +30,12 @@ async function main(): Promise<void> {
       snapshot.carrierCommitments.length
     } carrier commitments. Version ${snapshot.version}.\n`
   );
+  if (staleSources.length > 0) {
+    const details = staleSources.map((message) => `  - ${message}\n`).join("");
+    process.stdout.write(
+      `Warning: ${staleSources.length} critical source(s) are overdue for review; release:source-review will fail until they are re-checked.\n${details}`
+    );
+  }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

@@ -1,5 +1,6 @@
+import { MAX_FACT_STRING_LENGTH, MAX_FACT_ARRAY_ITEMS } from "./inputLimits";
 import { enrichClaimJurisdiction } from "./jurisdiction";
-import { canonicalizeProviderName, findProviderMatch } from "./provider";
+import { canonicalizeProviderName, findExactProviderMatch } from "./provider";
 import type { MvpIssueType, PolicyRouteRegion } from "./types";
 
 export type ClaimIssueType = MvpIssueType | "unknown";
@@ -18,6 +19,8 @@ export type ClaimDisruptionReason =
   | "weather"
   | "late_inbound_aircraft"
   | "other_controllable"
+  | "passenger_side"
+  | "other_reported"
   | "unknown";
 export type ClaimDisruptionReasonStatus = "not_provided" | "reported" | "unavailable";
 export type ClaimDeniedBoardingKind = "voluntary" | "involuntary" | "unknown";
@@ -47,6 +50,8 @@ export type ClaimLocation = {
 };
 
 export type ClaimFacts = {
+  riskContext?: string[];
+  acceptedAlternative: boolean | null;
   issueType: ClaimIssueType;
   providerType: ClaimProviderType;
   provider: string | null;
@@ -126,6 +131,8 @@ const disruptionReasons: ClaimDisruptionReason[] = [
   "weather",
   "late_inbound_aircraft",
   "other_controllable",
+  "passenger_side",
+  "other_reported",
   "unknown"
 ];
 const disruptionReasonStatuses: ClaimDisruptionReasonStatus[] = [
@@ -166,7 +173,7 @@ const recoveryPriorities: ClaimRecoveryPriority[] = [
 const confidenceLevels: ClaimFacts["confidence"][] = ["low", "medium", "high"];
 
 const nullableStringSchema = {
-  anyOf: [{ type: "string" }, { type: "null" }]
+  anyOf: [{ type: "string", maxLength: MAX_FACT_STRING_LENGTH }, { type: "null" }]
 } as const;
 const locationSchema = {
   type: "object",
@@ -184,6 +191,7 @@ export const claimFactsJsonSchema = {
   type: "object",
   additionalProperties: false,
   properties: {
+    acceptedAlternative: { anyOf: [{ type: "boolean" }, { type: "null" }] },
     issueType: { type: "string", enum: issueTypes },
     providerType: { type: "string", enum: providerTypes },
     provider: nullableStringSchema,
@@ -199,7 +207,9 @@ export const claimFactsJsonSchema = {
     disruptionType: { type: "string", enum: disruptionTypes },
     disruptionReason: { type: "string", enum: disruptionReasons },
     disruptionReasonStatus: { type: "string", enum: disruptionReasonStatuses },
-    arrivalDelayMinutes: { anyOf: [{ type: "integer", minimum: 0 }, { type: "null" }] },
+    arrivalDelayMinutes: {
+      anyOf: [{ type: "integer", minimum: 0 }, { type: "null" }]
+    },
     isOvernight: { anyOf: [{ type: "boolean" }, { type: "null" }] },
     deniedBoardingKind: { type: "string", enum: deniedBoardingKinds },
     bookingChannel: { type: "string", enum: bookingChannels },
@@ -214,17 +224,30 @@ export const claimFactsJsonSchema = {
       type: "array",
       items: { type: "string", enum: recoveryPriorities }
     },
-    preferredAlternatives: { type: "array", items: { type: "string" } },
+    preferredAlternatives: {
+      type: "array",
+      maxItems: MAX_FACT_ARRAY_ITEMS,
+      items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH }
+    },
     hasConnectionsOrReturnSegments: {
       anyOf: [{ type: "boolean" }, { type: "null" }]
     },
     loyaltyStatus: nullableStringSchema,
-    expenses: { type: "array", items: { type: "string" } },
-    evidence: { type: "array", items: { type: "string" } },
+    expenses: {
+      type: "array",
+      maxItems: MAX_FACT_ARRAY_ITEMS,
+      items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH }
+    },
+    evidence: {
+      type: "array",
+      maxItems: MAX_FACT_ARRAY_ITEMS,
+      items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH }
+    },
     userGoal: nullableStringSchema,
     confidence: { type: "string", enum: confidenceLevels }
   },
   required: [
+    "acceptedAlternative",
     "issueType",
     "providerType",
     "provider",
@@ -266,6 +289,7 @@ export function emptyClaimLocation(): ClaimLocation {
 
 export function emptyClaimFacts(): ClaimFacts {
   return {
+    acceptedAlternative: null,
     issueType: "unknown",
     providerType: "unknown",
     provider: null,
@@ -323,7 +347,7 @@ function parseNullableString(value: unknown, path: string, errors: string[]): st
   if (value === null) {
     return null;
   }
-  if (typeof value === "string") {
+  if (typeof value === "string" && value.length <= MAX_FACT_STRING_LENGTH) {
     const trimmed = value.trim();
     return trimmed || null;
   }
@@ -333,7 +357,11 @@ function parseNullableString(value: unknown, path: string, errors: string[]): st
 }
 
 function parseStringArray(value: unknown, path: string, errors: string[]): string[] {
-  if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
+  if (
+    !Array.isArray(value) ||
+    value.length > MAX_FACT_ARRAY_ITEMS ||
+    value.some((item) => typeof item !== "string" || item.length > MAX_FACT_STRING_LENGTH)
+  ) {
     errors.push(`${path} must be an array of strings`);
     return [];
   }
@@ -365,7 +393,7 @@ function parseRecoveryPriorities(value: unknown, errors: string[]): ClaimRecover
   if (value === undefined) {
     return [];
   }
-  if (!Array.isArray(value)) {
+  if (!Array.isArray(value) || value.length > MAX_FACT_ARRAY_ITEMS) {
     errors.push("recoveryPriorities must be an array");
     return [];
   }
@@ -417,6 +445,15 @@ export function parseClaimFacts(value: unknown): ClaimFactsParseResult {
       : (errors.push("isOvernight must be a boolean or null"), null);
 
   const facts: ClaimFacts = {
+    riskContext:
+      value.riskContext === undefined
+        ? []
+        : parseStringArray(value.riskContext, "riskContext", errors),
+    acceptedAlternative: parseOptionalBoolean(
+      value.acceptedAlternative,
+      "acceptedAlternative",
+      errors
+    ),
     issueType: parseEnum(value.issueType, issueTypes, "issueType", errors) ?? "unknown",
     providerType: parseEnum(value.providerType, providerTypes, "providerType", errors) ?? "unknown",
     provider: parseNullableString(value.provider, "provider", errors),
@@ -531,6 +568,8 @@ export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
           ? "airline"
           : "unknown"
       : normalized.providerType;
+  // Every concrete reason, including passenger-side and otherwise uncategorized
+  // reported causes, is an answered question rather than missing information.
   const disruptionReasonStatus =
     normalized.disruptionReason !== "unknown"
       ? "reported"
@@ -546,7 +585,8 @@ export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
     marketingCarrier: canonicalizeProviderName(normalized.marketingCarrier, "airline"),
     operatingCarrier,
     operatingCarrierRegion: operatingCarrier
-      ? (findProviderMatch(operatingCarrier, "airline")?.operatingCarrierRegion ?? null)
+      ? (findExactProviderMatch(operatingCarrier, "airline")?.operatingCarrierRegion ??
+        normalized.operatingCarrierRegion)
       : null,
     disruptingCarrier: canonicalizeProviderName(normalized.disruptingCarrier, "airline"),
     disruptionType,
@@ -579,7 +619,11 @@ export function getMissingClaimFields(facts: ClaimFacts): ClaimFactField[] {
     if (!hasLocation(normalized.destination)) {
       missing.push("destination");
     }
-    if (normalized.issueType === "airline_delay" && normalized.arrivalDelayMinutes === null) {
+    if (
+      normalized.issueType === "airline_delay" &&
+      normalized.arrivalDelayMinutes === null &&
+      normalized.journeyStage === "completed"
+    ) {
       missing.push("arrivalDelayMinutes");
     }
     if (

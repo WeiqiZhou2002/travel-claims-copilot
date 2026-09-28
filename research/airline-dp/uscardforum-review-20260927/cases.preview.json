@@ -1,0 +1,587 @@
+[
+  {
+    "case_id": "dp-b7aab60058b4de405f4b",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/484406",
+    "provider_type": "airline",
+    "provider": null,
+    "carrier": "American Airlines",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "原 PVG–DFW 航班取消；改经日本后因出票问题被 JL 拒载，再滞留三天。；原航班 1/24；改签 1/27 至 1/30（2026 年帖内上下文）；PVG–DFW；改签经日本，日本机场未披露；原取消归因暴雪；后续出票错误由作者转述客服承认。",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 先按天气拒绝食宿赔付，给予里程。 (miles: received)；[final] 复核后作者报告获得酒店及餐饮补偿。 (expense_reimbursement: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "邮件申诉，强调天气取消与后续出票错误应分开处理。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-b7aab60058b4de405f4b",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "event.provider"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-b7aab60058b4de405f4b",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-7692981dddde90a01f32",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/528095",
+    "provider_type": "airline",
+    "provider": "Capital One Travel",
+    "carrier": "American Airlines",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "airline_delay",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "BUF–PHL 延误后未赶上 SEA 航班，被改经 ORD 过夜。；作者称最近返家；8/28 已等数日投诉回复，具体乘机日未披露；BUF–PHL–SEA；替代 PHL–ORD–SEA；AA 书面归因为空管限制。",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 改签经 ORD，拒绝提供酒店及食宿。 (rebooking: received; care: rejected)；[final] 升级后作者报告获 credit 和里程。 (voucher: received; miles: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "两轮邮件无果后转交 AA 高层投诉。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-7692981dddde90a01f32",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-7692981dddde90a01f32",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-c140cdb2e84cd1f8ee9a",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/496402",
+    "provider_type": "airline",
+    "provider": null,
+    "carrier": "Delta Air Lines",
+    "brand_or_airline": "Delta Air Lines",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "已飞抵 SEA 后 DL281 取消；后续等候方案约四天，五人选择返家。；上个月（相对 2026-04-04 发帖）；受影响 SEA–PVG；前段出发城市未披露；作者归因西雅图暴雪。",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 提供四天后候补；柜台称可退款，未提供食宿。 (rebooking: offered; refund: promised; care: rejected)；[intermediate] 退款部门随后拒绝退还积分。 (refund: rejected)",
+    "evidence_used": [],
+    "escalation_path": [
+      "要求先返家再退款；按电话指引提交退款申请。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-c140cdb2e84cd1f8ee9a",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "event.provider"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-c140cdb2e84cd1f8ee9a",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-e88d6c75e2e70860ab2b",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/477236",
+    "provider_type": "airline",
+    "provider": null,
+    "carrier": "Japan Airlines",
+    "brand_or_airline": "Japan Airlines",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "CTS–HND–DFW 行程的 1/24 JL12 取消，曾被改成经 SFO 的经济舱。；原定 2026-01-24 HND–DFW；1/22 收到取消通知；受影响 HND–DFW；全程 CTS–HND–DFW；取消邮件称 DFW 极端天气。",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] CTS 柜台先提 AA 高经/经济舱，后要求找出票方。 (rebooking: withdrawn)；[intermediate] 先改经 SFO 的经济舱。 (rebooking: received)；[final] HND 改为 1/25 JL12，并告知延至 1/26。 (rebooking: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "联系出票方及日航，拒绝降舱；赴 HND F14 柜台处理。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-e88d6c75e2e70860ab2b",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "event.provider"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-e88d6c75e2e70860ab2b",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-7f5d1675d2d0b666cfb4",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/473103",
+    "provider_type": "airline",
+    "provider": "Virgin Atlantic",
+    "carrier": "KLM",
+    "brand_or_airline": "KLM",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "KL1001 取消，影响 VS 里程兑换的 AMS–LHR–MIA 联程。；原计划 Jan 9，2026 年帖内上下文；受影响 AMS–LHR；原兑换行程 AMS–LHR–MIA；作者称阿姆斯特丹天气导致取消。",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 自动改为 KL627 AMS–MIA 商务。 (rebooking: received)；[intermediate] 客服称已换 KL1005+VS117，但作者遇到航段显示及值机异常。 (rebooking: promised)；[final] 再改 KL1005+BA171+AA；作者实际搭 BA 到 PIT。 (rebooking: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "两次致电 AF 要求调整，并到机场值机。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-7f5d1675d2d0b666cfb4",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-7f5d1675d2d0b666cfb4",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-c59d41dc339168248fe5",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/493023",
+    "provider_type": "airline",
+    "provider": "Alaska Airlines",
+    "carrier": "Qatar Airways",
+    "brand_or_airline": "Qatar Airways",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "5 月初 MLE–DOH–SFO 的后段取消。；原旅行时间 2026 年 5 月初；4/1 本人确认取消；受影响 DOH–SFO；全程 MLE–DOH–SFO",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 先改经 DOH、ORD。 (rebooking: received)；[final] 4/28 更新改为土航经 IST。 (rebooking: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "多次致电 AS。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-c59d41dc339168248fe5",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "cause"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-c59d41dc339168248fe5",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-8ee4e6587ead4674f8aa",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/493023",
+    "provider_type": "airline",
+    "provider": "Qatar Airways",
+    "carrier": "Qatar Airways",
+    "brand_or_airline": "Qatar Airways",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "6 月 SFO–DOH 取消。；6 月份；2026 年讨论上下文；SFO–DOH；另购 DOH–MLE，不合并为联程",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 已改为 SEA–DOH，R 舱；选座需付费。 (rebooking: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "致电美国客服要求改出发地。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-8ee4e6587ead4674f8aa",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "cause"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-8ee4e6587ead4674f8aa",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-448e12b660defe54cb9b",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/493023",
+    "provider_type": "airline",
+    "provider": null,
+    "carrier": "Qatar Airways",
+    "brand_or_airline": "Qatar Airways",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "6/5 SFO–DOH–MLE 已被取消。；6.5；2026 年上下文；SFO–DOH–MLE",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 仅提供 DFW–DOH–MLE 改签选项。 (rebooking: offered)；[intermediate] 作者补充需自行解决前往 DFW。",
+    "evidence_used": [],
+    "escalation_path": [
+      "致电询问替代行程。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-448e12b660defe54cb9b",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "cause",
+      "event.provider"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-448e12b660defe54cb9b",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-0a8c022c8b6a3f70f3d8",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/126649",
+    "provider_type": "airline",
+    "provider": null,
+    "carrier": "Porter Airlines",
+    "brand_or_airline": "Porter Airlines",
+    "issue_type": "airline_delay",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "EWR–YTZ 延误错失去 YQB 衔接，滞留多伦多。；5/28；文中称距发帖七个月；EWR–YTZ–YQB；作者称天气导致机组短缺。",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 安排候补及 Fairmont 住宿。 (care: received)；[final] 另给予航空代金券。 (voucher: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "争取额外补偿。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-0a8c022c8b6a3f70f3d8",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "event.provider"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-0a8c022c8b6a3f70f3d8",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-31994db8b0739e4c151d",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/126649",
+    "provider_type": "airline",
+    "provider": "Air Canada",
+    "carrier": "Air Canada",
+    "brand_or_airline": "Air Canada",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "YUL–EWR 先延误后取消，滞留蒙特利尔一晚。；6/1；同帖 2022 年行程；YUL–EWR；作者称天气；AC 以天气拒赔。",
+    "requested_compensation": [],
+    "actual_outcome": "[unknown] 拒绝赔偿，给出 25% 折扣码。 (cash_compensation: rejected; other: received)",
+    "evidence_used": [],
+    "escalation_path": [],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-31994db8b0739e4c151d",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "passenger_actions"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-31994db8b0739e4c151d",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-ccc21be2bbe9e912de84",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/469439",
+    "provider_type": "airline",
+    "provider": null,
+    "carrier": "American Airlines",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "airline_delay",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "LAX–DFW 延误两小时，错失后续衔接并改到次日。；今天；相对 2025-12-28 页面时间，当地日期未校验；已识别 LAX–DFW；后续目的地未披露；本段机组缺位；前序原因在原帖称换机、后续总结称天气，保留差异。",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 改签到次日并提供酒店和餐券。 (rebooking: received; care: received)；[final] 关联总结报告 AA 另给 credit 与积分。 (voucher: received; miles: received)",
+    "evidence_used": [],
+    "escalation_path": [],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-ccc21be2bbe9e912de84",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "passenger_actions",
+      "event.provider",
+      "前序原因：原帖 equipment change；关联总结 weather。当前航段 crew unavailable 一致；不据此判断可控性。"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-ccc21be2bbe9e912de84",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-c73931d3beef0f050e9c",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/352934",
+    "provider_type": "airline",
+    "provider": null,
+    "carrier": "Finnair",
+    "brand_or_airline": "Finnair",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "原定傍晚去 HEL 的 Finnair 航班被取消。；今天傍晚；2025-02-11 原帖，相对时间保留；原 LAX–HEL；替代 LAX–LHR–HEL",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 自动改为 BA 执飞首段、AY 后段，经 LHR。 (rebooking: received)；[intermediate] BA 柜台核对证件后办理值机。 (other: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "接受替代路线，到 BA 柜台出示相关证件办理值机。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-c73931d3beef0f050e9c",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "cause",
+      "event.provider"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-c73931d3beef0f050e9c",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-b709b74e59b36bc64df9",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/407456",
+    "provider_type": "airline",
+    "provider": "American Airlines",
+    "carrier": "American Airlines",
+    "brand_or_airline": "American Airlines",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "6/28 MAD–JFK 在起飞前约十小时取消，已办值机。；06/28；2025 年帖子上下文；MAD–JFK",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 作者报告已换成 Iberia 经伦敦的行程。 (rebooking: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "在 AA 官网选择替代航班。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：not_reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-b709b74e59b36bc64df9",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "cause"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-b709b74e59b36bc64df9",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-cca2b57b889d0d249819",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/467467",
+    "provider_type": "airline",
+    "provider": null,
+    "carrier": "Air Canada",
+    "brand_or_airline": "Air Canada",
+    "issue_type": "airline_cancellation",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "蒙特利尔去温哥华的 AC 航班在值机后取消，影响另购 ZIPAIR 行程。；今天；相对 2025-12-21 06:54 页面时间，当地日期不明确；蒙特利尔–温哥华",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 自动安排三天后，机场人员称无法改签。 (rebooking: received)；[final] 电话客服改为次日直飞，并完成值机。 (rebooking: received)",
+    "evidence_used": [],
+    "escalation_path": [
+      "机场排队无果后致电 AC。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-cca2b57b889d0d249819",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "cause",
+      "event.provider"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-cca2b57b889d0d249819",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  },
+  {
+    "case_id": "dp-81200d1341565dd70cd1",
+    "source_type": "community_dp",
+    "source_name": "USCardForum / 美卡论坛",
+    "source_url": "https://www.uscardforum.com/t/topic/103731",
+    "provider_type": "airline",
+    "provider": null,
+    "carrier": "Lufthansa",
+    "brand_or_airline": "Lufthansa",
+    "issue_type": "denied_boarding",
+    "location_country": "unknown",
+    "booking_channel": "unknown",
+    "loyalty_status": "unknown",
+    "reservation_type": "unknown",
+    "facts": "曼谷返美途中自愿让座，原在线座位被撤销，改经日本。；本月罢工背景下当前返美行程；9/3 发帖时仍在更新旅程；BKK–ORD；原中转点未披露，替代经 NRT；作者将超售与 LH 罢工联系，未经独立证实。",
+    "requested_compensation": [],
+    "actual_outcome": "[initial] 先提供 TG 接 JL 的经 NRT 行程。 (rebooking: offered)；[intermediate] 最终改 TG 接 NH，并安排 300 欧元现金卡。 (rebooking: received; cash_compensation: promised)；[final] 后续就降舱提出 160 EUR 或 250 USD 券的选择。 (cash_compensation: offered; voucher: offered)",
+    "evidence_used": [],
+    "escalation_path": [
+      "主动接受改道但不接受次日出发；就舱等与补偿交涉。"
+    ],
+    "reusable_lesson": "仅供对照已报告的处理过程，不代表通用政策或赔付保证。",
+    "confidence": "low",
+    "notes": "最终处置状态：reported。来源与完整记录：research/airline-dp/uscardforum-review-20260927/ready-for-review.json#dp-81200d1341565dd70cd1",
+    "review_status": "needs_review",
+    "review_notes": [
+      "自动生成的格式预览，未经入库审核。未报告的渠道、会员、票种和地域保持未知。",
+      "requested_compensation 与 evidence_used 未自动推断；证据索引保留在原始 DP，不能当作旅客提交材料。",
+      "event.provider",
+      "作者主动让座，但称拿到 involuntary denied boarding 文件；仅按自述保留，不认定法定非自愿拒载。"
+    ],
+    "role_notes": [
+      "provider 为原出票/办理方；carrier 为受影响航段承运人。改签后的承运人不覆盖原 carrier。"
+    ],
+    "provenance": {
+      "dp_id": "dp-81200d1341565dd70cd1",
+      "source_path": "research/airline-dp/uscardforum-review-20260927/ready-for-review.json",
+      "schema_version": "0.3"
+    }
+  }
+]

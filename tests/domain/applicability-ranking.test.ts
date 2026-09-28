@@ -34,13 +34,16 @@ function contextFor(overrides: Parameters<typeof claimState>[0] = {}) {
 }
 
 function caseFixture(overrides: Partial<Case> = {}): Case {
+  // These fixtures describe directly booked flights, so the operating carrier is the provider.
+  const provider = overrides.provider === undefined ? "Air France" : overrides.provider;
   return {
     case_id: "case",
     source_type: "community_dp",
     source_name: "Community report",
     source_url: "https://example.test/case",
     provider_type: "airline",
-    provider: "Air France",
+    provider,
+    carrier: provider,
     brand_or_airline: "Air France",
     issue_type: "airline_cancellation",
     location_country: "France",
@@ -318,7 +321,7 @@ describe("applicability-first retrieval ranking", () => {
       2
     );
     expect(ranked[0]?.item.case_id).toBe("united");
-    expect(ranked[0]?.reasons).toContain("provider_exact_match");
+    expect(ranked[0]?.reasons).toContain("carrier_match");
   });
 
   it("keeps scripts only when every frozen citation is admissible and does not slice citations", () => {

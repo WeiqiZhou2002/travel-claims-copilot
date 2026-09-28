@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import cases from "../../../data/cases.json";
 import policies from "../../../data/policies.json";
 import scripts from "../../../data/scripts.json";
+import { productionCaseLibraryRaw } from "../../../lib/case-library";
 import { analyzeProviderFeedback, generateActionScript } from "../../../lib/actionAssistant";
 import { buildAnalysisFromFacts } from "../../../lib/analyze";
 import { parseClaimFacts } from "../../../lib/claimFacts";
@@ -133,7 +133,7 @@ export async function POST(request: Request): Promise<Response> {
   const analysis = buildAnalysisFromFacts(
     parsedFacts.data,
     policies as Policy[],
-    cases as Case[],
+    productionCaseLibraryRaw() as Case[],
     scripts as Script[]
   );
   if (!analysis.actionPlan) {

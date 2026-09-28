@@ -107,6 +107,7 @@ export function validKnowledgeFixture(): MutableKnowledgeSnapshot {
         source_url: "https://example.test/community-case",
         provider_type: "airline",
         provider: "United",
+        carrier: "United",
         brand_or_airline: "United",
         issue_type: "airline_delay",
         location_country: "US",
@@ -185,6 +186,15 @@ export const invalidKnowledgeFixtures = [
   invalidFixture("stale medium-authority critical source", /stale/i, (snapshot) => {
     snapshot.policies[0].authority_level = "medium";
     snapshot.policies[0].last_checked = "2026-06-17";
+  }),
+  invalidFixture("empty case carrier", /carrier must be a non-empty string/i, (snapshot) => {
+    snapshot.cases[0].carrier = " ";
+  }),
+  invalidFixture("carrier on a hotel case", /carrier is only valid for airline/i, (snapshot) => {
+    snapshot.cases[0].provider_type = "hotel";
+  }),
+  invalidFixture("unknown script remedy", /remedy/i, (snapshot) => {
+    snapshot.scripts[0].remedy = "cash_now";
   }),
   invalidFixture("unapproved case without notes", /not approved/i, (snapshot) => {
     snapshot.cases[0].review_status = "needs_review";

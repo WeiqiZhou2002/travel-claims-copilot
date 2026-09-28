@@ -21,6 +21,8 @@ const defaultLimits: Required<RetrievalLimits> = {
   scriptLimit: 2
 };
 
+// A selected case is presentation-only, so an approved synthetic example may still be shown;
+// synthetic cases never enter similar-case retrieval.
 function isApprovedCase(item: Case): boolean {
   return item.review_status === "approved";
 }
@@ -32,6 +34,10 @@ function withSelectedCaseFacts(facts: ExtractedFacts, selectedCase?: Case): Extr
 export function buildRetrievalQuery(facts: ExtractedFacts): RetrievalQuery {
   return {
     description: facts.description,
+    ticketingProvider: facts.ticketingProvider,
+    carrier: facts.operatingCarrier,
+    journeyStage: facts.journeyStage,
+    acceptedAlternative: facts.acceptedAlternative,
     issueType: facts.issueType,
     provider: facts.provider,
     providerType: facts.providerType,
@@ -42,7 +48,7 @@ export function buildRetrievalQuery(facts: ExtractedFacts): RetrievalQuery {
     arrivalDelayMinutes: facts.arrivalDelayMinutes,
     isOvernight: facts.isOvernight,
     deniedBoardingKind: facts.deniedBoardingKind,
-    operatingCarrier: facts.operatingCarrier ?? facts.provider,
+    operatingCarrier: facts.operatingCarrier,
     operatingCarrierRegion: facts.operatingCarrierRegion,
     originRegion: facts.originRegion,
     destinationRegion: facts.destinationRegion,
@@ -97,8 +103,9 @@ export function retrieveKnowledge(
   const resolvedFacts = withSelectedCaseFacts(facts, selectedCase);
   const query = buildRetrievalQuery(resolvedFacts);
   const rankedPolicies = rankPolicies(query, policies);
+  // Every applicable policy is kept by default so remedy assessment sees the full official basis.
   const officialBasis = rankedPolicies
-    .slice(0, limits.policyLimit ?? defaultLimits.policyLimit)
+    .slice(0, limits.policyLimit ?? rankedPolicies.length)
     .map(({ item }) => item);
 
   return {

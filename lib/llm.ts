@@ -123,7 +123,8 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
 
       if (!response.ok) {
         throw (
-          classifyModelFailure({ status: response.status }) ?? new Error("openai_request_failed")
+          classifyModelFailure({ status: response.status }) ??
+          Object.assign(new Error("openai_request_failed"), { status: response.status })
         );
       }
 

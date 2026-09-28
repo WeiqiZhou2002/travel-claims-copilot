@@ -10,7 +10,11 @@ export function getPublicScenarioCatalog(): readonly PublicScenarioSummary[] {
 function getKnownIssueTypes(cases: Case[]): IssueType[] {
   return Array.from(
     new Set(
-      cases.filter((item) => item.review_status === "approved").map((item) => item.issue_type)
+      cases
+        .filter(
+          (item) => item.review_status === "approved" && item.source_type !== "synthetic_example"
+        )
+        .map((item) => item.issue_type)
     )
   )
     .map(normalizeIssueType)
@@ -23,7 +27,9 @@ export function buildScenarioSummaries(
   cases: Case[],
   scripts: Script[]
 ): ScenarioSummary[] {
-  const approvedCases = cases.filter((item) => item.review_status === "approved");
+  const approvedCases = cases.filter(
+    (item) => item.review_status === "approved" && item.source_type !== "synthetic_example"
+  );
 
   return getKnownIssueTypes(approvedCases)
     .map((issueType) => {
@@ -35,7 +41,13 @@ export function buildScenarioSummaries(
       const matchingScripts = scripts.filter((script) =>
         script.incident_types.some((incidentType) => incidentType === issueType)
       );
-      const providers = Array.from(new Set(matchingCases.map((item) => item.provider))).sort();
+      const providers = Array.from(
+        new Set(
+          matchingCases
+            .map((item) => item.provider)
+            .filter((value): value is string => Boolean(value))
+        )
+      ).sort();
       const sampleCase = matchingCases[0];
 
       return {
@@ -49,6 +61,7 @@ export function buildScenarioSummaries(
           ? {
               caseId: sampleCase.case_id,
               provider: sampleCase.provider,
+              carrier: sampleCase.carrier,
               brandOrAirline: sampleCase.brand_or_airline,
               facts: sampleCase.facts
             }

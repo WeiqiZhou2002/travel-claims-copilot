@@ -11,7 +11,10 @@ import { assessEu261Candidate } from "../lib/jurisdiction";
 
 describe("ClaimFacts schema", () => {
   it("rejects values outside the supported issue taxonomy", () => {
-    const result = parseClaimFacts({ ...emptyClaimFacts(), issueType: "lost_baggage" });
+    const result = parseClaimFacts({
+      ...emptyClaimFacts(),
+      issueType: "lost_baggage"
+    });
 
     expect(result.success).toBe(false);
   });
@@ -120,7 +123,12 @@ describe("ClaimFacts schema", () => {
       issueType: "airline_cancellation",
       provider: "Air France",
       origin: { city: "Paris", airport: null, country: null, region: null },
-      destination: { city: "New York", airport: null, country: null, region: null },
+      destination: {
+        city: "New York",
+        airport: null,
+        country: null,
+        region: null
+      },
       disruptionType: "cancellation",
       disruptionReason: "unknown",
       disruptionReasonStatus: "unavailable"
@@ -149,7 +157,12 @@ describe("jurisdiction assessment", () => {
     const facts = {
       ...emptyClaimFacts(),
       origin: { city: "New York", airport: "JFK", country: null, region: null },
-      destination: { city: "Paris", airport: "CDG", country: null, region: null }
+      destination: {
+        city: "Paris",
+        airport: "CDG",
+        country: null,
+        region: null
+      }
     };
 
     expect(assessEu261Candidate(facts).needsOperatingCarrierCheck).toBe(true);
@@ -217,8 +230,12 @@ describe("structured analyze API", () => {
     expect(result.legalRegimes).toEqual(["EU261", "US_DOT_REFUND"]);
     expect(result.controllability).toBe("controllable");
     expect(result.officialBasis[0]?.policy_id).toBe("eu261_regulation_261_2004");
-    expect(result.suggestedAsks.aggressive).toContain(
-      "Fixed EU261 compensation if eligibility is met"
+    expect(result.remedies).toContainEqual(
+      expect.objectContaining({
+        id: "fixed_compensation",
+        status: "needs_verification",
+        sourceIds: expect.arrayContaining(["eu261_regulation_261_2004"])
+      })
     );
     expect(result.handlingPlaybook).toMatchObject({
       situation: "completed_disruption",
@@ -271,13 +288,13 @@ describe("structured analyze API", () => {
         officialBasisStatus: "scope_confirmed",
         officialSourceCount: 2,
         reportedCaseCount: expect.any(Number),
-        unresolvedConditionCount: 0
+        unresolvedConditionCount: 1
       })
     );
     expect(policyIds).toContain("eu261_regulation_261_2004");
     expect(result.scripts.map((script: { script_id: string }) => script.script_id)).toEqual([
       "eu261_claim_email_en",
-      "eu261_authority_escalation_en"
+      "us_dot_refund_request_en"
     ]);
   });
 

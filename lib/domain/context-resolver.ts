@@ -27,6 +27,22 @@ export type CanonicalProviderMatch = Pick<
 
 const providerDefinitions: ProviderDefinition[] = [
   {
+    provider: "ANA",
+    providerType: "airline",
+    // A bare "Ana" is also a given name, so free text needs the full airline name.
+    terms: ["all nippon airways", "ana flight", "全日空"]
+  },
+  {
+    provider: "Cathay Pacific",
+    providerType: "airline",
+    terms: ["cathay pacific", "国泰"]
+  },
+  {
+    provider: "Japan Airlines",
+    providerType: "airline",
+    terms: ["japan airlines", "jal", "日航"]
+  },
+  {
     provider: "American Airlines",
     providerType: "airline",
     operatingCarrierRegion: "US",
@@ -134,6 +150,7 @@ const providerDefinitions: ProviderDefinition[] = [
       "bonvoy",
       "万豪旅享家",
       "万豪",
+      "万豪酒店",
       "喜来登",
       "威斯汀"
     ]
@@ -409,6 +426,43 @@ export function findCanonicalProviderMatch(
         operatingCarrierRegion: match.operatingCarrierRegion
       }
     : undefined;
+}
+
+// Normalizing a structured provider field is an exact alias lookup, never free-text extraction.
+export function findExactCanonicalProviderMatch(
+  value: string,
+  providerType?: KnownProviderType | "unknown"
+): CanonicalProviderMatch | undefined {
+  const normalized = normalizeProviderText(value);
+  const match = providerDefinitions.find(
+    (definition) =>
+      (!providerType || providerType === "unknown" || definition.providerType === providerType) &&
+      [definition.provider, ...definition.terms].some(
+        (term) => normalizeProviderText(term) === normalized
+      )
+  );
+  return match
+    ? {
+        provider: match.provider,
+        providerType: match.providerType,
+        operatingCarrierRegion: match.operatingCarrierRegion
+      }
+    : undefined;
+}
+
+export function findMentionedAirlines(text: string): CanonicalProviderMatch[] {
+  const normalized = normalizeProviderText(text).replaceAll("united states", "");
+  return providerDefinitions
+    .filter(
+      (definition) =>
+        definition.providerType === "airline" &&
+        definition.terms.some((term) => termIndex(normalized, normalizeProviderText(term)) >= 0)
+    )
+    .map((definition) => ({
+      provider: definition.provider,
+      providerType: definition.providerType,
+      operatingCarrierRegion: definition.operatingCarrierRegion
+    }));
 }
 
 export function canonicalizeProviderNameValue(

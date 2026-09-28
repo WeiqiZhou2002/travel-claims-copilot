@@ -1,0 +1,390 @@
+[
+  {
+    "schema_version": "0.3",
+    "dp_id": "dp-8c6d426241fc96ccea1f",
+    "event": {
+      "description": "ANA里程出票的联程中，国航CA951取消。",
+      "occurred_at": {
+        "text": "2026-06-18帖子称前天收到取消邮件；原旅行计划在2026年11月",
+        "normalized": "2026-06-16",
+        "precision": "relative"
+      },
+      "route": {
+        "origin": "DLC",
+        "destination": "ORD",
+        "text": "DLC–NRT–ORD；受影响段DLC–NRT"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ],
+      "provider": "ANA",
+      "carrier": "Air China",
+      "airline_reported": "ANA、国航"
+    },
+    "cause": null,
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "电话询问补救；申请上海出发及删去首段。",
+        "channel": "phone",
+        "evidence_ids": [
+          "e2"
+        ]
+      },
+      {
+        "action_id": "a2",
+        "order": 2,
+        "time_text": null,
+        "description": "询问东京过夜食宿是否承担。",
+        "channel": "phone",
+        "evidence_ids": [
+          "e3"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "提供退票或提前一天乘ANA的选择。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "refund",
+              "description": "退票选项",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "offered",
+              "evidence_ids": [
+                "e2"
+              ]
+            },
+            {
+              "kind": "rebooking",
+              "description": "提前一天ANA航班",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "offered",
+              "evidence_ids": [
+                "e2"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e2"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "intermediate",
+          "description": "拒绝改出发城市及删除首段。",
+          "after_action_id": "a1",
+          "measures": [],
+          "evidence_ids": [
+            "e2"
+          ]
+        },
+        {
+          "response_id": "r3",
+          "order": 3,
+          "time_text": null,
+          "phase": "final",
+          "description": "作者接受提前一天改签；ANA拒绝承担东京食宿，理由是国航取消。",
+          "after_action_id": "a2",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "提前一天DLC–NRT",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "accepted",
+              "evidence_ids": [
+                "e3"
+              ]
+            },
+            {
+              "kind": "care",
+              "description": "东京过夜食宿",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "rejected",
+              "evidence_ids": [
+                "e3"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e3"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "source_id": "s1",
+        "url": "https://www.uscardforum.com/t/topic/513378",
+        "forum": "美卡论坛",
+        "post_locator": "主题正文及下列楼层",
+        "posted_at": "2026-06-18 17:50 (页面时间，时区未标)",
+        "observed_at": "2026-09-26T08:05:37Z",
+        "reading_scope": "partial；工具返回正文与楼层1–21，含缺号；采用1楼，未宣称全帖已读",
+        "access_method": "web_open_fallback",
+        "limitation": "网页工具返回的文本视图；未通过 Chrome 核验动态页面或全部后续更新。"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "1楼，行程及收到邮件段",
+        "excerpt": null,
+        "supports": [
+          "event"
+        ],
+        "note": "用楼层及段落定位；事实摘要见关联字段。未保存全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "1楼，两个选项及两次改法被拒段",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]",
+          "airline_handling.responses[0]",
+          "airline_handling.responses[1]"
+        ],
+        "note": "用楼层及段落定位；事实摘要见关联字段。未保存全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "1楼，最后改签及食宿答复段",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[1]",
+          "airline_handling.responses[2]"
+        ],
+        "note": "用楼层及段落定位；事实摘要见关联字段。未保存全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "具体旅行日",
+        "取消根本原因"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "R齐全；有改签接受与食宿拒绝。最终为已报告方案，不代表未来行程已履行。 角色字段按已保留的原帖证据标准化；原文名称另存。",
+      "verification": "第一手作者自述；非独立真实性或政策资格验证。"
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "dp-1c92b0d611be2a425396",
+    "event": {
+      "description": "AS出票的AA航班取消，改签后旧航段仍显示且选座报错。",
+      "occurred_at": {
+        "text": "Feb22；2026-02-22当日帖子语境",
+        "normalized": "2026-02-22",
+        "precision": "day"
+      },
+      "route": {
+        "origin": "LAX",
+        "destination": "BOS",
+        "text": "LAX–BOS；新航班原文日期为Feb25"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ],
+      "provider": "Alaska Airlines",
+      "carrier": "American Airlines",
+      "airline_reported": "AS、AA"
+    },
+    "cause": {
+      "description": "作者称天气导致取消。",
+      "attributed_to": "passenger",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "联系AA改签，后向AA与AS查询出票和选座。",
+        "channel": "chat/phone",
+        "evidence_ids": [
+          "e1",
+          "e2"
+        ]
+      },
+      {
+        "action_id": "a2",
+        "order": 2,
+        "time_text": null,
+        "description": "请求AS重新出票。",
+        "channel": "message",
+        "evidence_ids": [
+          "e3"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "not_reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "AA改至Feb25；旧航段仍在。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "新行程已显示，实际乘机未报告",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e1"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e1"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "intermediate",
+          "description": "AA客服协助选座，表示无法删除旧航段。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "other",
+              "description": "客服选座",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e2"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e2"
+          ]
+        },
+        {
+          "response_id": "r3",
+          "order": 3,
+          "time_text": null,
+          "phase": "intermediate",
+          "description": "据作者转述，AS称已变成AA票，应找AA。",
+          "after_action_id": "a2",
+          "measures": [],
+          "evidence_ids": [
+            "e3"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "source_id": "s1",
+        "url": "https://www.uscardforum.com/t/topic/485645",
+        "forum": "美卡论坛",
+        "post_locator": "主题正文及下列楼层",
+        "posted_at": "2026-02-22 07:00 (页面时间，时区未标)",
+        "observed_at": "2026-09-26T08:05:37Z",
+        "reading_scope": "partial；工具返回楼层1–18，采用1/6/8/11/14/15/18；无实际成行报告",
+        "access_method": "web_open_fallback",
+        "limitation": "网页工具返回的文本视图；未通过 Chrome 核验动态页面或全部后续更新。"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "1楼，取消、原新航班日期及改签记录",
+        "excerpt": null,
+        "supports": [
+          "event",
+          "cause",
+          "passenger_actions[0]",
+          "airline_handling.responses[0]"
+        ],
+        "note": "用楼层及段落定位；事实摘要见关联字段。未保存全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "作者6/8楼，AA回复及选座",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]",
+          "airline_handling.responses[1]"
+        ],
+        "note": "用楼层及段落定位；事实摘要见关联字段。未保存全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "作者11/14楼，AS答复",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[1]",
+          "airline_handling.responses[2]"
+        ],
+        "note": "用楼层及段落定位；事实摘要见关联字段。未保存全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "最终成行结果"
+      ],
+      "conflicts": [
+        {
+          "type": "noncritical_wording",
+          "detail": "1楼“两天后”与Feb22→Feb25不一致；保留明确日期，不推算延误时长。",
+          "evidence_ids": [
+            "e1"
+          ]
+        }
+      ],
+      "duplicate_of": null,
+      "rationale": "R齐全；保留已知回应，最终乘机或后续处置未报告。 时间间隔用语差异不改变已报告取消与初始回应；待审核时复核。 角色字段按已保留的原帖证据标准化；原文名称另存。",
+      "verification": "第一手作者自述；非独立真实性或政策资格验证。"
+    }
+  }
+]

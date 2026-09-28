@@ -206,7 +206,11 @@ const rankingReasonLabels = {
   provider_scope_match: "Provider scope match",
   controllability_match: "Controllability match",
   authority_match: "Authority match",
-  confidence_match: "Confidence match"
+  confidence_match: "Confidence match",
+  ticketing_provider_match: "Ticketing provider match",
+  carrier_match: "Operating carrier match",
+  provider_carrier_pair_match: "Ticketing and operating carrier match",
+  route_scope_unknown: "Route scope unknown"
 } satisfies Record<RetrievalMatchReason, string>;
 
 const incompleteOutcomePatterns = [

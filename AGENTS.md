@@ -38,8 +38,12 @@ High-risk issues such as injury, litigation, large property loss, or complex ins
 
 Prefer a simple deterministic workflow over a complex autonomous agent.
 
+Use LLM-only natural-language fact extraction in the guided intake; fail clearly without a regex
+fallback. Keep deterministic schema checks, retrieval, eligibility conditions, and safety
+boundaries.
+
 Initial workflow:
-1. Extract structured facts from user input.
+1. Extract structured facts from user input with the LLM.
 2. Classify provider_type, provider, and issue_type.
 3. Search policies and cases.
 4. Deterministically generate a compact ActionPlan using retrieved data.

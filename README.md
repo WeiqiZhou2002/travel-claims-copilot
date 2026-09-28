@@ -26,11 +26,13 @@ The app currently uses:
 - TypeScript
 - Tailwind CSS
 - local JSON seed data
-- optional multi-turn LLM fact extraction through OpenAI Responses or DeepSeek Chat Completions
+- LLM-only multi-turn fact extraction through OpenAI Responses or DeepSeek Chat Completions
 - strict `ClaimFacts` JSON Schema validation with incident and jurisdiction kept separate
 - operational intent for trip stage, ticket ownership, award travel, rebooking, and recovery priorities
 - deterministic contact-first and handling-playbook generation
-- deterministic local extraction when no API key is configured or a model call fails
+- clear, categorized intake failures (no rule-based guessing) when no model is configured or a
+  model call fails
+- a local-only DP review workspace and versioned publication of reviewed community cases
 - explainable weighted retrieval with deterministic Top-K results
 - approved-case filtering and deterministic response generation
 - pre-LLM safety routing for unsupported high-risk claims
@@ -86,8 +88,9 @@ DEEPSEEK_BASE_URL=https://api.deepseek.com
 
 For backward compatibility, a DeepSeek setup using `OPENAI_API_KEY`, a `deepseek-*` model, and
 `OPENAI_BASE_URL=https://api.deepseek.com/` is detected automatically. The obsolete bare model
-name `deepseek-v4` is normalized to `deepseek-v4-flash`. Without a configured key, the same UI
-uses the deterministic fallback and labels it as `Local`.
+name `deepseek-v4` is normalized to `deepseek-v4-flash`. Guided intake requires a configured
+model: without one, `/api/intake` and free-text `/api/analyze` return `503` with
+`failureCategory: "not_configured"` instead of guessing facts with rules.
 
 Open:
 
@@ -107,6 +110,19 @@ Validate the data and run the retrieval test suite:
 npm run validate:data
 npm test
 ```
+
+`validate:data` lists critical sources that are past their 30-day review window as warnings;
+`release:source-review` fails until they are re-checked.
+
+Measure extraction accuracy against the configured live model (reads `.env.local`):
+
+```bash
+npm run eval:intake
+```
+
+Review collected airline DPs locally at `http://127.0.0.1:3000/review` (development mode only),
+then export audited approvals with `npm run publish:cases` and commit `data/reviewed-cases.json`.
+See `docs/dp-review.md`.
 
 ## Demo Test Inputs
 
@@ -160,7 +176,7 @@ lib/
   claimFacts.ts           ClaimFacts types, JSON Schema, validation, and missing fields
   jurisdiction.ts         Location, carrier, EU261, and UK261 route enrichment
   policyScope.ts          Route applicability and controllability rules
-  intake.ts               Multi-turn extraction, fact merging, questions, and fallback
+  intake.ts               LLM-only multi-turn extraction, safety gates, and follow-up questions
   handlingPlaybook.ts     Contact-first, ask ladder, ticket checks, and escalation rules
   llm.ts                  OpenAI and DeepSeek structured-output adapters
   analyze.ts              Structured-facts and legacy-description orchestration
@@ -174,8 +190,8 @@ lib/
 
 tests/
   claimFacts.test.ts      Schema, jurisdiction, and structured API tests
-  intake.test.ts          LLM client, fallback, and multi-turn API tests
-  intake-evals.test.ts    Colloquial and multi-turn evaluation conversations
+  intake.test.ts          LLM-only intake contract, LLM clients, and canonical protocol tests
+  intake-evals.test.ts    Live-model colloquial and multi-turn evaluations (npm run eval:intake)
   handlingPlaybook.test.ts Operational workflow decision tests
   retrieval.test.ts       Five golden scenarios plus classification/retrieval guards
 ```
@@ -187,7 +203,7 @@ The current product flow separates semantic intake from deterministic analysis:
 ```text
 natural user message + prior ClaimFacts
   -> POST /api/intake
-  -> provider-specific LLM structured output, or deterministic fallback
+  -> provider-specific LLM structured output (a model failure is reported, never guessed)
   -> server validation + jurisdiction enrichment + missing-field calculation
   -> targeted follow-up question until ready
   -> POST /api/analyze with validated ClaimFacts
@@ -228,7 +244,8 @@ cause-dependent policies remain conditional instead.
 The OpenAI adapter requests strict JSON Schema output with `store: false`. The DeepSeek adapter
 uses Chat Completions JSON Output and includes the same schema in its system prompt. Both enforce
 the same 1,200-token output ceiling, 64 KiB response ceiling, bounded timeout, safe failure codes,
-runtime `ClaimFacts` validation, and deterministic fallback. `/api/analyze` never relies on model
+runtime `ClaimFacts` validation, and categorized failure reporting (no rule-based fallback).
+`/api/analyze` never relies on model
 memory for policies, cases, compensation amounts, or sources.
 
 The LLM should not invent policies, cases, compensation amounts, or sources.
@@ -455,7 +472,7 @@ Implemented:
 - server-only DeepSeek configuration
 - strict structured fact extraction within the four-type allowlist
 - multi-turn fact merging and targeted clarification
-- deterministic fallback, schema validation, timeouts, and evidence-only retrieval
+- categorized model failures, schema validation, timeouts, and evidence-only retrieval
 - trip-stage, booking-owner, ticket-type, airline-role, and recovery-preference extraction
 - conditional `contactFirst`, ask ladder, ticketing checks, fallback, and source provenance
 - explicit separation of industry guidance, community guidance, and required official-policy checks

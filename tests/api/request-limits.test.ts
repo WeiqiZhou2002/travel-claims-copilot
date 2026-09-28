@@ -1346,7 +1346,8 @@ describe("strict extraction metadata parsing", () => {
 });
 
 describe("legacy public intake compatibility", () => {
-  it("continues to accept the bounded legacy facts request", async () => {
+  it("admits the bounded legacy facts request to LLM intake", async () => {
+    vi.stubEnv("LLM_PROVIDER", "disabled");
     const response = await intakeRoute.POST(
       jsonRequest("intake", {
         message: "My flight was delayed by 20 minutes.",
@@ -1354,7 +1355,9 @@ describe("legacy public intake compatibility", () => {
       })
     );
 
-    expect(response.status).toBe(200);
+    // The request passes every input bound; only the unconfigured model stops it.
+    expect(response.status).toBe(503);
+    expect((await response.json()).failureCategory).toBe("not_configured");
   });
 
   it("still requires the legacy JSON body to declare its media type", async () => {

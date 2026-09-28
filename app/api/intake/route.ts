@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 
 import { createIntakeRouteHandler } from "../../../lib/api/intake-route-handler";
 import { emptyClaimFacts, parseClaimFacts } from "../../../lib/claimFacts";
-import { MAX_INTAKE_MESSAGE_LENGTH, requestBodyExceedsLimit } from "../../../lib/inputLimits";
-import { processIntake } from "../../../lib/intake";
+import { MAX_INTAKE_MESSAGE_LENGTH, readBoundedJson } from "../../../lib/inputLimits";
+import { IntakeError, processIntake } from "../../../lib/intake";
+import { acquireIntakeCapacity } from "../../../lib/intakeCapacity";
 
 const canonicalIntakePost = createIntakeRouteHandler();
 
@@ -24,14 +25,11 @@ function withNoStore(response: Response): Response {
 }
 
 async function legacyIntakePost(request: Request): Promise<Response> {
-  if (requestBodyExceedsLimit(request)) {
-    return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
+  const parsedBody = await readBoundedJson(request);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: parsedBody.status });
   }
-
-  const body = (await request.json().catch(() => null)) as {
-    message?: unknown;
-    facts?: unknown;
-  } | null;
+  const body = parsedBody.value;
   const message = typeof body?.message === "string" ? body.message.trim() : "";
 
   if (!message) {
@@ -56,7 +54,26 @@ async function legacyIntakePost(request: Request): Promise<Response> {
     currentFacts = parsed.data;
   }
 
-  return NextResponse.json(await processIntake(message, currentFacts));
+  const release = acquireIntakeCapacity();
+  if (!release) {
+    return NextResponse.json(
+      { error: "Intake is busy. Please retry shortly." },
+      { status: 429, headers: { "Retry-After": "60" } }
+    );
+  }
+  try {
+    return NextResponse.json(await processIntake(message, currentFacts));
+  } catch (error) {
+    if (error instanceof IntakeError) {
+      return NextResponse.json(
+        { error: error.message, failureCategory: error.category },
+        { status: error.status }
+      );
+    }
+    return NextResponse.json({ error: "事实抽取失败，请稍后重试。" }, { status: 503 });
+  } finally {
+    release();
+  }
 }
 
 export async function POST(request: Request): Promise<Response> {

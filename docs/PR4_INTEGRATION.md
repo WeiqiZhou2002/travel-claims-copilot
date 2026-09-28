@@ -28,7 +28,8 @@ This document records how PR #4 was integrated on top of the current product bra
   canonical structured format from PR #4.
 - The guided intake supports OpenAI or DeepSeek through `LLM_PROVIDER` and provider-specific
   environment variables. They share the same extraction schema, output bounds, timeout, failure,
-  runtime-validation, and deterministic-fallback contract while using provider-native endpoints.
+  and runtime-validation contract while using provider-native endpoints. Since the airline DP
+  integration the guided intake has no deterministic fallback; see docs/INTEGRATION_AIRLINE_DP.md.
 - The canonical public GPT mode remains pinned to OpenAI and protected by its reviewed release
   controls. Product work on that separate protocol is deferred.
 - Supported Node.js versions are `>=22.14 <26`; CI and `.nvmrc` continue to use Node 22.

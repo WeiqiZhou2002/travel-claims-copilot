@@ -41,7 +41,9 @@ describe("professional-help safety boundary", () => {
       new Request("http://localhost/api/intake", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: "x".repeat(MAX_INTAKE_MESSAGE_LENGTH + 1) })
+        body: JSON.stringify({
+          message: "x".repeat(MAX_INTAKE_MESSAGE_LENGTH + 1)
+        })
       })
     );
 
