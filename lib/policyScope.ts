@@ -49,7 +49,8 @@ export function controllabilityFromReason(
   ) {
     return "controllable";
   }
-  if (reason === "weather") {
+  // Controllability is from the airline perspective, not a finding of legal fault.
+  if (reason === "weather" || reason === "passenger_side") {
     return "uncontrollable";
   }
   return "unknown";
@@ -541,6 +542,9 @@ function evaluateControllability(
   );
 }
 
+export const passengerSideCompensationExplanation =
+  "The passenger reports a document, check-in or conduct reason; mandatory involuntary denied-boarding compensation generally does not apply. Rebooking or refund under the fare rules may still be relevant.";
+
 function evaluateRemedyConditions(
   policy: Policy,
   query: RetrievalQuery,
@@ -602,26 +606,36 @@ function evaluateRemedyConditions(
   }
 
   if (
-    policy.legal_regime === "US_DOT_DENIED_BOARDING" &&
+    ["US_DOT_DENIED_BOARDING", "EU261", "UK261", "CA_APPR"].includes(
+      policy.legal_regime,
+    ) &&
     query.issueType === "denied_boarding"
   ) {
     const kind = query.deniedBoardingKind;
+    const passengerSide = query.disruptionReason === "passenger_side";
+    const dot = policy.legal_regime === "US_DOT_DENIED_BOARDING";
     conditions.push(
       condition(
         "denied_boarding_kind",
         "Mandatory denied-boarding compensation",
-        !kind || kind === "unknown"
-          ? "unknown"
-          : kind === "involuntary"
-            ? query.disruptionReason === "oversales"
-              ? "met"
-              : "unknown"
-            : "not_met",
-        !kind || kind === "unknown"
-          ? "Voluntary versus involuntary denied boarding must be confirmed."
-          : kind === "involuntary"
-            ? "The passenger reports involuntary denied boarding; oversales must also be confirmed. Other eligibility conditions remain to be verified."
-            : "The passenger reports a voluntary bump, which uses negotiated terms instead of mandatory involuntary compensation.",
+        passengerSide
+          ? "not_met"
+          : !kind || kind === "unknown"
+            ? "unknown"
+            : kind === "involuntary"
+              ? dot && query.disruptionReason === "oversales"
+                ? "met"
+                : "unknown"
+              : "not_met",
+        passengerSide
+          ? passengerSideCompensationExplanation
+          : !kind || kind === "unknown"
+            ? "Voluntary versus involuntary denied boarding must be confirmed."
+            : kind === "involuntary"
+              ? dot
+                ? "The passenger reports involuntary denied boarding; oversales must also be confirmed. Other eligibility conditions remain to be verified."
+                : "The passenger reports involuntary denied boarding; reasonable refusal grounds and other eligibility conditions remain to be verified."
+              : "The passenger reports a voluntary bump, which uses negotiated terms instead of mandatory involuntary compensation.",
         "remedy",
       ),
     );

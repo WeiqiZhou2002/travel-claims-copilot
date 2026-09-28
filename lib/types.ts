@@ -204,6 +204,8 @@ export type ExtractedFacts = {
     | "weather"
     | "late_inbound_aircraft"
     | "other_controllable"
+    | "passenger_side"
+    | "other_reported"
     | "unknown";
   arrivalDelayMinutes?: number;
   isOvernight?: boolean;

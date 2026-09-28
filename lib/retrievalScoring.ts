@@ -215,6 +215,16 @@ function candidateHasDisruptionReason(
       "前序航班晚到",
       "进港飞机晚到",
     ],
+    passenger_side: [
+      "passport",
+      "visa",
+      "travel documents",
+      "证件",
+      "护照",
+      "签证",
+      "迟到值机",
+    ],
+    other_reported: [],
     other_controllable: [
       "controllable",
       "airline control",
@@ -296,7 +306,11 @@ export function rankCases(
       return false;
     }
     const candidateReason = [item.facts, item.actual_outcome].join(" ");
-    if (query.disruptionReason && query.disruptionReason !== "unknown") {
+    if (
+      query.disruptionReason &&
+      query.disruptionReason !== "unknown" &&
+      query.disruptionReason !== "other_reported"
+    ) {
       const opposite =
         query.disruptionReason === "weather"
           ? (["crew", "mechanical"] as const)
@@ -497,6 +511,11 @@ export function rankScripts(
   scripts: Script[],
 ): ScoredRetrievalItem<Script>[] {
   const candidates = scripts.filter((script) => {
+    if (
+      query.disruptionReason === "passenger_side" &&
+      script.required_denied_boarding_kind === "involuntary"
+    )
+      return false;
     if (
       script.required_denied_boarding_kind &&
       script.required_denied_boarding_kind !== query.deniedBoardingKind

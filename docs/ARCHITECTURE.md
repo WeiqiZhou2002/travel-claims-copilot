@@ -13,6 +13,18 @@
 
 旧 `lib/classifier.ts` 保留供离线历史检索回归测试使用，公共入口不再以它抽取自然语言事实。范围保护仍可以在模型前阻止明显高风险请求，不属于事实抽取 fallback。
 
+## 已报告原因与确定性补偿排除
+
+`passenger_side` 表示报告的旅客证件、值机/登机迟到、行为或旅客相关健康/安全问题；`other_reported` 表示已有具体原因但不在其他分类中，如空管、罢工、机场安检。两者均归一化为 `reported`，模型输出通过 schema 后，应用不再追问缺失原因。
+
+可控性保留现有三值：`passenger_side → uncontrollable` 指从航司角度不可控，不新增与原因分类重复的 passenger 维度；`other_reported → unknown`，不推断控制主体或法律免责。原因关键词仅用于社区案例检索，不能覆盖 LLM 事实；`other_reported` 不参与原因匹配加分或相反原因排除。
+
+在既有 `evaluateRemedyConditions` 中，旅客原因拒载对 DOT、EU、UK、加拿大均生成 `denied_boarding_kind: not_met`。这是补偿条件的排除，不是删除整个政策来源或否定一切权利。`assessRemedies` 将固定补偿标为不支持，检索过滤要求 involuntary 的话术，生成器换用证件/时间线/票规证据清单，并提示票规内改签或退款的选择。
+
+法律边界的依据包括 [14 CFR 250.6(a)](https://www.ecfr.gov/current/title-14/chapter-II/subchapter-A/part-250/section-250.6)、[EU261 第 2(j) 条](https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:32004R0261)、[英国发布的第 2(j) 条文本](https://www.legislation.gov.uk/eur/2004/261/pdfs/eur_20040261_adopted_en.pdf) 和 [加拿大 CTA 对拒载与拒绝运输的区分](https://otc-cta.gc.ca/eng/publication/denied-boarding-a-guide)。这里只记录本次排除条件的依据，不改写既有政策数据或更新其 last_checked。
+
+不能仅因航司声称证件不符就断言旅客有错：错误的证件判断可能属于法规保护范围，参见 [欧委会说明](https://ireland.representation.ec.europa.eu/live-work-study-eu/air-passenger-rights-frequently-asked-questions_en)。提示词将有争议的证件判断、航司值机系统故障与旅客原因分开；具体争议仍需核实。此次没有新增争议裁决模型。
+
 ## 审核与发布隔离
 
 采集候选 → 本地审核服务 → 本地事务存储 → 显式导出经审核发布快照 → Git 提交 / 部署 → 线上静态案例检索。

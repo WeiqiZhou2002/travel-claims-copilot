@@ -333,6 +333,14 @@ function getEvidence(
   issueType: IssueType,
   retrieval: RetrievalResult,
 ): string[] {
+  if (retrieval.query.disruptionReason === "passenger_side") {
+    return [
+      "Booking confirmation and applicable fare rules",
+      "Airline's written reason for refusal or disruption",
+      "Travel-document requirements and check-in or boarding timeline",
+      "Correspondence about rebooking or refund options",
+    ];
+  }
   const regime = getPrimaryLegalRegime(retrieval);
   if (
     regime === "US_DOT_REFUND" &&
@@ -353,10 +361,16 @@ function getCautions(
   retrieval: RetrievalResult,
 ): string[] {
   const regime = getPrimaryLegalRegime(retrieval);
-  if (regime && cautionsByRegime[regime]) {
-    return cautionsByRegime[regime];
-  }
-  return cautionsByIssue[issueType] ?? fallbackCautions;
+  const cautions =
+    (regime && cautionsByRegime[regime]) ||
+    cautionsByIssue[issueType] ||
+    fallbackCautions;
+  return retrieval.query.disruptionReason === "passenger_side"
+    ? [
+        ...cautions,
+        "证件/值机问题通常不产生强制补偿，可询问改签、退款或票规内的选择",
+      ]
+    : cautions;
 }
 
 function buildSummary(

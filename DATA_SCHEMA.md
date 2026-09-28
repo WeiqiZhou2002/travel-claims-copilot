@@ -10,7 +10,12 @@
 
 此处 ClaimFacts.provider 暂保留旧 intake 的服务商识别字段，不作为出票方匹配依据。航司案例检索通过适配读取 `bookingProvider ?? validatingCarrier` 为出票方、`operatingCarrier` 为 carrier；未知 carrier 不再从 provider 回填。页面分别展示出票方和实际承运方。
 - `origin`, `destination`: city / airport / country / region
-- `disruptionType`, `disruptionReason`, `disruptionReasonStatus`
+- `disruptionType`
+- `disruptionReason`: `crew | mechanical | oversales | weather | late_inbound_aircraft | other_controllable | passenger_side | other_reported | unknown`
+- `disruptionReasonStatus`: `not_provided | reported | unavailable`
+  - `passenger_side`：报告的旅客自身原因，包括证件/签证无效、旅客迟到值机/登机、旅客行为或旅客相关健康/安全拒载；不代表独立认定旅客法律责任。航司值机系统故障导致迟到不能归入此项。
+  - `other_reported`：已报告但无法归入现有类别的具体原因，如空管、罢工或机场安检；不是“未提供原因”。
+  - 原因非 `unknown` 时，归一化状态一律为 `reported`；不会再次把原因列为缺失项。`unknown + not_provided` 与 `unknown + unavailable` 仍保持区别。
 - `arrivalDelayMinutes`, `isOvernight`, `deniedBoardingKind`
 - `bookingChannel`: `direct | ota | portal | travel_agent | corporate_travel | unknown`
 - `bookingProvider`: string | null
@@ -30,6 +35,8 @@
 
 `journeyStage` 表示用户当前处于行程前、机场、途中还是已经结束；`disruptionTiming`
 表示应采用提前航变还是临近出发 IRROPS 的处理流程。它们都不是 incident type。
+
+`passenger_side` 的可控性为 `uncontrollable`，仅指从航司角度不可控；`other_reported` 为 `unknown`，不把所有罢工、空管、安检自动认定为免责原因。旅客原因的拒载在 DOT、EU261、UK261、CA_APPR 的 `denied_boarding_kind` 补偿条件中为 `not_met`；`fixed_compensation` 为 `not_supported`，不输出要求非自愿拒载补偿的话术。票规内改签/退款等选择仍需另行核对。
 
 ## HandlingPlaybook
 
