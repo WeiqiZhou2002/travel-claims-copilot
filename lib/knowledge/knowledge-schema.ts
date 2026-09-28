@@ -21,6 +21,17 @@ export type RawKnowledgeSnapshot = {
 
 export type ParseKnowledgeOptions = {
   asOf: string;
+  /**
+   * Receives each critical source that is past its 30-day review window. When omitted, a stale
+   * source rejects the snapshot. Runtime callers pass a handler so an overdue editorial review
+   * degrades downstream assessments instead of failing every request.
+   */
+  onStaleSource?: (message: string) => void;
+};
+
+type CheckedDateContext = {
+  asOfEpoch: number;
+  onStaleSource?: (message: string) => void;
 };
 
 const MVP_INCIDENTS = [
@@ -152,13 +163,15 @@ function parseCalendarDate(value: unknown, label: string): { value: string; epoc
 function validateCheckedDate(
   value: unknown,
   label: string,
-  asOfEpoch: number,
+  context: CheckedDateContext,
   critical: boolean
 ): string {
   const checked = parseCalendarDate(value, label);
-  if (checked.epoch > asOfEpoch) throw new Error(`${label} cannot be in the future.`);
-  if (critical && (asOfEpoch - checked.epoch) / DAY_MS > FRESHNESS_DAYS) {
-    throw new Error(`${label} is stale; critical sources must be reviewed within 30 days.`);
+  if (checked.epoch > context.asOfEpoch) throw new Error(`${label} cannot be in the future.`);
+  if (critical && (context.asOfEpoch - checked.epoch) / DAY_MS > FRESHNESS_DAYS) {
+    const message = `${label} is stale; critical sources must be reviewed within 30 days.`;
+    if (!context.onStaleSource) throw new Error(message);
+    context.onStaleSource(message);
   }
   return checked.value;
 }
@@ -175,7 +188,7 @@ function validateHttps(value: unknown, label: string): string {
   return text;
 }
 
-function parsePolicies(value: unknown, asOfEpoch: number): Policy[] {
+function parsePolicies(value: unknown, dates: CheckedDateContext): Policy[] {
   const records = arrayValue(value, "policies").map((item, index) =>
     objectValue(item, `policy[${index}]`)
   );
@@ -242,7 +255,7 @@ function parsePolicies(value: unknown, asOfEpoch: number): Policy[] {
     stringArray(record.applicable_conditions, `${label}.applicable_conditions`);
     stringArray(record.compensation_or_rights, `${label}.compensation_or_rights`);
     stringValue(record.summary, `${label}.summary`);
-    validateCheckedDate(record.last_checked, `${label}.last_checked`, asOfEpoch, true);
+    validateCheckedDate(record.last_checked, `${label}.last_checked`, dates, true);
 
     return structuredClone(record) as Policy;
   });
@@ -484,7 +497,7 @@ function parsePredicate(value: unknown, label: string): CarrierCommitmentPredica
   throw new Error(`${label} has unknown predicate kind ${kind}.`);
 }
 
-function parseCarrierCommitments(value: unknown, asOfEpoch: number): CarrierCommitment[] {
+function parseCarrierCommitments(value: unknown, dates: CheckedDateContext): CarrierCommitment[] {
   const records = arrayValue(value, "carrier_commitments").map((item, index) =>
     objectValue(item, `carrier_commitment[${index}]`)
   );
@@ -534,7 +547,7 @@ function parseCarrierCommitments(value: unknown, asOfEpoch: number): CarrierComm
     const lastChecked = validateCheckedDate(
       record.last_checked,
       `${label}.last_checked`,
-      asOfEpoch,
+      dates,
       true
     );
     const reviewerNote = stringValue(record.reviewer_note, `${label}.reviewer_note`);
@@ -683,10 +696,11 @@ export function parseKnowledgeSnapshot(
   options: ParseKnowledgeOptions
 ): KnowledgeSnapshot {
   const asOf = parseCalendarDate(options.asOf, "asOf");
-  const policies = parsePolicies(raw.policies, asOf.epoch);
+  const dates = { asOfEpoch: asOf.epoch, onStaleSource: options.onStaleSource };
+  const policies = parsePolicies(raw.policies, dates);
   const cases = parseCases(raw.cases);
   const scripts = parseScripts(raw.scripts);
-  const carrierCommitments = parseCarrierCommitments(raw.carrierCommitments, asOf.epoch);
+  const carrierCommitments = parseCarrierCommitments(raw.carrierCommitments, dates);
   assertDisjointNamespaces(policies, cases, scripts, carrierCommitments);
   assertScriptReferences(policies, cases, scripts, carrierCommitments);
   const validatedContent = { policies, cases, scripts, carrierCommitments };

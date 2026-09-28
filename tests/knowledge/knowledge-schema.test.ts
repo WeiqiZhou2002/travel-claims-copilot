@@ -137,6 +137,23 @@ describe("production knowledge", () => {
     expect(cliMessage).toBe(runtimeMessage);
   });
 
+  it("reports overdue sources at runtime instead of rejecting the snapshot", async () => {
+    const overdueAsOf = "2026-12-31";
+    const stale: string[] = [];
+
+    expect(() => parseKnowledgeSnapshot(productionKnowledgeRaw(), { asOf: overdueAsOf })).toThrow(
+      /stale/
+    );
+    const snapshot = await loadKnowledgeSnapshot({
+      asOf: overdueAsOf,
+      onStaleSource: (message) => stale.push(message)
+    });
+
+    expect(snapshot.policies.length).toBeGreaterThan(0);
+    expect(stale.length).toBeGreaterThan(0);
+    expect(stale.every((message) => /stale/.test(message))).toBe(true);
+  });
+
   it("returns fresh independently frozen snapshots from every repository load", async () => {
     const repository = createKnowledgeRepository({ raw: validKnowledgeFixture(), asOf: AS_OF });
 
