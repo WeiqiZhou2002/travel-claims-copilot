@@ -9,6 +9,9 @@
 - `provider`: string | null
 - `origin`, `destination`: city / airport / country / region
 - `disruptionType`, `disruptionReason`, `disruptionReasonStatus`
+  - `disruptionReason` 可为 `passenger_side`（旅客证件、迟到值机等旅客侧原因）或
+    `other_reported`（航管、罢工、安检等其他已报告原因）；二者都是已回答的问题，不据此推断航司可控。
+- `acceptedAlternative`: boolean | null（仅在用户明确接受或拒绝替代方案时填写）
 - `arrivalDelayMinutes`, `isOvernight`, `deniedBoardingKind`
 - `bookingChannel`: `direct | ota | portal | travel_agent | corporate_travel | unknown`
 - `bookingProvider`: string | null
@@ -140,7 +143,8 @@ An umbrella `US_AIRLINE_COMMITMENT` policy is regulator context only and therefo
 - source_name: string
 - source_url: string
 - provider_type: "hotel" | "airline" | "credit_card" | "ota"
-- provider: string
+- provider: string | null（航司案例为原出票 / 订票方；酒店案例为酒店集团）
+- carrier: string | null（航司案例为受影响航段的实际承运方；非航司案例必须为 null）
 - brand_or_airline: string
 - issue_type: string
 - location_country: string
@@ -157,6 +161,10 @@ An umbrella `US_AIRLINE_COMMITMENT` policy is regulator context only and therefo
 - notes: string
 - review_status: "approved" | "needs_review" | "excluded"
 - review_notes: string[]
+
+Human-reviewed community DPs are published to `data/reviewed-cases.json` (see `docs/dp-review.md`)
+and merged with the seed cases by `lib/case-library.ts`; each published case carries its
+`reviewed_version`.
 
 `review_status` controls product retrieval. Only `approved` cases may appear as similar cases. Records marked `needs_review` or `excluded` remain in the consolidated file for provenance and future cleanup, but must not be presented to users.
 
