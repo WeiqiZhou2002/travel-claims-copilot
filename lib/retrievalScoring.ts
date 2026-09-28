@@ -3,12 +3,12 @@ import {
   applicabilityRuleMatches,
   evaluatePolicyApplicability,
   policyAppliesToRoute,
-  policyRegionsFromCountry
+  policyRegionsFromCountry,
 } from "./policyScope";
 import {
   canonicalHotelGroup,
   providerMatchKey,
-  providersMatch
+  providersMatch,
 } from "./provider";
 import type {
   Case,
@@ -16,7 +16,7 @@ import type {
   RetrievalMatchReason,
   RetrievalQuery,
   ScoredRetrievalItem,
-  Script
+  Script,
 } from "./types";
 
 const stopWords = new Set([
@@ -39,7 +39,7 @@ const stopWords = new Set([
   "this",
   "through",
   "with",
-  "would"
+  "would",
 ]);
 
 const euLocations = new Set([
@@ -61,7 +61,7 @@ const euLocations = new Set([
   "czechia",
   "switzerland",
   "norway",
-  "iceland"
+  "iceland",
 ]);
 
 function normalizeText(value: string): string {
@@ -78,13 +78,17 @@ function tokenize(value: string): Set<string> {
   const latinTokens = normalized
     .split(/\s+/)
     .filter((token) => token.length >= 2 && !stopWords.has(token));
-  const hanTokens = Array.from(value.matchAll(/[\p{Script=Han}]+/gu)).flatMap(([chunk]) => {
-    if (chunk.length <= 2) {
-      return [chunk];
-    }
+  const hanTokens = Array.from(value.matchAll(/[\p{Script=Han}]+/gu)).flatMap(
+    ([chunk]) => {
+      if (chunk.length <= 2) {
+        return [chunk];
+      }
 
-    return Array.from({ length: chunk.length - 1 }, (_, index) => chunk.slice(index, index + 2));
-  });
+      return Array.from({ length: chunk.length - 1 }, (_, index) =>
+        chunk.slice(index, index + 2),
+      );
+    },
+  );
 
   return new Set([...latinTokens, ...hanTokens]);
 }
@@ -92,7 +96,7 @@ function tokenize(value: string): Set<string> {
 function addScore(
   current: ScoredRetrievalItem<unknown>,
   points: number,
-  reason: RetrievalMatchReason
+  reason: RetrievalMatchReason,
 ): void {
   current.score += points;
   if (!current.reasons.includes(reason)) {
@@ -100,7 +104,11 @@ function addScore(
   }
 }
 
-function addIssueScore<T>(result: ScoredRetrievalItem<T>, query: RetrievalQuery, issueType: string) {
+function addIssueScore<T>(
+  result: ScoredRetrievalItem<T>,
+  query: RetrievalQuery,
+  issueType: string,
+) {
   if (issueType === query.issueType) {
     addScore(result, 40, "exact_issue_match");
   } else {
@@ -111,7 +119,7 @@ function addIssueScore<T>(result: ScoredRetrievalItem<T>, query: RetrievalQuery,
 function addProviderScore<T>(
   result: ScoredRetrievalItem<T>,
   queryProvider: string | undefined,
-  candidateProvider: string
+  candidateProvider: string,
 ) {
   const normalizedCandidate = providerMatchKey(candidateProvider);
 
@@ -142,7 +150,10 @@ function addProviderScore<T>(
   }
 }
 
-function locationsMatch(queryCountry: string, candidateCountry: string): boolean {
+function locationsMatch(
+  queryCountry: string,
+  candidateCountry: string,
+): boolean {
   const normalizedQuery = normalizeText(queryCountry);
   const normalizedCandidate = normalizeText(candidateCountry);
 
@@ -156,7 +167,7 @@ function locationsMatch(queryCountry: string, candidateCountry: string): boolean
 function addDescriptionOverlap<T>(
   result: ScoredRetrievalItem<T>,
   description: string,
-  candidateText: string
+  candidateText: string,
 ) {
   const queryTokens = tokenize(description);
   if (queryTokens.size === 0) {
@@ -164,7 +175,9 @@ function addDescriptionOverlap<T>(
   }
 
   const candidateTokens = tokenize(candidateText);
-  const overlapCount = Array.from(queryTokens).filter((token) => candidateTokens.has(token)).length;
+  const overlapCount = Array.from(queryTokens).filter((token) =>
+    candidateTokens.has(token),
+  ).length;
   if (overlapCount > 0) {
     addScore(result, Math.min(15, overlapCount * 3), "description_overlap");
   }
@@ -172,16 +185,26 @@ function addDescriptionOverlap<T>(
 
 function candidateHasDisruptionReason(
   reason: RetrievalQuery["disruptionReason"],
-  candidateText: string
+  candidateText: string,
 ): boolean {
   if (!reason || reason === "unknown") {
     return false;
   }
 
   const normalized = normalizeText(candidateText);
-  const terms: Record<Exclude<NonNullable<RetrievalQuery["disruptionReason"]>, "unknown">, string[]> = {
+  const terms: Record<
+    Exclude<NonNullable<RetrievalQuery["disruptionReason"]>, "unknown">,
+    string[]
+  > = {
     crew: ["crew", "机组"],
-    mechanical: ["mechanical", "maintenance", "equipment", "technical", "机械", "故障"],
+    mechanical: [
+      "mechanical",
+      "maintenance",
+      "equipment",
+      "technical",
+      "机械",
+      "故障",
+    ],
     oversales: ["oversold", "overbooked", "oversales", "bump", "超售"],
     weather: ["weather", "storm", "snow", "天气", "暴雪"],
     late_inbound_aircraft: [
@@ -190,15 +213,22 @@ function candidateHasDisruptionReason(
       "incoming aircraft",
       "previous flight arrived late",
       "前序航班晚到",
-      "进港飞机晚到"
+      "进港飞机晚到",
     ],
-    other_controllable: ["controllable", "airline control", "航司原因", "可控原因"]
+    other_controllable: [
+      "controllable",
+      "airline control",
+      "航司原因",
+      "可控原因",
+    ],
   };
 
   return terms[reason].some((term) => normalized.includes(normalizeText(term)));
 }
 
-function detectDeniedBoardingKind(candidateText: string): RetrievalQuery["deniedBoardingKind"] {
+function detectDeniedBoardingKind(
+  candidateText: string,
+): RetrievalQuery["deniedBoardingKind"] {
   const normalized = normalizeText(candidateText);
   if (
     normalized.includes("involuntary") ||
@@ -223,21 +253,26 @@ function detectDeniedBoardingKind(candidateText: string): RetrievalQuery["denied
 
 function sortScoredItems<T>(
   items: ScoredRetrievalItem<T>[],
-  getStableId: (item: T) => string
+  getStableId: (item: T) => string,
 ): ScoredRetrievalItem<T>[] {
   return items.sort(
-    (left, right) => right.score - left.score || getStableId(left.item).localeCompare(getStableId(right.item))
+    (left, right) =>
+      right.score - left.score ||
+      getStableId(left.item).localeCompare(getStableId(right.item)),
   );
 }
 
 function jurisdictionScore(
   applicableRegions: Policy["applicable_regions"],
-  query: RetrievalQuery
+  query: RetrievalQuery,
 ): number {
   if (query.originRegion && applicableRegions.includes(query.originRegion)) {
     return 20;
   }
-  if (query.destinationRegion && applicableRegions.includes(query.destinationRegion)) {
+  if (
+    query.destinationRegion &&
+    applicableRegions.includes(query.destinationRegion)
+  ) {
     return 12;
   }
   return 15;
@@ -245,19 +280,34 @@ function jurisdictionScore(
 
 export function rankCases(
   query: RetrievalQuery,
-  cases: Case[]
+  cases: Case[],
 ): ScoredRetrievalItem<Case>[] {
   const aliases = new Set<string>(getIssueAliases(query.issueType));
   const queryHotelGroup =
-    query.providerType === "hotel" ? canonicalHotelGroup(query.provider) : undefined;
+    query.providerType === "hotel"
+      ? canonicalHotelGroup(query.provider)
+      : undefined;
   const candidates = cases.filter((item) => {
-    if (item.review_status !== "approved" || item.source_type === "synthetic_example" || !aliases.has(item.issue_type)) {
+    if (
+      item.review_status !== "approved" ||
+      item.source_type === "synthetic_example" ||
+      !aliases.has(item.issue_type)
+    ) {
       return false;
     }
     const candidateReason = [item.facts, item.actual_outcome].join(" ");
     if (query.disruptionReason && query.disruptionReason !== "unknown") {
-      const opposite = query.disruptionReason === "weather" ? ["crew", "mechanical"] as const : ["weather"] as const;
-      if (opposite.some(reason => candidateHasDisruptionReason(reason, candidateReason)) && !candidateHasDisruptionReason(query.disruptionReason, candidateReason)) return false;
+      const opposite =
+        query.disruptionReason === "weather"
+          ? (["crew", "mechanical"] as const)
+          : (["weather"] as const);
+      if (
+        opposite.some((reason) =>
+          candidateHasDisruptionReason(reason, candidateReason),
+        ) &&
+        !candidateHasDisruptionReason(query.disruptionReason, candidateReason)
+      )
+        return false;
     }
     if (query.deniedBoardingKind && query.deniedBoardingKind !== "unknown") {
       const kind = detectDeniedBoardingKind(candidateReason);
@@ -265,21 +315,30 @@ export function rankCases(
     }
     if (queryHotelGroup) {
       const caseHotelGroup =
-        canonicalHotelGroup(item.provider) ?? canonicalHotelGroup(item.brand_or_airline);
-      return item.provider_type === "hotel" && caseHotelGroup === queryHotelGroup;
+        canonicalHotelGroup(item.provider) ??
+        canonicalHotelGroup(item.brand_or_airline);
+      return (
+        item.provider_type === "hotel" && caseHotelGroup === queryHotelGroup
+      );
     }
     if (item.provider_type !== "airline") return true;
     // Without route geography, a shared incident alone is too weak a basis
     // for borrowing another airline's outcome from a different jurisdiction.
     if (query.policyRegions.length === 0) {
-      return providersMatch(query.carrier, item.carrier) || providersMatch(query.ticketingProvider, item.provider);
+      return (
+        providersMatch(query.carrier, item.carrier) ||
+        providersMatch(query.ticketingProvider, item.provider)
+      );
     }
 
     const caseRegions = policyRegionsFromCountry(item.location_country);
     // A newly imported case may not have normalized geography yet. Only a
     // matching issuer/carrier pair can rescue it, as a conditional analogue.
     if (caseRegions.length === 0) {
-      return providersMatch(query.carrier, item.carrier) && providersMatch(query.ticketingProvider, item.provider);
+      return (
+        providersMatch(query.carrier, item.carrier) &&
+        providersMatch(query.ticketingProvider, item.provider)
+      );
     }
     return caseRegions.some((region) => query.policyRegions.includes(region));
   });
@@ -293,17 +352,24 @@ export function rankCases(
       item.facts,
       item.actual_outcome,
       item.evidence_used.join(" "),
-      item.reusable_lesson
+      item.reusable_lesson,
     ].join(" ");
 
     addIssueScore(result, query, item.issue_type);
     if (item.provider_type === "airline") {
-      const issuerMatches = providersMatch(query.ticketingProvider, item.provider);
+      const issuerMatches = providersMatch(
+        query.ticketingProvider,
+        item.provider,
+      );
       const carrierMatches = providersMatch(query.carrier, item.carrier);
       if (issuerMatches) addScore(result, 20, "ticketing_provider_match");
       if (carrierMatches) addScore(result, 20, "carrier_match");
-      if (issuerMatches && carrierMatches) addScore(result, 10, "provider_carrier_pair_match");
-      if (query.policyRegions.length > 0 && policyRegionsFromCountry(item.location_country).length === 0) {
+      if (issuerMatches && carrierMatches)
+        addScore(result, 10, "provider_carrier_pair_match");
+      if (
+        query.policyRegions.length > 0 &&
+        policyRegionsFromCountry(item.location_country).length === 0
+      ) {
         addScore(result, -10, "route_scope_unknown");
       }
     } else {
@@ -318,7 +384,7 @@ export function rankCases(
     }
     if (
       policyRegionsFromCountry(item.location_country).some((region) =>
-        query.policyRegions.includes(region)
+        query.policyRegions.includes(region),
       )
     ) {
       addScore(result, 15, "jurisdiction_match");
@@ -328,7 +394,9 @@ export function rankCases(
     }
     if (
       query.loyaltyStatus &&
-      normalizeText(item.loyalty_status).includes(normalizeText(query.loyaltyStatus))
+      normalizeText(item.loyalty_status).includes(
+        normalizeText(query.loyaltyStatus),
+      )
     ) {
       addScore(result, 4, "loyalty_status_match");
     }
@@ -359,7 +427,7 @@ export function rankCases(
 
 export function rankPolicies(
   query: RetrievalQuery,
-  policies: Policy[]
+  policies: Policy[],
 ): ScoredRetrievalItem<Policy>[] {
   const candidates = policies.filter((policy) => {
     const assessment = evaluatePolicyApplicability(policy, query);
@@ -372,17 +440,23 @@ export function rankPolicies(
 
     return (
       policy.applicable_regions.includes("global") ||
-      policy.applicable_regions.some((region) => query.policyRegions.includes(region))
+      policy.applicable_regions.some((region) =>
+        query.policyRegions.includes(region),
+      )
     );
   });
   const scored = candidates.map((policy) => {
-    const result: ScoredRetrievalItem<Policy> = { item: policy, score: 0, reasons: [] };
+    const result: ScoredRetrievalItem<Policy> = {
+      item: policy,
+      score: 0,
+      reasons: [],
+    };
     const candidateText = [
       policy.provider,
       policy.policy_name,
       policy.summary,
       policy.applicable_conditions.join(" "),
-      policy.compensation_or_rights.join(" ")
+      policy.compensation_or_rights.join(" "),
     ].join(" ");
 
     addIssueScore(result, query, query.issueType);
@@ -396,7 +470,7 @@ export function rankPolicies(
       addScore(
         result,
         jurisdictionScore(policy.applicable_regions, query),
-        "jurisdiction_match"
+        "jurisdiction_match",
       );
     }
     if (policy.applicable_providers.length > 0) {
@@ -420,52 +494,68 @@ export function rankPolicies(
 
 export function rankScripts(
   query: RetrievalQuery,
-  scripts: Script[]
+  scripts: Script[],
 ): ScoredRetrievalItem<Script>[] {
   const candidates = scripts.filter((script) => {
-    if (script.required_denied_boarding_kind && script.required_denied_boarding_kind !== query.deniedBoardingKind) return false;
+    if (
+      script.required_denied_boarding_kind &&
+      script.required_denied_boarding_kind !== query.deniedBoardingKind
+    )
+      return false;
     // Escalation needs a previous provider response, which intake does not yet verify.
     if (script.channel === "regulator_complaint") return false;
     const incidentMatches = script.incident_types.some(
-      (incidentType) => incidentType === query.issueType
+      (incidentType) => incidentType === query.issueType,
     );
     const regionMatches = applicabilityRuleMatches(
       script.applicability_rule,
       script.applicable_regions,
-      query
+      query,
     );
     const normalizedScriptProvider = providerMatchKey(script.provider);
     const providerMatches =
       normalizedScriptProvider.startsWith("generic") ||
-      (query.provider ? providersMatch(query.provider, script.provider) : false);
+      (query.provider
+        ? providersMatch(query.provider, script.provider)
+        : false);
     const controllabilityMatches =
       script.required_controllability === "any" ||
       script.required_controllability === query.controllability;
 
-    return incidentMatches && regionMatches && providerMatches && controllabilityMatches;
+    return (
+      incidentMatches &&
+      regionMatches &&
+      providerMatches &&
+      controllabilityMatches
+    );
   });
   const scored = candidates.map((script) => {
-    const result: ScoredRetrievalItem<Script> = { item: script, score: 0, reasons: [] };
+    const result: ScoredRetrievalItem<Script> = {
+      item: script,
+      score: 0,
+      reasons: [],
+    };
 
     addIssueScore(result, query, query.issueType);
     addProviderScore(result, query.provider, script.provider);
     addDescriptionOverlap(
       result,
       query.description,
-      [script.provider, script.template, script.when_to_use].join(" ")
+      [script.provider, script.template, script.when_to_use].join(" "),
     );
 
     if (
       applicabilityRuleMatches(
         script.applicability_rule,
         script.applicable_regions,
-        query
-      ) && !script.applicable_regions.includes("global")
+        query,
+      ) &&
+      !script.applicable_regions.includes("global")
     ) {
       addScore(
         result,
         jurisdictionScore(script.applicable_regions, query),
-        "jurisdiction_match"
+        "jurisdiction_match",
       );
     }
     if (script.required_controllability !== "any") {

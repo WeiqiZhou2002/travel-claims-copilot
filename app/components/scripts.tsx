@@ -1,9 +1,9 @@
 import type { Script } from "../../lib/types";
-import { FallbackText,Section } from "./shared";
+import { FallbackText, Section } from "./shared";
 export function ScriptSection({
   scripts,
   copiedScriptId,
-  onCopy
+  onCopy,
 }: {
   scripts: Script[];
   copiedScriptId: string | null;
@@ -12,11 +12,16 @@ export function ScriptSection({
   return (
     <Section title="Scripts">
       {scripts.length === 0 ? (
-        <FallbackText>No matching script found in local demo data.</FallbackText>
+        <FallbackText>
+          No matching script found in local demo data.
+        </FallbackText>
       ) : (
         <div className="grid gap-3">
           {scripts.map((script) => (
-            <article className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm" key={script.script_id}>
+            <article
+              className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm"
+              key={script.script_id}
+            >
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
                   <h3 className="text-lg font-semibold capitalize text-ink">
@@ -44,4 +49,3 @@ export function ScriptSection({
     </Section>
   );
 }
-

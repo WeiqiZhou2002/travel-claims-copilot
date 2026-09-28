@@ -1,4 +1,10 @@
-export function Checklist({ title, items }: { title: string; items: string[] }) {
+export function Checklist({
+  title,
+  items,
+}: {
+  title: string;
+  items: string[];
+}) {
   return (
     <Section title={title}>
       <div className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm">
@@ -15,10 +21,18 @@ export function Checklist({ title, items }: { title: string; items: string[] }) 
   );
 }
 
-export function Section({ title, children }: { title: string; children: React.ReactNode }) {
+export function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-ink/60">{title}</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-ink/60">
+        {title}
+      </h2>
       {children}
     </section>
   );
@@ -28,7 +42,10 @@ export function TagList({ items }: { items: string[] }) {
   return (
     <div className="mt-4 flex flex-wrap gap-2">
       {items.map((item) => (
-        <span className="rounded-full bg-mint/10 px-3 py-1 text-xs font-medium text-mint" key={item}>
+        <span
+          className="rounded-full bg-mint/10 px-3 py-1 text-xs font-medium text-mint"
+          key={item}
+        >
           {item}
         </span>
       ))}

@@ -6,10 +6,14 @@ const handlingSourceLabels: Record<
 > = {
   industry_guidance: "Industry guidance",
   community_guide: "Community guide",
-  official_policy_required: "Official policy check required"
+  official_policy_required: "Official policy check required",
 };
 
-export function HandlingPlaybookSection({ playbook }: { playbook: HandlingPlaybook }) {
+export function HandlingPlaybookSection({
+  playbook,
+}: {
+  playbook: HandlingPlaybook;
+}) {
   return (
     <Section title="What to do now">
       <div className="overflow-hidden rounded-lg border border-ink/10 bg-white shadow-sm">
@@ -26,16 +30,23 @@ export function HandlingPlaybookSection({ playbook }: { playbook: HandlingPlaybo
               {playbook.contactFirst.role.replaceAll("_", " ")}
             </p>
           </div>
-          <p className="text-sm leading-6 text-white/75">{playbook.contactFirst.reason}</p>
+          <p className="text-sm leading-6 text-white/75">
+            {playbook.contactFirst.reason}
+          </p>
         </div>
 
         <div className="grid gap-6 p-5 lg:grid-cols-2">
           <div>
-            <h3 className="text-sm font-semibold text-ink">Ask in this order</h3>
+            <h3 className="text-sm font-semibold text-ink">
+              Ask in this order
+            </h3>
             {playbook.askLadder.length > 0 ? (
               <ol className="mt-3 space-y-3">
                 {playbook.askLadder.map((item, index) => (
-                  <li className="flex gap-3 text-sm leading-6 text-ink/75" key={item}>
+                  <li
+                    className="flex gap-3 text-sm leading-6 text-ink/75"
+                    key={item}
+                  >
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-mint/10 text-xs font-semibold text-mint">
                       {index + 1}
                     </span>
@@ -53,10 +64,15 @@ export function HandlingPlaybookSection({ playbook }: { playbook: HandlingPlaybo
           <div className="space-y-5">
             {playbook.ticketingChecks.length > 0 ? (
               <div>
-                <h3 className="text-sm font-semibold text-ink">After any rebooking</h3>
+                <h3 className="text-sm font-semibold text-ink">
+                  After any rebooking
+                </h3>
                 <ul className="mt-3 space-y-2">
                   {playbook.ticketingChecks.map((item) => (
-                    <li className="flex gap-3 text-sm leading-6 text-ink/70" key={item}>
+                    <li
+                      className="flex gap-3 text-sm leading-6 text-ink/70"
+                      key={item}
+                    >
                       <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-mint" />
                       <span>{item}</span>
                     </li>
@@ -67,10 +83,15 @@ export function HandlingPlaybookSection({ playbook }: { playbook: HandlingPlaybo
 
             {playbook.fallback.length > 0 ? (
               <div>
-                <h3 className="text-sm font-semibold text-ink">If the first request fails</h3>
+                <h3 className="text-sm font-semibold text-ink">
+                  If the first request fails
+                </h3>
                 <ul className="mt-3 space-y-2">
                   {playbook.fallback.map((item) => (
-                    <li className="border-l-2 border-coral/40 pl-3 text-sm leading-6 text-ink/70" key={item}>
+                    <li
+                      className="border-l-2 border-coral/40 pl-3 text-sm leading-6 text-ink/70"
+                      key={item}
+                    >
                       {item}
                     </li>
                   ))}
@@ -117,14 +138,14 @@ export function HandlingPlaybookSection({ playbook }: { playbook: HandlingPlaybo
               >
                 {handlingSourceLabels[source.sourceType]}
               </span>
-            )
+            ),
           )}
           <span className="w-full text-xs leading-5 text-ink/50">
-            Procedural guidance is not a guarantee of rebooking, reimbursement, or compensation.
+            Procedural guidance is not a guarantee of rebooking, reimbursement,
+            or compensation.
           </span>
         </div>
       </div>
     </Section>
   );
 }
-

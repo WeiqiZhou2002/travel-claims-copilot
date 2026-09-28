@@ -9,7 +9,7 @@ import {
   emptyClaimFacts,
   normalizeClaimFacts,
   type ClaimDisruptionReason,
-  type ClaimLocation
+  type ClaimLocation,
 } from "../lib/claimFacts";
 import type { Case, IssueType, Policy, Script } from "../lib/types";
 import { retrieveKnowledge } from "../lib/retrieval";
@@ -21,7 +21,7 @@ const scripts = scriptsJson as Script[];
 function location(
   city: string,
   country: string,
-  region: ClaimLocation["region"] = null
+  region: ClaimLocation["region"] = null,
 ): ClaimLocation {
   return { city, airport: null, country, region };
 }
@@ -32,9 +32,12 @@ function analyzeRoute({
   origin,
   destination,
   reason = "unknown",
-  arrivalDelayMinutes = 240
+  arrivalDelayMinutes = 240,
 }: {
-  issueType?: Extract<IssueType, "airline_delay" | "airline_cancellation" | "denied_boarding">;
+  issueType?: Extract<
+    IssueType,
+    "airline_delay" | "airline_cancellation" | "denied_boarding"
+  >;
   provider: string;
   origin: ClaimLocation;
   destination: ClaimLocation;
@@ -56,9 +59,11 @@ function analyzeRoute({
           ? "denied_boarding"
           : "cancellation",
     disruptionReason: reason,
-    arrivalDelayMinutes: issueType === "airline_delay" ? arrivalDelayMinutes : null,
-    deniedBoardingKind: issueType === "denied_boarding" ? "involuntary" : "unknown",
-    confidence: "high"
+    arrivalDelayMinutes:
+      issueType === "airline_delay" ? arrivalDelayMinutes : null,
+    deniedBoardingKind:
+      issueType === "denied_boarding" ? "involuntary" : "unknown",
+    confidence: "high",
   });
 
   return buildAnalysisFromFacts(facts, policies, cases, scripts);
@@ -67,14 +72,16 @@ function analyzeRoute({
 describe("regional policy applicability", () => {
   it("extracts route direction for deterministic regional matching", () => {
     const facts = classifyInput(
-      "My British Airways flight from New York to London was cancelled because of a mechanical issue."
+      "My British Airways flight from New York to London was cancelled because of a mechanical issue.",
     );
     const retrieval = retrieveKnowledge(facts, policies, cases, scripts);
 
     expect(retrieval.query.originRegion).toBe("US");
     expect(retrieval.query.destinationRegion).toBe("UK");
     expect(retrieval.query.operatingCarrierRegion).toBe("UK");
-    expect(retrieval.officialBasis.map((policy) => policy.legal_regime)).toContain("UK261");
+    expect(
+      retrieval.officialBasis.map((policy) => policy.legal_regime),
+    ).toContain("UK261");
   });
 
   it("applies UK261 to a UK departure", () => {
@@ -82,15 +89,15 @@ describe("regional policy applicability", () => {
       provider: "British Airways",
       origin: location("London", "United Kingdom"),
       destination: location("New York", "United States"),
-      reason: "mechanical"
+      reason: "mechanical",
     });
 
     expect(result.legalRegimes).toContain("UK261");
     expect(result.officialBasis.map((policy) => policy.policy_id)).toContain(
-      "uk261_assimilated_regulation_261_2004"
+      "uk261_assimilated_regulation_261_2004",
     );
     expect(result.scripts.map((script) => script.script_id)).toContain(
-      "uk261_claim_email_en"
+      "uk261_claim_email_en",
     );
   });
 
@@ -99,12 +106,12 @@ describe("regional policy applicability", () => {
       provider: "United",
       origin: location("New York", "United States"),
       destination: location("London", "United Kingdom"),
-      reason: "mechanical"
+      reason: "mechanical",
     });
 
     expect(result.legalRegimes).not.toContain("UK261");
     expect(result.scripts.map((script) => script.script_id)).not.toContain(
-      "uk261_claim_email_en"
+      "uk261_claim_email_en",
     );
   });
 
@@ -113,13 +120,13 @@ describe("regional policy applicability", () => {
       provider: "Air France",
       origin: location("New York", "United States"),
       destination: location("Paris", "France"),
-      reason: "mechanical"
+      reason: "mechanical",
     });
     const nonEuCarrierResult = analyzeRoute({
       provider: "United",
       origin: location("New York", "United States"),
       destination: location("Paris", "France"),
-      reason: "mechanical"
+      reason: "mechanical",
     });
 
     expect(euCarrierResult.legalRegimes).toContain("EU261");
@@ -130,14 +137,14 @@ describe("regional policy applicability", () => {
     const result = analyzeRoute({
       provider: "United",
       origin: location("Chicago", "United States"),
-      destination: location("Beijing", "China")
+      destination: location("Beijing", "China"),
     });
 
     expect(result.policyRegions).toEqual(["US", "CN"]);
     expect(result.legalRegimes).not.toContain("EU261");
-    expect(result.officialBasis.map((policy) => policy.legal_regime)).not.toContain(
-      "EU261"
-    );
+    expect(
+      result.officialBasis.map((policy) => policy.legal_regime),
+    ).not.toContain("EU261");
   });
 
   it("reports condition-level EU261 applicability without conflating scope and remedy", () => {
@@ -146,22 +153,26 @@ describe("regional policy applicability", () => {
       provider: "Air France",
       origin: location("Paris", "France"),
       destination: location("New York", "United States"),
-      reason: "late_inbound_aircraft"
+      reason: "late_inbound_aircraft",
     });
     const assessment = result.policyAssessments.find(
-      (item) => item.policyId === "eu261_regulation_261_2004"
+      (item) => item.policyId === "eu261_regulation_261_2004",
     );
 
     expect(assessment?.status).toBe("met");
     expect(assessment?.conditions).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ code: "route", status: "met", kind: "scope" }),
+        expect.objectContaining({
+          code: "route",
+          status: "met",
+          kind: "scope",
+        }),
         expect.objectContaining({
           code: "arrival_delay",
           status: "met",
-          kind: "remedy"
-        })
-      ])
+          kind: "remedy",
+        }),
+      ]),
     );
   });
 
@@ -172,7 +183,7 @@ describe("regional policy applicability", () => {
       origin: location("Paris", "France"),
       destination: location("New York", "United States"),
       reason: "mechanical",
-      arrivalDelayMinutes: 120
+      arrivalDelayMinutes: 120,
     });
 
     expect(result.evidenceCoverage.officialBasisStatus).toBe("scope_confirmed");
@@ -181,24 +192,26 @@ describe("regional policy applicability", () => {
 
   it("keeps inbound EU261 coverage conditional when the operating carrier is unknown", () => {
     const retrieval = retrieveKnowledge(
-      classifyInput("My flight from New York to Paris arrived four hours late."),
+      classifyInput(
+        "My flight from New York to Paris arrived four hours late.",
+      ),
       policies,
       cases,
-      scripts
+      scripts,
     );
     const euPolicyId = retrieval.officialBasis.find(
-      (policy) => policy.legal_regime === "EU261"
+      (policy) => policy.legal_regime === "EU261",
     )?.policy_id;
     const assessment = retrieval.policyAssessments.find(
-      (item) => item.policyId === euPolicyId
+      (item) => item.policyId === euPolicyId,
     );
 
-    expect(retrieval.officialBasis.map((policy) => policy.legal_regime)).toContain(
-      "EU261"
-    );
+    expect(
+      retrieval.officialBasis.map((policy) => policy.legal_regime),
+    ).toContain("EU261");
     expect(assessment?.status).toBe("unknown");
     expect(assessment?.conditions).toContainEqual(
-      expect.objectContaining({ code: "route", status: "unknown" })
+      expect.objectContaining({ code: "route", status: "unknown" }),
     );
   });
 
@@ -207,15 +220,15 @@ describe("regional policy applicability", () => {
       classifyInput("United cancelled my flight without giving a reason."),
       policies,
       cases,
-      scripts
+      scripts,
     );
     const assessment = retrieval.policyAssessments.find(
-      (item) => item.policyId === "dot_airline_cancellation_delay_dashboard"
+      (item) => item.policyId === "dot_airline_cancellation_delay_dashboard",
     );
 
     expect(assessment?.status).toBe("unknown");
     expect(assessment?.conditions).toContainEqual(
-      expect.objectContaining({ code: "controllability", status: "unknown" })
+      expect.objectContaining({ code: "controllability", status: "unknown" }),
     );
   });
 
@@ -225,14 +238,17 @@ describe("regional policy applicability", () => {
       provider: "Air Canada",
       origin: location("Toronto", "Canada"),
       destination: location("New York", "United States"),
-      reason: "crew"
+      reason: "crew",
     });
 
     expect(result.policyRegions).toEqual(["CA", "US"]);
     expect(result.legalRegimes).toContain("CA_APPR");
-    const refund = result.remedies.find(item => item.id === "refund");
+    const refund = result.remedies.find((item) => item.id === "refund");
     expect(refund?.status).toBe("needs_verification");
-    expect(refund?.sourceIds).toContain(result.officialBasis.find(item => item.legal_regime === "CA_APPR")?.policy_id);
+    expect(refund?.sourceIds).toContain(
+      result.officialBasis.find((item) => item.legal_regime === "CA_APPR")
+        ?.policy_id,
+    );
     expect(result.suggestedAsks.standard).toContain(refund?.request);
   });
 
@@ -242,11 +258,13 @@ describe("regional policy applicability", () => {
       provider: "Qantas",
       origin: location("Sydney", "Australia"),
       destination: location("Melbourne", "Australia"),
-      reason: "mechanical"
+      reason: "mechanical",
     });
 
     expect(result.legalRegimes).toEqual(["AU_ACL"]);
-    expect(result.cautions.join(" ")).toContain("does not create an EU-style fixed compensation table");
+    expect(result.cautions.join(" ")).toContain(
+      "does not create an EU-style fixed compensation table",
+    );
   });
 
   it("retrieves both Chinese passenger-service regulations for a mainland departure", () => {
@@ -254,15 +272,17 @@ describe("regional policy applicability", () => {
       provider: "China Eastern Airlines",
       origin: location("Shanghai", "China"),
       destination: location("Tokyo", "Japan", "other"),
-      reason: "crew"
+      reason: "crew",
     });
     const policyIds = result.officialBasis.map((policy) => policy.policy_id);
 
     expect(result.legalRegimes).toEqual(["CN_FLIGHT_REGULATION"]);
     expect(policyIds).toContain("cn_flight_normality_regulation_2016");
-    expect(policyIds).toContain("cn_public_air_transport_passenger_service_2021");
+    expect(policyIds).toContain(
+      "cn_public_air_transport_passenger_service_2021",
+    );
     expect(result.scripts.map((script) => script.script_id)).toContain(
-      "cn_flight_disruption_request_zh"
+      "cn_flight_disruption_request_zh",
     );
   });
 
@@ -271,7 +291,7 @@ describe("regional policy applicability", () => {
       provider: "United",
       origin: location("Los Angeles", "United States"),
       destination: location("Shanghai", "China"),
-      reason: "weather"
+      reason: "weather",
     });
 
     expect(result.legalRegimes).toContain("US_DOT_REFUND");

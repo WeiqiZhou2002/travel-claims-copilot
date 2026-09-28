@@ -4,7 +4,8 @@ import { issueLabels } from "./labels";
 export function EmptyState() {
   return (
     <div className="rounded-lg border border-dashed border-ink/20 bg-white p-8 text-center text-ink/65">
-      Complete the guided intake to retrieve official references, reviewed cases, and scripts.
+      Complete the guided intake to retrieve official references, reviewed
+      cases, and scripts.
     </div>
   );
 }
@@ -17,7 +18,9 @@ export function ClaimSnapshot({
   extractionMode: IntakeExtractionMode | null;
 }) {
   const route = facts
-    ? [formatLocation(facts.origin), formatLocation(facts.destination)].filter(Boolean).join(" → ")
+    ? [formatLocation(facts.origin), formatLocation(facts.destination)]
+        .filter(Boolean)
+        .join(" → ")
     : "";
 
   return (
@@ -35,11 +38,26 @@ export function ClaimSnapshot({
 
       {facts ? (
         <dl className="mt-4 space-y-3 text-sm">
-          <FactRow label="Issue" value={issueLabels[facts.issueType] ?? "Needs more detail"} />
-          {facts.providerType === "airline" ? <>
-            <FactRow label="Ticketing provider" value={facts.bookingProvider ?? facts.validatingCarrier ?? "Unknown"} />
-            <FactRow label="Operating carrier" value={facts.operatingCarrier ?? "Unknown"} />
-          </> : <FactRow label="Provider" value={facts.provider ?? "Unknown"} />}
+          <FactRow
+            label="Issue"
+            value={issueLabels[facts.issueType] ?? "Needs more detail"}
+          />
+          {facts.providerType === "airline" ? (
+            <>
+              <FactRow
+                label="Ticketing provider"
+                value={
+                  facts.bookingProvider ?? facts.validatingCarrier ?? "Unknown"
+                }
+              />
+              <FactRow
+                label="Operating carrier"
+                value={facts.operatingCarrier ?? "Unknown"}
+              />
+            </>
+          ) : (
+            <FactRow label="Provider" value={facts.provider ?? "Unknown"} />
+          )}
           <FactRow label="Route" value={route || "Unknown"} />
           <FactRow
             label="Event"
@@ -48,26 +66,31 @@ export function ClaimSnapshot({
           {facts.providerType === "airline" ? (
             <FactRow label="Reason" value={formatDisruptionReason(facts)} />
           ) : null}
-          {facts.providerType === "airline" && facts.journeyStage !== "unknown" ? (
-            <FactRow label="Stage" value={facts.journeyStage.replaceAll("_", " ")} />
+          {facts.providerType === "airline" &&
+          facts.journeyStage !== "unknown" ? (
+            <FactRow
+              label="Stage"
+              value={facts.journeyStage.replaceAll("_", " ")}
+            />
           ) : null}
-          {facts.providerType === "airline" && facts.disruptionTiming !== "unknown" ? (
+          {facts.providerType === "airline" &&
+          facts.disruptionTiming !== "unknown" ? (
             <FactRow
               label="Timing"
               value={facts.disruptionTiming.replaceAll("_", " ")}
             />
           ) : null}
-          {facts.providerType === "airline" && facts.ticketType !== "unknown" ? (
+          {facts.providerType === "airline" &&
+          facts.ticketType !== "unknown" ? (
             <FactRow label="Ticket" value={formatTicket(facts)} />
           ) : null}
         </dl>
       ) : (
         <p className="mt-4 text-sm leading-6 text-ink/65">
-          Facts will appear here as the conversation becomes specific enough to search.
+          Facts will appear here as the conversation becomes specific enough to
+          search.
         </p>
       )}
-
-
     </div>
   );
 }
@@ -95,7 +118,7 @@ function formatDisruptionReason(facts: ClaimFacts): string {
 }
 
 function formatTicket(facts: ClaimFacts): string {
-  const issuer = facts.awardProgram ?? facts.bookingProvider ?? facts.validatingCarrier;
+  const issuer =
+    facts.awardProgram ?? facts.bookingProvider ?? facts.validatingCarrier;
   return issuer ? `${facts.ticketType} · ${issuer}` : facts.ticketType;
 }
-

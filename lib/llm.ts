@@ -43,7 +43,11 @@ function extractResponseText(payload: unknown): string | undefined {
       continue;
     }
     for (const content of item.content) {
-      if (isRecord(content) && content.type === "output_text" && typeof content.text === "string") {
+      if (
+        isRecord(content) &&
+        content.type === "output_text" &&
+        typeof content.text === "string"
+      ) {
         return content.text;
       }
     }
@@ -62,7 +66,9 @@ function extractDeepSeekMessage(payload: unknown): string | undefined {
       continue;
     }
     if (choice.finish_reason === "length") {
-      throw new Error("DeepSeek Chat Completions API truncated the structured output");
+      throw new Error(
+        "DeepSeek Chat Completions API truncated the structured output",
+      );
     }
     if (
       isRecord(choice.message) &&
@@ -94,7 +100,10 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
   constructor(options: OpenAIResponsesClientOptions) {
     this.apiKey = options.apiKey;
     this.model = options.model ?? "gpt-5.6-luna";
-    this.baseUrl = (options.baseUrl ?? "https://api.openai.com/v1").replace(/\/$/, "");
+    this.baseUrl = (options.baseUrl ?? "https://api.openai.com/v1").replace(
+      /\/$/,
+      "",
+    );
     this.timeoutMs = options.timeoutMs ?? 12_000;
     this.fetcher = options.fetcher ?? fetch;
   }
@@ -108,7 +117,7 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
         method: "POST",
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           model: this.model,
@@ -123,20 +132,24 @@ export class OpenAIResponsesClient implements StructuredOutputClient {
               type: "json_schema",
               name: request.schemaName,
               strict: true,
-              schema: request.schema
-            }
-          }
+              schema: request.schema,
+            },
+          },
         }),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI Responses API returned HTTP ${response.status}`);
+        throw new Error(
+          `OpenAI Responses API returned HTTP ${response.status}`,
+        );
       }
 
       const text = extractResponseText(await response.json());
       if (!text) {
-        throw new Error("OpenAI Responses API returned no structured output text");
+        throw new Error(
+          "OpenAI Responses API returned no structured output text",
+        );
       }
 
       return JSON.parse(text) as T;
@@ -156,7 +169,10 @@ export class DeepSeekChatCompletionsClient implements StructuredOutputClient {
   constructor(options: DeepSeekChatCompletionsClientOptions) {
     this.apiKey = options.apiKey;
     this.model = normalizeDeepSeekModel(options.model);
-    this.baseUrl = (options.baseUrl ?? "https://api.deepseek.com").replace(/\/+$/, "");
+    this.baseUrl = (options.baseUrl ?? "https://api.deepseek.com").replace(
+      /\/+$/,
+      "",
+    );
     this.timeoutMs = options.timeoutMs ?? 12_000;
     this.fetcher = options.fetcher ?? fetch;
   }
@@ -167,7 +183,7 @@ export class DeepSeekChatCompletionsClient implements StructuredOutputClient {
     const systemPrompt = [
       request.instructions,
       "Return only valid JSON matching this JSON Schema exactly:",
-      JSON.stringify(request.schema)
+      JSON.stringify(request.schema),
     ].join("\n\n");
 
     try {
@@ -175,29 +191,33 @@ export class DeepSeekChatCompletionsClient implements StructuredOutputClient {
         method: "POST",
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           model: this.model,
           max_tokens: 4096,
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: request.input }
+            { role: "user", content: request.input },
           ],
           thinking: { type: "disabled" },
           response_format: { type: "json_object" },
-          stream: false
+          stream: false,
         }),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       if (!response.ok) {
-        throw new Error(`DeepSeek Chat Completions API returned HTTP ${response.status}`);
+        throw new Error(
+          `DeepSeek Chat Completions API returned HTTP ${response.status}`,
+        );
       }
 
       const content = extractDeepSeekMessage(await response.json());
       if (!content) {
-        throw new Error("DeepSeek Chat Completions API returned no structured output text");
+        throw new Error(
+          "DeepSeek Chat Completions API returned no structured output text",
+        );
       }
 
       return JSON.parse(content) as T;
@@ -208,7 +228,7 @@ export class DeepSeekChatCompletionsClient implements StructuredOutputClient {
 }
 
 export function createOpenAIClientFromEnv(
-  env: LlmEnvironment = process.env
+  env: LlmEnvironment = process.env,
 ): OpenAIResponsesClient | undefined {
   const apiKey = env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
@@ -218,12 +238,12 @@ export function createOpenAIClientFromEnv(
   return new OpenAIResponsesClient({
     apiKey,
     model: env.OPENAI_INTAKE_MODEL?.trim() || "gpt-5.6-luna",
-    baseUrl: env.OPENAI_BASE_URL?.trim() || undefined
+    baseUrl: env.OPENAI_BASE_URL?.trim() || undefined,
   });
 }
 
 export function createDeepSeekClientFromEnv(
-  env: LlmEnvironment = process.env
+  env: LlmEnvironment = process.env,
 ): DeepSeekChatCompletionsClient | undefined {
   // Accept the old OPENAI_* gateway convention so existing local setups keep working.
   const dedicatedApiKey = env.DEEPSEEK_API_KEY?.trim();
@@ -239,12 +259,12 @@ export function createDeepSeekClientFromEnv(
       (!dedicatedApiKey ? env.OPENAI_INTAKE_MODEL?.trim() : undefined),
     baseUrl:
       env.DEEPSEEK_BASE_URL?.trim() ||
-      (!dedicatedApiKey ? env.OPENAI_BASE_URL?.trim() : undefined)
+      (!dedicatedApiKey ? env.OPENAI_BASE_URL?.trim() : undefined),
   });
 }
 
 export function resolveLlmProvider(
-  env: LlmEnvironment = process.env
+  env: LlmEnvironment = process.env,
 ): LlmProvider | undefined {
   const explicitProvider = env.LLM_PROVIDER?.trim().toLowerCase();
   if (explicitProvider === "openai" || explicitProvider === "deepseek") {
@@ -255,10 +275,14 @@ export function resolveLlmProvider(
   }
 
   const model = (
-    env.DEEPSEEK_INTAKE_MODEL?.trim() || env.OPENAI_INTAKE_MODEL?.trim() || ""
+    env.DEEPSEEK_INTAKE_MODEL?.trim() ||
+    env.OPENAI_INTAKE_MODEL?.trim() ||
+    ""
   ).toLowerCase();
   const baseUrl = (
-    env.DEEPSEEK_BASE_URL?.trim() || env.OPENAI_BASE_URL?.trim() || ""
+    env.DEEPSEEK_BASE_URL?.trim() ||
+    env.OPENAI_BASE_URL?.trim() ||
+    ""
   ).toLowerCase();
 
   if (
@@ -273,7 +297,7 @@ export function resolveLlmProvider(
 }
 
 export function createStructuredOutputClientFromEnv(
-  env: LlmEnvironment = process.env
+  env: LlmEnvironment = process.env,
 ): StructuredOutputClient | undefined {
   const provider = resolveLlmProvider(env);
   if (provider === "deepseek") {

@@ -4,7 +4,7 @@ export const MVP_ISSUE_TYPES = [
   "hotel_walk",
   "airline_delay",
   "airline_cancellation",
-  "denied_boarding"
+  "denied_boarding",
 ] as const satisfies readonly MvpIssueType[];
 
 const mvpIssueTypeSet = new Set<IssueType>(MVP_ISSUE_TYPES);
@@ -24,7 +24,7 @@ export const issueLabels: Record<IssueType, string> = {
   hotel_relocation_before_opening: "Hotel relocation before opening",
   hotel_room_feature_mismatch: "Hotel room feature mismatch",
   hotel_elite_benefit_closure: "Hotel elite benefit closure",
-  unknown: "Needs more detail"
+  unknown: "Needs more detail",
 };
 
 const issueAliases: Partial<Record<IssueType, string[]>> = {
@@ -33,23 +33,23 @@ const issueAliases: Partial<Record<IssueType, string[]>> = {
     "airline_cancellation",
     "controllable_airline_cancellation",
     "controllable_airline_delay",
-    "eu261_delay_or_cancellation"
+    "eu261_delay_or_cancellation",
   ],
   airline_delay: [
     "airline_delay",
     "controllable_airline_delay",
     "controllable_airline_cancellation",
-    "eu261_delay_or_cancellation"
+    "eu261_delay_or_cancellation",
   ],
   baggage_delay: ["baggage_delay", "airline_baggage_not_checked"],
   denied_boarding: ["denied_boarding"],
-  unknown: []
+  unknown: [],
 };
 
 const legacyIssueTypes: Record<string, IssueType> = {
   controllable_airline_cancellation: "airline_cancellation",
   controllable_airline_delay: "airline_delay",
-  eu261_delay_or_cancellation: "airline_delay"
+  eu261_delay_or_cancellation: "airline_delay",
 };
 
 export function normalizeIssueType(value: unknown): IssueType | undefined {
@@ -68,6 +68,8 @@ export function getIssueAliases(issueType: IssueType): string[] {
   return issueAliases[issueType] ?? [issueType];
 }
 
-export function isMvpIssueType(issueType: IssueType): issueType is MvpIssueType {
+export function isMvpIssueType(
+  issueType: IssueType,
+): issueType is MvpIssueType {
   return mvpIssueTypeSet.has(issueType);
 }

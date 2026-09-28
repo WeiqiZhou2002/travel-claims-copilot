@@ -1,14 +1,19 @@
 import { arrivalDelayFromText, affirmativeDisruptionText } from "./factText";
 import { normalizeIssueType } from "./issueTaxonomy";
 import { inferRouteLocations } from "./jurisdiction";
-import { findProviderMatch, findOperatingCarrierMatch, findTicketingProvider, type ProviderMatch } from "./provider";
+import {
+  findProviderMatch,
+  findOperatingCarrierMatch,
+  findTicketingProvider,
+  type ProviderMatch,
+} from "./provider";
 import type {
   AnalyzeOptions,
   Case,
   ExtractedFacts,
   IssueType,
   PolicyRouteRegion,
-  ProviderType
+  ProviderType,
 } from "./types";
 
 type MatchResult = {
@@ -34,10 +39,8 @@ const loyaltyStatuses = [
   { status: "Globalist", terms: ["globalist", "环球客", "球客"] },
   { status: "Explorist", terms: ["explorist", "探索者"] },
   { status: "Diamond", terms: ["diamond", "钻石", "钻卡"] },
-  { status: "Gold", terms: ["gold", "金卡"] }
+  { status: "Gold", terms: ["gold", "金卡"] },
 ] as const;
-
-
 
 function hasTerm(text: string, term: string): boolean {
   if (/^[a-z0-9]+$/i.test(term) && term.length <= 3) {
@@ -55,25 +58,61 @@ function findCountry(text: string): string | undefined {
   const countryTerms: Array<[string, string[]]> = [
     ["EU", ["eu261", "european union", "europe", "欧盟", "欧洲"]],
     ["US", ["united states", "u.s.", "usa", "美国"]],
-    ["United Kingdom", ["united kingdom", "uk", "london", "lhr", "英国", "伦敦"]],
+    [
+      "United Kingdom",
+      ["united kingdom", "uk", "london", "lhr", "英国", "伦敦"],
+    ],
     ["France", ["france", "paris", "cdg", "法国", "巴黎"]],
     ["Germany", ["germany", "frankfurt", "fra", "德国", "法兰克福"]],
     ["Italy", ["italy", "rome", "意大利", "罗马"]],
     ["China", ["china", "beijing", "shanghai", "中国", "北京", "上海"]],
-    ["Canada", ["canada", "toronto", "vancouver", "加拿大", "多伦多", "温哥华"]],
-    ["Australia", ["australia", "sydney", "melbourne", "澳大利亚", "澳洲", "悉尼", "墨尔本"]],
-    ["Japan", ["japan", "日本"]]
+    [
+      "Canada",
+      ["canada", "toronto", "vancouver", "加拿大", "多伦多", "温哥华"],
+    ],
+    [
+      "Australia",
+      [
+        "australia",
+        "sydney",
+        "melbourne",
+        "澳大利亚",
+        "澳洲",
+        "悉尼",
+        "墨尔本",
+      ],
+    ],
+    ["Japan", ["japan", "日本"]],
   ];
 
-  return countryTerms.find(([, terms]) => terms.some((term) => hasTerm(text, term)))?.[0];
+  return countryTerms.find(([, terms]) =>
+    terms.some((term) => hasTerm(text, term)),
+  )?.[0];
 }
 
 function findBookingChannel(text: string): Case["booking_channel"] | undefined {
-  if (hasAny(text, ["chase travel", "amex fhr", "capital one travel", "portal", "信用卡旅行门户"]).length) {
+  if (
+    hasAny(text, [
+      "chase travel",
+      "amex fhr",
+      "capital one travel",
+      "portal",
+      "信用卡旅行门户",
+    ]).length
+  ) {
     return "portal";
   }
 
-  if (hasAny(text, ["agoda", "expedia", "booking.com", "priceline", "ota", "第三方平台"]).length) {
+  if (
+    hasAny(text, [
+      "agoda",
+      "expedia",
+      "booking.com",
+      "priceline",
+      "ota",
+      "第三方平台",
+    ]).length
+  ) {
     return "ota";
   }
 
@@ -85,7 +124,7 @@ function findBookingChannel(text: string): Case["booking_channel"] | undefined {
       "官网预订",
       "官网订",
       "官方渠道",
-      "直接预订"
+      "直接预订",
     ]).length
   ) {
     return "direct";
@@ -95,19 +134,51 @@ function findBookingChannel(text: string): Case["booking_channel"] | undefined {
 }
 
 function findLoyaltyStatus(text: string): string | undefined {
-  return loyaltyStatuses.find(({ terms }) => terms.some((term) => hasTerm(text, term)))?.status;
+  return loyaltyStatuses.find(({ terms }) =>
+    terms.some((term) => hasTerm(text, term)),
+  )?.status;
 }
 
-function findDisruptionReason(text: string): ExtractedFacts["disruptionReason"] {
-  if (hasAny(text, ["weather", "storm", "snow", "hurricane", "天气", "暴雪", "雷暴"]).length) {
+function findDisruptionReason(
+  text: string,
+): ExtractedFacts["disruptionReason"] {
+  if (
+    hasAny(text, [
+      "weather",
+      "storm",
+      "snow",
+      "hurricane",
+      "天气",
+      "暴雪",
+      "雷暴",
+    ]).length
+  ) {
     return "weather";
   }
 
-  if (hasAny(text, ["crew issue", "crew timeout", "crew timed out", "crew availability", "机组", "机组超时"]).length) {
+  if (
+    hasAny(text, [
+      "crew issue",
+      "crew timeout",
+      "crew timed out",
+      "crew availability",
+      "机组",
+      "机组超时",
+    ]).length
+  ) {
     return "crew";
   }
 
-  if (hasAny(text, ["mechanical", "maintenance", "equipment issue", "technical issue", "机械故障", "飞机故障"]).length) {
+  if (
+    hasAny(text, [
+      "mechanical",
+      "maintenance",
+      "equipment issue",
+      "technical issue",
+      "机械故障",
+      "飞机故障",
+    ]).length
+  ) {
     return "mechanical";
   }
 
@@ -124,21 +195,33 @@ function findDisruptionReason(text: string): ExtractedFacts["disruptionReason"] 
       "incoming plane arrived late",
       "previous flight arrived late",
       "前序航班晚到",
-      "进港飞机晚到"
+      "进港飞机晚到",
     ]).length ||
-    /(?:because|due to)\s+(?:the\s+)?(?:plane|aircraft)\s+arrived late/.test(text)
+    /(?:because|due to)\s+(?:the\s+)?(?:plane|aircraft)\s+arrived late/.test(
+      text,
+    )
   ) {
     return "late_inbound_aircraft";
   }
 
-  if (hasAny(text, ["within the airline's control", "airline control", "controllable", "航司原因", "可控原因"]).length) {
+  if (
+    hasAny(text, [
+      "within the airline's control",
+      "airline control",
+      "controllable",
+      "航司原因",
+      "可控原因",
+    ]).length
+  ) {
     return "other_controllable";
   }
 
   return "unknown";
 }
 
-function findDeniedBoardingKind(text: string): ExtractedFacts["deniedBoardingKind"] {
+function findDeniedBoardingKind(
+  text: string,
+): ExtractedFacts["deniedBoardingKind"] {
   if (
     hasAny(text, [
       "involuntary denied boarding",
@@ -147,7 +230,7 @@ function findDeniedBoardingKind(text: string): ExtractedFacts["deniedBoardingKin
       "not volunteering",
       "forced to give up",
       "非自愿拒载",
-      "非自愿拒绝登机"
+      "非自愿拒绝登机",
     ]).length
   ) {
     return "involuntary";
@@ -162,7 +245,7 @@ function findDeniedBoardingKind(text: string): ExtractedFacts["deniedBoardingKin
       "seeking volunteers",
       "自愿改签",
       "征集自愿者",
-      "征集自愿改签"
+      "征集自愿改签",
     ]).length
   ) {
     return "voluntary";
@@ -178,10 +261,13 @@ function buildFacts(
   signals: string[],
   options: AnalyzeOptions,
   match: Partial<MatchResult>,
-  confidence: ExtractedFacts["confidence"]
+  confidence: ExtractedFacts["confidence"],
 ): ExtractedFacts {
   const route = inferRouteLocations(description);
-  const operator = match.providerType === "airline" ? findOperatingCarrierMatch(description) : undefined;
+  const operator =
+    match.providerType === "airline"
+      ? findOperatingCarrierMatch(description)
+      : undefined;
 
   return {
     description,
@@ -203,7 +289,7 @@ function buildFacts(
     caseId: options.caseId,
     confidence,
     signals: Array.from(new Set(signals)),
-    source
+    source,
   };
 }
 
@@ -217,7 +303,14 @@ function matchIssue(description: string): MatchResult {
   const arrivalDelayMinutes = arrivalDelayFromText(description) ?? undefined;
   const deniedBoardingKind = findDeniedBoardingKind(text);
   const isOvernight =
-    hasAny(text, ["overnight", "next morning", "next day", "tomorrow", "过夜", "第二天"]).length > 0;
+    hasAny(text, [
+      "overnight",
+      "next morning",
+      "next day",
+      "tomorrow",
+      "过夜",
+      "第二天",
+    ]).length > 0;
   const shared = {
     ...provider,
     country,
@@ -226,7 +319,7 @@ function matchIssue(description: string): MatchResult {
     disruptionReason,
     arrivalDelayMinutes,
     isOvernight,
-    deniedBoardingKind
+    deniedBoardingKind,
   };
 
   const hotelContextSignals = hasAny(text, [
@@ -236,7 +329,7 @@ function matchIssue(description: string): MatchResult {
     "front desk",
     "酒店",
     "前台",
-    "入住"
+    "入住",
   ]);
   const hotelWalkSignals = hasAny(text, [
     "hotel walk",
@@ -250,7 +343,7 @@ function matchIssue(description: string): MatchResult {
     "到店无房",
     "酒店超售",
     "没有房间",
-    "无法安排房间"
+    "无法安排房间",
   ]);
   if (
     hotelWalkSignals.length > 0 &&
@@ -261,7 +354,7 @@ function matchIssue(description: string): MatchResult {
       issueType: "hotel_walk",
       providerType: "hotel",
       confidence: "high",
-      signals: [...hotelContextSignals, ...hotelWalkSignals]
+      signals: [...hotelContextSignals, ...hotelWalkSignals],
     };
   }
 
@@ -277,7 +370,7 @@ function matchIssue(description: string): MatchResult {
     "hours late",
     "延误",
     "取消",
-    "错过转机"
+    "错过转机",
   ]);
   const euSignals = hasAny(text, [
     "eu261",
@@ -287,9 +380,12 @@ function matchIssue(description: string): MatchResult {
     "flight from europe",
     "欧盟261",
     "欧盟",
-    "欧洲出发"
+    "欧洲出发",
   ]);
-  if (euSignals.length > 0 && (disruptionSignals.length > 0 || hasTerm(text, "eu261"))) {
+  if (
+    euSignals.length > 0 &&
+    (disruptionSignals.length > 0 || hasTerm(text, "eu261"))
+  ) {
     const isCancellation = /cancellation|cancelled|canceled|取消/.test(text);
     return {
       ...shared,
@@ -297,7 +393,7 @@ function matchIssue(description: string): MatchResult {
       providerType: "airline",
       country: country ?? "EU",
       confidence: "high",
-      signals: [...euSignals, ...disruptionSignals]
+      signals: [...euSignals, ...disruptionSignals],
     };
   }
 
@@ -310,7 +406,7 @@ function matchIssue(description: string): MatchResult {
     "航司",
     "航班",
     "登机",
-    "机场"
+    "机场",
   ]);
   const deniedBoardingSignals = hasAny(text, [
     "denied boarding",
@@ -327,7 +423,7 @@ function matchIssue(description: string): MatchResult {
     "航班超售",
     "征集自愿者",
     "征集自愿改签",
-    "自愿改签"
+    "自愿改签",
   ]);
   if (
     deniedBoardingSignals.length > 0 &&
@@ -339,12 +435,23 @@ function matchIssue(description: string): MatchResult {
       providerType: "airline",
       disruptionReason,
       confidence: deniedBoardingKind === "unknown" ? "medium" : "high",
-      signals: [...airlineContextSignals, ...deniedBoardingSignals]
+      signals: [...airlineContextSignals, ...deniedBoardingSignals],
     };
   }
 
-  const cancellationSignals = hasAny(text, ["cancellation", "cancelled", "canceled", "取消"]);
-  const delaySignals = hasAny(text, ["delay", "delayed", "late", "延误", "晚点"]);
+  const cancellationSignals = hasAny(text, [
+    "cancellation",
+    "cancelled",
+    "canceled",
+    "取消",
+  ]);
+  const delaySignals = hasAny(text, [
+    "delay",
+    "delayed",
+    "late",
+    "延误",
+    "晚点",
+  ]);
   if (
     airlineContextSignals.length > 0 &&
     (cancellationSignals.length > 0 || delaySignals.length > 0)
@@ -352,15 +459,19 @@ function matchIssue(description: string): MatchResult {
     return {
       ...shared,
       issueType:
-        cancellationSignals.length > 0 ? "airline_cancellation" : "airline_delay",
+        cancellationSignals.length > 0
+          ? "airline_cancellation"
+          : "airline_delay",
       providerType: "airline",
       confidence: disruptionReason === "unknown" ? "medium" : "high",
       signals: [
         ...airlineContextSignals,
         ...cancellationSignals,
         ...delaySignals,
-        ...(disruptionReason && disruptionReason !== "unknown" ? [disruptionReason] : [])
-      ]
+        ...(disruptionReason && disruptionReason !== "unknown"
+          ? [disruptionReason]
+          : []),
+      ],
     };
   }
 
@@ -372,7 +483,7 @@ function matchIssue(description: string): MatchResult {
     "travel document",
     "签证",
     "护照",
-    "旅行证件"
+    "旅行证件",
   ]);
   if (travelDocumentSignals.length > 0) {
     return {
@@ -380,7 +491,7 @@ function matchIssue(description: string): MatchResult {
       issueType: "unknown",
       providerType: "airline",
       confidence: "low",
-      signals: [...airlineContextSignals, ...travelDocumentSignals]
+      signals: [...airlineContextSignals, ...travelDocumentSignals],
     };
   }
 
@@ -388,7 +499,7 @@ function matchIssue(description: string): MatchResult {
     "trip delay insurance",
     "amex",
     "card insurance",
-    "travel protection"
+    "travel protection",
   ]);
   if (tripInsuranceSignals.length > 0) {
     return {
@@ -396,7 +507,7 @@ function matchIssue(description: string): MatchResult {
       issueType: "airline_delay_trip_insurance",
       providerType: "airline",
       confidence: "high",
-      signals: tripInsuranceSignals
+      signals: tripInsuranceSignals,
     };
   }
 
@@ -405,7 +516,7 @@ function matchIssue(description: string): MatchResult {
     "luggage",
     "checked bag",
     "gate-check",
-    "gate check"
+    "gate check",
   ]);
   if (baggageSignals.length > 0) {
     const notCheckedSignals = hasAny(text, [
@@ -413,16 +524,18 @@ function matchIssue(description: string): MatchResult {
       "could not check",
       "didn't check",
       "did not check",
-      "check-in"
+      "check-in",
     ]);
 
     return {
       ...shared,
       issueType:
-        notCheckedSignals.length > 0 ? "airline_baggage_not_checked" : "baggage_delay",
+        notCheckedSignals.length > 0
+          ? "airline_baggage_not_checked"
+          : "baggage_delay",
       providerType: "airline",
       confidence: "high",
-      signals: [...baggageSignals, ...notCheckedSignals]
+      signals: [...baggageSignals, ...notCheckedSignals],
     };
   }
 
@@ -430,7 +543,7 @@ function matchIssue(description: string): MatchResult {
     "mixed carrier",
     "operating carrier",
     "chase travel",
-    "rebooked onto another airline"
+    "rebooked onto another airline",
   ]);
   if (mixedCarrierSignals.length > 0) {
     return {
@@ -438,38 +551,51 @@ function matchIssue(description: string): MatchResult {
       issueType: "airline_rebooking_mixed_carrier_delay",
       providerType: "airline",
       confidence: "high",
-      signals: mixedCarrierSignals
+      signals: mixedCarrierSignals,
     };
   }
 
   const hotelMatches: Array<{ issueType: IssueType; terms: string[] }> = [
     {
       issueType: "hotel_relocation_before_opening",
-      terms: ["delayed opening", "hotel not open", "opening postponed"]
+      terms: ["delayed opening", "hotel not open", "opening postponed"],
     },
     {
       issueType: "hotel_billing_dispute",
-      terms: ["billing", "security deposit", "incorrect charge", "folio"]
+      terms: ["billing", "security deposit", "incorrect charge", "folio"],
     },
     {
       issueType: "hotel_property_loss",
-      terms: ["lost item", "personal item missing"]
+      terms: ["lost item", "personal item missing"],
     },
     {
       issueType: "hotel_elite_benefit_closure",
-      terms: ["club closed", "lounge closed", "breakfast benefit", "club access"]
+      terms: [
+        "club closed",
+        "lounge closed",
+        "breakfast benefit",
+        "club access",
+      ],
     },
     {
       issueType: "hotel_room_feature_mismatch",
-      terms: ["room feature", "upgrade charge", "broken amenity", "missing amenity"]
+      terms: [
+        "room feature",
+        "upgrade charge",
+        "broken amenity",
+        "missing amenity",
+      ],
     },
     {
       issueType: "hotel_service_issue",
-      terms: ["restaurant closed", "undelivered service", "service issue"]
-    }
+      terms: ["restaurant closed", "undelivered service", "service issue"],
+    },
   ];
   const hotelMatch = hotelMatches
-    .map((candidate) => ({ ...candidate, signals: hasAny(text, candidate.terms) }))
+    .map((candidate) => ({
+      ...candidate,
+      signals: hasAny(text, candidate.terms),
+    }))
     .find((candidate) => candidate.signals.length > 0);
   if (hotelMatch) {
     return {
@@ -477,7 +603,7 @@ function matchIssue(description: string): MatchResult {
       issueType: hotelMatch.issueType,
       providerType: "hotel",
       confidence: "high",
-      signals: hotelMatch.signals
+      signals: hotelMatch.signals,
     };
   }
 
@@ -485,16 +611,22 @@ function matchIssue(description: string): MatchResult {
     ...shared,
     issueType: "unknown",
     confidence: "low",
-    signals: []
+    signals: [],
   };
 }
 
 export interface FactExtractor {
-  extract(description: string, options?: AnalyzeOptions): Promise<ExtractedFacts>;
+  extract(
+    description: string,
+    options?: AnalyzeOptions,
+  ): Promise<ExtractedFacts>;
 }
 
 export class DeterministicFactExtractor implements FactExtractor {
-  async extract(description: string, options: AnalyzeOptions = {}): Promise<ExtractedFacts> {
+  async extract(
+    description: string,
+    options: AnalyzeOptions = {},
+  ): Promise<ExtractedFacts> {
     return classifyInput(description, options);
   }
 }
@@ -507,7 +639,7 @@ export function classifyIssue(input: string): IssueType {
 
 export function classifyInput(
   description: string,
-  options: AnalyzeOptions = {}
+  options: AnalyzeOptions = {},
 ): ExtractedFacts {
   const selectedIssueType = normalizeIssueType(options.issueType);
   const match = matchIssue(description);
@@ -520,7 +652,7 @@ export function classifyInput(
       match.signals,
       options,
       match,
-      selectedIssueType ? "high" : match.confidence
+      selectedIssueType ? "high" : match.confidence,
     );
   }
 
@@ -532,7 +664,7 @@ export function classifyInput(
       match.signals,
       options,
       match,
-      "high"
+      "high",
     );
   }
 
@@ -543,6 +675,6 @@ export function classifyInput(
     match.signals,
     options,
     match,
-    match.confidence
+    match.confidence,
   );
 }

@@ -3,11 +3,11 @@ import {
   getMissingIntakeFields,
   parseClaimFacts,
   type ClaimFactField,
-  type ClaimFacts
+  type ClaimFacts,
 } from "./claimFacts";
 import {
   createStructuredOutputClientFromEnv,
-  type StructuredOutputClient
+  type StructuredOutputClient,
 } from "./llm";
 import { claimFactsJsonSchema } from "./claimFacts";
 import { assessClaimSafety, type SafetyAssessment } from "./safety";
@@ -24,14 +24,28 @@ export type IntakeResult = {
   safety?: SafetyAssessment;
 };
 
-export type IntakeFailureCategory = "not_configured" | "timeout" | "authentication" | "rate_limit" | "input_budget" | "invalid_output" | "upstream";
+export type IntakeFailureCategory =
+  | "not_configured"
+  | "timeout"
+  | "authentication"
+  | "rate_limit"
+  | "input_budget"
+  | "invalid_output"
+  | "upstream";
 export class IntakeError extends Error {
-  constructor(public category: IntakeFailureCategory, public status = 503, cause?: unknown) {
-    super(category === "not_configured"
-      ? "事实抽取服务尚未配置，请配置服务端 LLM 后重试。"
-      : category === "input_budget"
-      ? "当前案件信息过长，请精简后重试。"
-      : "事实抽取暂时失败，请重试。未使用规则猜测或覆盖你的事实。", {cause});
+  constructor(
+    public category: IntakeFailureCategory,
+    public status = 503,
+    cause?: unknown,
+  ) {
+    super(
+      category === "not_configured"
+        ? "事实抽取服务尚未配置，请配置服务端 LLM 后重试。"
+        : category === "input_budget"
+          ? "当前案件信息过长，请精简后重试。"
+          : "事实抽取暂时失败，请重试。未使用规则猜测或覆盖你的事实。",
+      { cause },
+    );
   }
 }
 
@@ -71,8 +85,6 @@ Rules:
 - Route regions determine which policies may apply; do not encode EU261 or another legal regime as the issue type.
 - Return only the schema-defined structured output.`;
 
-
-
 function isChinese(text: string): boolean {
   return /[\p{Script=Han}]/u.test(text);
 }
@@ -80,7 +92,7 @@ function isChinese(text: string): boolean {
 function questionForMissingFields(
   fields: ClaimFactField[],
   chinese: boolean,
-  facts: ClaimFacts
+  facts: ClaimFacts,
 ): string {
   const selected = fields.slice(0, 3);
   if (selected.includes("issueType")) {
@@ -133,7 +145,9 @@ function questionForMissingFields(
       : "How late did you reach your destination, and what reason did the airline give?";
   }
   if (needsArrivalDelay) {
-    return chinese ? "你最终晚到多久？" : "How late did you reach your destination?";
+    return chinese
+      ? "你最终晚到多久？"
+      : "How late did you reach your destination?";
   }
   if (needsDisruptionReason) {
     return chinese
@@ -141,7 +155,9 @@ function questionForMissingFields(
       : "What reason did the airline give?";
   }
   if (selected.includes("disruptionType")) {
-    return chinese ? "航班是延误、取消，还是拒绝登机？" : "Was the flight delayed, cancelled, or denied boarding?";
+    return chinese
+      ? "航班是延误、取消，还是拒绝登机？"
+      : "Was the flight delayed, cancelled, or denied boarding?";
   }
   if (selected.includes("journeyStage")) {
     return chinese
@@ -186,25 +202,32 @@ function questionForMissingFields(
       : "What matters most in a replacement: earliest arrival, the same date, nonstop travel, the airport, or the cabin?";
   }
 
-  return chinese ? "请再补充一些事情经过。" : "Please add a little more detail about what happened.";
+  return chinese
+    ? "请再补充一些事情经过。"
+    : "Please add a little more detail about what happened.";
 }
 
 async function extractWithLlm(
   client: StructuredOutputClient,
   message: string,
-  currentFacts: ClaimFacts
+  currentFacts: ClaimFacts,
 ): Promise<ClaimFacts> {
-  const input = JSON.stringify({ priorFacts: currentFacts, latestUserMessage: message });
+  const input = JSON.stringify({
+    priorFacts: currentFacts,
+    latestUserMessage: message,
+  });
   if (input.length > 20_000) throw new Error("Intake input budget exceeded");
   const raw = await client.generate<unknown>({
     schemaName: "travel_claim_facts",
     schema: claimFactsJsonSchema as unknown as Record<string, unknown>,
     instructions: intakeInstructions,
-    input
+    input,
   });
   const parsed = parseClaimFacts(raw);
   if (!parsed.success) {
-    throw new Error(`LLM returned invalid claim facts: ${parsed.errors.join("; ")}`);
+    throw new Error(
+      `LLM returned invalid claim facts: ${parsed.errors.join("; ")}`,
+    );
   }
 
   return parsed.data;
@@ -213,23 +236,30 @@ async function extractWithLlm(
 export async function processIntake(
   message: string,
   currentFacts: ClaimFacts = emptyClaimFacts(),
-  dependencies: IntakeDependencies = {}
+  dependencies: IntakeDependencies = {},
 ): Promise<IntakeResult> {
   const safety = assessClaimSafety(message, currentFacts);
   if (safety) {
     return {
       status: "unsupported",
-      facts: { ...currentFacts, riskContext: [...(currentFacts.riskContext ?? []), message.slice(0, 1500)].slice(-32) },
+      facts: {
+        ...currentFacts,
+        riskContext: [
+          ...(currentFacts.riskContext ?? []),
+          message.slice(0, 1500),
+        ].slice(-32),
+      },
       missingFields: [],
       question: null,
       extractionMode: "blocked",
-      safety
+      safety,
     };
   }
 
-  const configuredClient = dependencies.llmClient === undefined
-    ? createStructuredOutputClientFromEnv()
-    : dependencies.llmClient ?? undefined;
+  const configuredClient =
+    dependencies.llmClient === undefined
+      ? createStructuredOutputClientFromEnv()
+      : (dependencies.llmClient ?? undefined);
   const started = Date.now();
   if (!configuredClient) throw new IntakeError("not_configured", 503);
   let facts: ClaimFacts;
@@ -238,24 +268,53 @@ export async function processIntake(
     facts = await extractWithLlm(configuredClient, message, currentFacts);
   } catch (error) {
     const detail = error instanceof Error ? error.message : "";
-    const category = error instanceof Error && error.name === "AbortError" ? "timeout"
-      : /HTTP (401|403)/.test(detail) ? "authentication"
-      : /HTTP 429/.test(detail) ? "rate_limit"
-      : /input budget/.test(detail) ? "input_budget"
-      : error instanceof SyntaxError || /invalid claim facts|structured output|truncated/.test(detail) ? "invalid_output" : "upstream";
-    throw new IntakeError(category, category === "input_budget" ? 413 : 503, error);
+    const category =
+      error instanceof Error && error.name === "AbortError"
+        ? "timeout"
+        : /HTTP (401|403)/.test(detail)
+          ? "authentication"
+          : /HTTP 429/.test(detail)
+            ? "rate_limit"
+            : /input budget/.test(detail)
+              ? "input_budget"
+              : error instanceof SyntaxError ||
+                  /invalid claim facts|structured output|truncated/.test(detail)
+                ? "invalid_output"
+                : "upstream";
+    throw new IntakeError(
+      category,
+      category === "input_budget" ? 413 : 503,
+      error,
+    );
   }
 
   const extractedSafety = assessClaimSafety(message, facts);
-  if (extractedSafety) return {
-    status: "unsupported", facts: { ...facts, riskContext: [...(currentFacts.riskContext ?? []), message.slice(0, 1500)].slice(-32) },
-    missingFields: [], question: null, extractionMode, safety: extractedSafety
-  };
+  if (extractedSafety)
+    return {
+      status: "unsupported",
+      facts: {
+        ...facts,
+        riskContext: [
+          ...(currentFacts.riskContext ?? []),
+          message.slice(0, 1500),
+        ].slice(-32),
+      },
+      missingFields: [],
+      question: null,
+      extractionMode,
+      safety: extractedSafety,
+    };
   const missingFields = getMissingIntakeFields(facts);
-  if (process.env.NODE_ENV !== "test") console.info(JSON.stringify({
-    event: "intake_complete", requestId: crypto.randomUUID(), durationMs: Date.now() - started,
-    extractionMode, missingFieldCount: missingFields.length
-  }));
+  if (process.env.NODE_ENV !== "test")
+    console.info(
+      JSON.stringify({
+        event: "intake_complete",
+        requestId: crypto.randomUUID(),
+        durationMs: Date.now() - started,
+        extractionMode,
+        missingFieldCount: missingFields.length,
+      }),
+    );
   return {
     status: missingFields.length === 0 ? "ready" : "needs_info",
     facts,
@@ -264,6 +323,6 @@ export async function processIntake(
       missingFields.length > 0
         ? questionForMissingFields(missingFields, isChinese(message), facts)
         : null,
-    extractionMode
+    extractionMode,
   };
 }

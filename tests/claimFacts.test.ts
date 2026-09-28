@@ -4,14 +4,17 @@ import {
   emptyClaimFacts,
   getMissingClaimFields,
   normalizeClaimFacts,
-  parseClaimFacts
+  parseClaimFacts,
 } from "../lib/claimFacts";
 import { POST } from "../app/api/analyze/route";
 import { assessEu261Candidate } from "../lib/jurisdiction";
 
 describe("ClaimFacts schema", () => {
   it("rejects values outside the supported issue taxonomy", () => {
-    const result = parseClaimFacts({ ...emptyClaimFacts(), issueType: "lost_baggage" });
+    const result = parseClaimFacts({
+      ...emptyClaimFacts(),
+      issueType: "lost_baggage",
+    });
 
     expect(result.success).toBe(false);
   });
@@ -19,7 +22,7 @@ describe("ClaimFacts schema", () => {
   it("normalizes an issue into provider and disruption types", () => {
     const facts = normalizeClaimFacts({
       ...emptyClaimFacts(),
-      issueType: "airline_cancellation"
+      issueType: "airline_cancellation",
     });
 
     expect(facts.providerType).toBe("airline");
@@ -42,7 +45,7 @@ describe("ClaimFacts schema", () => {
       autoRebookedItinerary: "AF009 one day later",
       recoveryPriorities: ["same_date", "nonstop", "same_date"],
       preferredAlternatives: ["AF007"],
-      hasConnectionsOrReturnSegments: true
+      hasConnectionsOrReturnSegments: true,
     });
 
     expect(result.success).toBe(true);
@@ -70,7 +73,7 @@ describe("ClaimFacts schema", () => {
       "autoRebookedItinerary",
       "recoveryPriorities",
       "preferredAlternatives",
-      "hasConnectionsOrReturnSegments"
+      "hasConnectionsOrReturnSegments",
     ]) {
       delete legacyFacts[field];
     }
@@ -87,14 +90,14 @@ describe("ClaimFacts schema", () => {
       ticketType: "unknown",
       autoRebooked: null,
       recoveryPriorities: [],
-      preferredAlternatives: []
+      preferredAlternatives: [],
     });
   });
 
   it("rejects unsupported recovery priorities", () => {
     const result = parseClaimFacts({
       ...emptyClaimFacts(),
-      recoveryPriorities: ["free_upgrade"]
+      recoveryPriorities: ["free_upgrade"],
     });
 
     expect(result.success).toBe(false);
@@ -106,14 +109,14 @@ describe("ClaimFacts schema", () => {
       issueType: "airline_cancellation",
       provider: "Air France",
       origin: { city: "Paris", airport: null, country: null, region: null },
-      disruptionType: "cancellation"
+      disruptionType: "cancellation",
     });
 
     expect(facts.origin.country).toBe("France");
     expect(facts.origin.region).toBe("EU_EEA_CH");
     expect(getMissingClaimFields(facts)).toEqual([
       "destination",
-      "disruptionReason"
+      "disruptionReason",
     ]);
   });
 
@@ -123,10 +126,15 @@ describe("ClaimFacts schema", () => {
       issueType: "airline_cancellation",
       provider: "Air France",
       origin: { city: "Paris", airport: null, country: null, region: null },
-      destination: { city: "New York", airport: null, country: null, region: null },
+      destination: {
+        city: "New York",
+        airport: null,
+        country: null,
+        region: null,
+      },
       disruptionType: "cancellation",
       disruptionReason: "unknown",
-      disruptionReasonStatus: "unavailable"
+      disruptionReasonStatus: "unavailable",
     });
 
     expect(getMissingClaimFields(facts)).toEqual([]);
@@ -138,13 +146,13 @@ describe("jurisdiction assessment", () => {
     const facts = {
       ...emptyClaimFacts(),
       provider: "Air France",
-      origin: { city: "Paris", airport: "CDG", country: null, region: null }
+      origin: { city: "Paris", airport: "CDG", country: null, region: null },
     };
 
     expect(assessEu261Candidate(facts)).toEqual({
       isCandidate: true,
       needsOperatingCarrierCheck: false,
-      reasons: ["departure_region_eu_eea_ch"]
+      reasons: ["departure_region_eu_eea_ch"],
     });
   });
 
@@ -152,7 +160,12 @@ describe("jurisdiction assessment", () => {
     const facts = {
       ...emptyClaimFacts(),
       origin: { city: "New York", airport: "JFK", country: null, region: null },
-      destination: { city: "Paris", airport: "CDG", country: null, region: null }
+      destination: {
+        city: "Paris",
+        airport: "CDG",
+        country: null,
+        region: null,
+      },
     };
 
     expect(assessEu261Candidate(facts).needsOperatingCarrierCheck).toBe(true);
@@ -169,12 +182,12 @@ describe("jurisdiction assessment", () => {
         city: "New York",
         airport: "JFK",
         country: null,
-        region: null
+        region: null,
       },
       disruptionType: "cancellation",
       disruptionReason: "late_inbound_aircraft",
       arrivalDelayMinutes: 240,
-      confidence: "medium"
+      confidence: "medium",
     });
 
     expect(facts.issueType).toBe("airline_cancellation");
@@ -193,14 +206,14 @@ describe("structured analyze API", () => {
         city: "New York",
         airport: "JFK",
         country: null,
-        region: null
+        region: null,
       },
       disruptionType: "cancellation",
       disruptionReason: "mechanical",
       arrivalDelayMinutes: 240,
       journeyStage: "completed",
       disruptionTiming: "close_in_irrops",
-      confidence: "high"
+      confidence: "high",
     });
     const request = new Request("http://localhost/api/analyze", {
       method: "POST",
@@ -208,8 +221,8 @@ describe("structured analyze API", () => {
       body: JSON.stringify({
         description:
           "My Air France flight from Paris was cancelled and I arrived four hours late.",
-        facts
-      })
+        facts,
+      }),
     });
 
     const response = await POST(request);
@@ -220,17 +233,22 @@ describe("structured analyze API", () => {
     expect(result.policyRegions).toEqual(["EU_EEA_CH", "US"]);
     expect(result.legalRegimes).toEqual(["EU261", "US_DOT_REFUND"]);
     expect(result.controllability).toBe("controllable");
-    expect(result.officialBasis[0]?.policy_id).toBe("eu261_regulation_261_2004");
-    expect(result.remedies).toContainEqual(expect.objectContaining({
-      id: "fixed_compensation", status: "needs_verification",
-      sourceIds: expect.arrayContaining(["eu261_regulation_261_2004"])
-    }));
+    expect(result.officialBasis[0]?.policy_id).toBe(
+      "eu261_regulation_261_2004",
+    );
+    expect(result.remedies).toContainEqual(
+      expect.objectContaining({
+        id: "fixed_compensation",
+        status: "needs_verification",
+        sourceIds: expect.arrayContaining(["eu261_regulation_261_2004"]),
+      }),
+    );
     expect(result.handlingPlaybook).toMatchObject({
       situation: "completed_disruption",
       contactFirst: {
         role: "airline_customer_relations",
-        name: "Air France"
-      }
+        name: "Air France",
+      },
     });
   });
 
@@ -246,12 +264,12 @@ describe("structured analyze API", () => {
         city: "New York",
         airport: "JFK",
         country: null,
-        region: null
+        region: null,
       },
       disruptionType: "cancellation" as const,
       disruptionReason: "late_inbound_aircraft" as const,
       arrivalDelayMinutes: 240,
-      confidence: "medium" as const
+      confidence: "medium" as const,
     };
     const request = new Request("http://localhost/api/analyze", {
       method: "POST",
@@ -259,14 +277,14 @@ describe("structured analyze API", () => {
       body: JSON.stringify({
         description:
           "My Air France flight from Paris was cancelled and I arrived four hours late.",
-        facts
-      })
+        facts,
+      }),
     });
 
     const response = await POST(request);
     const result = await response.json();
     const policyIds = result.officialBasis.map(
-      (policy: { policy_id: string }) => policy.policy_id
+      (policy: { policy_id: string }) => policy.policy_id,
     );
 
     expect(response.status).toBe(200);
@@ -279,14 +297,13 @@ describe("structured analyze API", () => {
         officialBasisStatus: "scope_confirmed",
         officialSourceCount: 2,
         reportedCaseCount: expect.any(Number),
-        unresolvedConditionCount: 1
-      })
+        unresolvedConditionCount: 1,
+      }),
     );
     expect(policyIds).toContain("eu261_regulation_261_2004");
-    expect(result.scripts.map((script: { script_id: string }) => script.script_id)).toEqual([
-      "eu261_claim_email_en",
-      "us_dot_refund_request_en"
-    ]);
+    expect(
+      result.scripts.map((script: { script_id: string }) => script.script_id),
+    ).toEqual(["eu261_claim_email_en", "us_dot_refund_request_en"]);
   });
 
   it("rejects incomplete facts with actionable missing fields", async () => {
@@ -297,9 +314,9 @@ describe("structured analyze API", () => {
         facts: {
           ...emptyClaimFacts(),
           issueType: "denied_boarding",
-          provider: "Delta"
-        }
-      })
+          provider: "Delta",
+        },
+      }),
     });
 
     const response = await POST(request);

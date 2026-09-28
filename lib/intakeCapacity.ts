@@ -6,10 +6,18 @@ let active = 0;
 
 export function acquireIntakeCapacity(): (() => void) | undefined {
   const now = Date.now();
-  if (now - minuteStart >= 60_000) { minuteStart = now; requests = 0; }
+  if (now - minuteStart >= 60_000) {
+    minuteStart = now;
+    requests = 0;
+  }
   if (active >= 4 || requests >= 60) return undefined;
   active++;
   requests++;
   let released = false;
-  return () => { if (!released) { released = true; active--; } };
+  return () => {
+    if (!released) {
+      released = true;
+      active--;
+    }
+  };
 }

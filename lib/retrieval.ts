@@ -2,7 +2,7 @@ import { getIssueAliases, normalizeIssueType } from "./issueTaxonomy";
 import {
   controllabilityFromReason,
   evaluatePolicyApplicability,
-  policyRegionsFromCountry
+  policyRegionsFromCountry,
 } from "./policyScope";
 import { rankCases, rankPolicies, rankScripts } from "./retrievalScoring";
 import type {
@@ -12,20 +12,26 @@ import type {
   RetrievalLimits,
   RetrievalQuery,
   RetrievalResult,
-  Script
+  Script,
 } from "./types";
 
 const defaultLimits: Required<RetrievalLimits> = {
   policyLimit: 3,
   caseLimit: 3,
-  scriptLimit: 2
+  scriptLimit: 2,
 };
 
 function isApprovedCase(item: Case): boolean {
-  return item.review_status === "approved" && item.source_type !== "synthetic_example";
+  return (
+    item.review_status === "approved" &&
+    item.source_type !== "synthetic_example"
+  );
 }
 
-function withSelectedCaseFacts(facts: ExtractedFacts, selectedCase?: Case): ExtractedFacts {
+function withSelectedCaseFacts(
+  facts: ExtractedFacts,
+  selectedCase?: Case,
+): ExtractedFacts {
   if (!selectedCase) {
     return facts;
   }
@@ -36,15 +42,21 @@ function withSelectedCaseFacts(facts: ExtractedFacts, selectedCase?: Case): Extr
     ...facts,
     description: facts.description || selectedCase.facts,
     issueType: selectedIssueType ?? facts.issueType,
-    provider: (selectedCase.provider_type === "airline" ? selectedCase.carrier : selectedCase.provider) ?? undefined,
-    ticketingProvider: selectedCase.provider_type === "airline" ? selectedCase.provider ?? undefined : undefined,
+    provider:
+      (selectedCase.provider_type === "airline"
+        ? selectedCase.carrier
+        : selectedCase.provider) ?? undefined,
+    ticketingProvider:
+      selectedCase.provider_type === "airline"
+        ? (selectedCase.provider ?? undefined)
+        : undefined,
     operatingCarrier: selectedCase.carrier ?? undefined,
     providerType: selectedCase.provider_type,
     country: selectedCase.location_country,
     bookingChannel: selectedCase.booking_channel,
     loyaltyStatus: selectedCase.loyalty_status,
     confidence: selectedIssueType ? "high" : facts.confidence,
-    source: "selected_case"
+    source: "selected_case",
   };
 }
 
@@ -74,14 +86,15 @@ export function buildRetrievalQuery(facts: ExtractedFacts): RetrievalQuery {
         ? Array.from(new Set(facts.policyRegions))
         : policyRegionsFromCountry(facts.country),
     controllability:
-      facts.controllability ?? controllabilityFromReason(facts.disruptionReason)
+      facts.controllability ??
+      controllabilityFromReason(facts.disruptionReason),
   };
 }
 
 export function searchPolicies(
   query: RetrievalQuery,
   policies: Policy[],
-  limit = defaultLimits.policyLimit
+  limit = defaultLimits.policyLimit,
 ): Policy[] {
   return rankPolicies(query, policies)
     .slice(0, limit)
@@ -91,7 +104,7 @@ export function searchPolicies(
 export function searchCases(
   query: RetrievalQuery,
   cases: Case[],
-  limit = defaultLimits.caseLimit
+  limit = defaultLimits.caseLimit,
 ): Case[] {
   return rankCases(query, cases)
     .slice(0, limit)
@@ -101,7 +114,7 @@ export function searchCases(
 export function searchScripts(
   query: RetrievalQuery,
   scripts: Script[],
-  limit = defaultLimits.scriptLimit
+  limit = defaultLimits.scriptLimit,
 ): Script[] {
   return rankScripts(query, scripts)
     .slice(0, limit)
@@ -113,17 +126,19 @@ export function retrieveKnowledge(
   policies: Policy[],
   cases: Case[],
   scripts: Script[],
-  limits: RetrievalLimits = {}
+  limits: RetrievalLimits = {},
 ): RetrievalResult {
   const selectedCase = facts.caseId
-    ? cases.find((item) => isApprovedCase(item) && item.case_id === facts.caseId)
+    ? cases.find(
+        (item) => isApprovedCase(item) && item.case_id === facts.caseId,
+      )
     : undefined;
   const resolvedFacts = withSelectedCaseFacts(facts, selectedCase);
   const query = buildRetrievalQuery(resolvedFacts);
   const officialBasis = searchPolicies(
     query,
     policies,
-    limits.policyLimit ?? policies.length
+    limits.policyLimit ?? policies.length,
   );
 
   return {
@@ -132,10 +147,18 @@ export function retrieveKnowledge(
     issueAliases: getIssueAliases(resolvedFacts.issueType),
     officialBasis,
     policyAssessments: officialBasis.map((policy) =>
-      evaluatePolicyApplicability(policy, query)
+      evaluatePolicyApplicability(policy, query),
     ),
-    similarCases: searchCases(query, cases, limits.caseLimit ?? defaultLimits.caseLimit),
-    scripts: searchScripts(query, scripts, limits.scriptLimit ?? defaultLimits.scriptLimit),
-    selectedCase
+    similarCases: searchCases(
+      query,
+      cases,
+      limits.caseLimit ?? defaultLimits.caseLimit,
+    ),
+    scripts: searchScripts(
+      query,
+      scripts,
+      limits.scriptLimit ?? defaultLimits.scriptLimit,
+    ),
+    selectedCase,
   };
 }

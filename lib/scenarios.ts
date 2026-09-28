@@ -2,13 +2,21 @@ import {
   getIssueAliases,
   isMvpIssueType,
   issueLabels,
-  normalizeIssueType
+  normalizeIssueType,
 } from "./issueTaxonomy";
 import type { Case, IssueType, Policy, ScenarioSummary, Script } from "./types";
 
 function getKnownIssueTypes(cases: Case[]): IssueType[] {
   return Array.from(
-    new Set(cases.filter((item) => item.review_status === "approved" && item.source_type !== "synthetic_example").map((item) => item.issue_type))
+    new Set(
+      cases
+        .filter(
+          (item) =>
+            item.review_status === "approved" &&
+            item.source_type !== "synthetic_example",
+        )
+        .map((item) => item.issue_type),
+    ),
   )
     .map(normalizeIssueType)
     .filter((issueType): issueType is IssueType => Boolean(issueType))
@@ -18,21 +26,37 @@ function getKnownIssueTypes(cases: Case[]): IssueType[] {
 export function buildScenarioSummaries(
   policies: Policy[],
   cases: Case[],
-  scripts: Script[]
+  scripts: Script[],
 ): ScenarioSummary[] {
-  const approvedCases = cases.filter((item) => item.review_status === "approved" && item.source_type !== "synthetic_example");
+  const approvedCases = cases.filter(
+    (item) =>
+      item.review_status === "approved" &&
+      item.source_type !== "synthetic_example",
+  );
 
   return getKnownIssueTypes(approvedCases)
     .map((issueType) => {
       const aliases = new Set<string>(getIssueAliases(issueType));
-      const matchingCases = approvedCases.filter((item) => aliases.has(item.issue_type));
+      const matchingCases = approvedCases.filter((item) =>
+        aliases.has(item.issue_type),
+      );
       const matchingPolicies = policies.filter((policy) =>
-        policy.incident_types.some((incidentType) => incidentType === issueType)
+        policy.incident_types.some(
+          (incidentType) => incidentType === issueType,
+        ),
       );
       const matchingScripts = scripts.filter((script) =>
-        script.incident_types.some((incidentType) => incidentType === issueType)
+        script.incident_types.some(
+          (incidentType) => incidentType === issueType,
+        ),
       );
-      const providers = Array.from(new Set(matchingCases.map((item) => item.provider).filter((value): value is string => Boolean(value)))).sort();
+      const providers = Array.from(
+        new Set(
+          matchingCases
+            .map((item) => item.provider)
+            .filter((value): value is string => Boolean(value)),
+        ),
+      ).sort();
       const sampleCase = matchingCases[0];
 
       return {
@@ -48,9 +72,9 @@ export function buildScenarioSummaries(
               provider: sampleCase.provider,
               carrier: sampleCase.carrier,
               brandOrAirline: sampleCase.brand_or_airline,
-              facts: sampleCase.facts
+              facts: sampleCase.facts,
             }
-          : undefined
+          : undefined,
       };
     })
     .sort((left, right) => left.label.localeCompare(right.label));

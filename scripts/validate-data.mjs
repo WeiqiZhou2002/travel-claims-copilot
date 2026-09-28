@@ -45,14 +45,23 @@ const mvpIncidentTypes = [
   "hotel_walk",
   "airline_delay",
   "airline_cancellation",
-  "denied_boarding"
+  "denied_boarding",
 ];
 const legacyLegalIssueTypes = [
   "controllable_airline_delay",
   "controllable_airline_cancellation",
-  "eu261_delay_or_cancellation"
+  "eu261_delay_or_cancellation",
 ];
-const policyRegions = ["EU_EEA_CH", "UK", "US", "CA", "AU", "CN", "other", "global"];
+const policyRegions = [
+  "EU_EEA_CH",
+  "UK",
+  "US",
+  "CA",
+  "AU",
+  "CN",
+  "other",
+  "global",
+];
 const legalRegimes = [
   "provider_policy",
   "EU261",
@@ -62,7 +71,7 @@ const legalRegimes = [
   "US_AIRLINE_COMMITMENT",
   "CA_APPR",
   "AU_ACL",
-  "CN_FLIGHT_REGULATION"
+  "CN_FLIGHT_REGULATION",
 ];
 const policyApplicabilityRules = [
   "any_route",
@@ -72,22 +81,40 @@ const policyApplicabilityRules = [
   "eu261_route",
   "uk261_route",
   "australia_consumer_law",
-  "china_flight_regulation"
+  "china_flight_regulation",
 ];
 
 const [cases, policies, scripts] = await Promise.all([
   readJson("data/cases.json"),
   readJson("data/policies.json"),
-  readJson("data/scripts.json")
+  readJson("data/scripts.json"),
 ]);
-const release = JSON.parse(await readFile(resolve(projectRoot,"data/reviewed-cases.json"),"utf8"));
-if(release.schemaVersion !== 1 || !Array.isArray(release.cases) || !Array.isArray(release.managedIds) || new Set(release.managedIds).size !== release.managedIds.length || release.managedIds.some(id=>typeof id !== "string" || !/^[a-zA-Z0-9_-]{1,140}$/.test(id))) throw new Error("Invalid reviewed release manifest");
-for(const item of release.cases) {
-  if(item.review_status !== "approved" || item.source_type !== "community_dp" || !Number.isInteger(item.reviewed_version) || item.reviewed_version < 2 || !release.managedIds.includes(item.case_id)) throw new Error("Invalid reviewed publication");
+const release = JSON.parse(
+  await readFile(resolve(projectRoot, "data/reviewed-cases.json"), "utf8"),
+);
+if (
+  release.schemaVersion !== 1 ||
+  !Array.isArray(release.cases) ||
+  !Array.isArray(release.managedIds) ||
+  new Set(release.managedIds).size !== release.managedIds.length ||
+  release.managedIds.some(
+    (id) => typeof id !== "string" || !/^[a-zA-Z0-9_-]{1,140}$/.test(id),
+  )
+)
+  throw new Error("Invalid reviewed release manifest");
+for (const item of release.cases) {
+  if (
+    item.review_status !== "approved" ||
+    item.source_type !== "community_dp" ||
+    !Number.isInteger(item.reviewed_version) ||
+    item.reviewed_version < 2 ||
+    !release.managedIds.includes(item.case_id)
+  )
+    throw new Error("Invalid reviewed publication");
 }
-if(cases.some(item=>release.managedIds.includes(item.case_id))) throw new Error("Published DP conflicts with seed ID");
+if (cases.some((item) => release.managedIds.includes(item.case_id)))
+  throw new Error("Published DP conflicts with seed ID");
 cases.push(...release.cases);
-
 
 const caseFields = [
   "case_id",
@@ -112,7 +139,7 @@ const caseFields = [
   "confidence",
   "notes",
   "review_status",
-  "review_notes"
+  "review_notes",
 ];
 
 requireUnique(cases, "case_id", "cases.json");
@@ -122,24 +149,54 @@ for (const item of cases) {
   const label = `case ${item.case_id ?? "<unknown>"}`;
   requireFields(item, caseFields, label);
   for (const field of ["provider", "carrier"]) {
-    if (item[field] !== null && (typeof item[field] !== "string" || !item[field].trim())) {
+    if (
+      item[field] !== null &&
+      (typeof item[field] !== "string" || !item[field].trim())
+    ) {
       throw new Error(`${label}.${field} must be a non-empty string or null.`);
     }
   }
   if (item.provider_type !== "airline" && item.carrier !== null) {
     throw new Error(`${label}.carrier is only valid for airline cases.`);
   }
-  requireEnum(item.source_type, ["community_dp", "user_submitted", "synthetic_example"], label);
-  requireEnum(item.provider_type, ["hotel", "airline", "credit_card", "ota"], label);
-  requireEnum(item.booking_channel, ["direct", "ota", "portal", "unknown"], label);
-  requireEnum(item.reservation_type, ["paid", "points", "award", "unknown"], label);
+  requireEnum(
+    item.source_type,
+    ["community_dp", "user_submitted", "synthetic_example"],
+    label,
+  );
+  requireEnum(
+    item.provider_type,
+    ["hotel", "airline", "credit_card", "ota"],
+    label,
+  );
+  requireEnum(
+    item.booking_channel,
+    ["direct", "ota", "portal", "unknown"],
+    label,
+  );
+  requireEnum(
+    item.reservation_type,
+    ["paid", "points", "award", "unknown"],
+    label,
+  );
   requireEnum(item.confidence, ["high", "medium", "low"], label);
-  requireEnum(item.review_status, ["approved", "needs_review", "excluded"], label);
+  requireEnum(
+    item.review_status,
+    ["approved", "needs_review", "excluded"],
+    label,
+  );
   if (legacyLegalIssueTypes.includes(item.issue_type)) {
-    throw new Error(`${label}.issue_type must describe the incident, not a legal regime.`);
+    throw new Error(
+      `${label}.issue_type must describe the incident, not a legal regime.`,
+    );
   }
 
-  for (const field of ["requested_compensation", "evidence_used", "escalation_path", "review_notes"]) {
+  for (const field of [
+    "requested_compensation",
+    "evidence_used",
+    "escalation_path",
+    "review_notes",
+  ]) {
     if (!Array.isArray(item[field])) {
       throw new Error(`${label}.${field} must be an array.`);
     }
@@ -150,7 +207,9 @@ for (const item of cases) {
       throw new Error(`${label} must have an HTTPS source URL.`);
     }
     if (communityUrls.has(item.source_url)) {
-      throw new Error(`${label} duplicates community source URL ${item.source_url}.`);
+      throw new Error(
+        `${label} duplicates community source URL ${item.source_url}.`,
+      );
     }
     communityUrls.add(item.source_url);
   }
@@ -185,12 +244,16 @@ for (const policy of policies) {
       "applicable_conditions",
       "compensation_or_rights",
       "summary",
-      "last_checked"
+      "last_checked",
     ],
-    `policy ${policy.policy_id ?? "<unknown>"}`
+    `policy ${policy.policy_id ?? "<unknown>"}`,
   );
   const label = `policy ${policy.policy_id ?? "<unknown>"}`;
-  for (const field of ["incident_types", "applicable_regions", "applicable_providers"]) {
+  for (const field of [
+    "incident_types",
+    "applicable_regions",
+    "applicable_providers",
+  ]) {
     if (!Array.isArray(policy[field])) {
       throw new Error(`${label}.${field} must be an array.`);
     }
@@ -205,8 +268,14 @@ for (const policy of policies) {
   requireEnum(policy.applicability_rule, policyApplicabilityRules, label);
   requireEnum(
     policy.source_type,
-    ["official_policy", "government_regulation", "regulator_guidance", "official_dashboard", "terms"],
-    label
+    [
+      "official_policy",
+      "government_regulation",
+      "regulator_guidance",
+      "official_dashboard",
+      "terms",
+    ],
+    label,
   );
   requireEnum(policy.authority_level, ["high", "medium", "low"], label);
   if (!policy.source_url.startsWith("https://")) {
@@ -215,7 +284,7 @@ for (const policy of policies) {
   requireEnum(
     policy.required_controllability,
     ["controllable", "uncontrollable", "unknown", "any"],
-    label
+    label,
   );
 }
 
@@ -235,9 +304,9 @@ for (const script of scripts) {
       "tone",
       "language",
       "template",
-      "when_to_use"
+      "when_to_use",
     ],
-    label
+    label,
   );
   for (const field of ["incident_types", "applicable_regions"]) {
     if (!Array.isArray(script[field])) {
@@ -254,24 +323,34 @@ for (const script of scripts) {
   requireEnum(
     script.required_controllability,
     ["controllable", "uncontrollable", "unknown", "any"],
-    label
+    label,
   );
   requireEnum(
     script.channel,
-    ["front_desk", "airport_counter", "phone", "chat", "email", "corporate_escalation", "regulator_complaint"],
-    label
+    [
+      "front_desk",
+      "airport_counter",
+      "phone",
+      "chat",
+      "email",
+      "corporate_escalation",
+      "regulator_complaint",
+    ],
+    label,
   );
 }
 
 const statusCounts = Object.fromEntries(
   ["approved", "needs_review", "excluded"].map((status) => [
     status,
-    cases.filter((item) => item.review_status === status).length
-  ])
+    cases.filter((item) => item.review_status === status).length,
+  ]),
 );
 
 console.log(
-  `Validated ${policies.length} policies, ${cases.length} cases (${Object.entries(statusCounts)
+  `Validated ${policies.length} policies, ${cases.length} cases (${Object.entries(
+    statusCounts,
+  )
     .map(([status, count]) => `${count} ${status}`)
-    .join(", ")}), and ${scripts.length} scripts.`
+    .join(", ")}), and ${scripts.length} scripts.`,
 );

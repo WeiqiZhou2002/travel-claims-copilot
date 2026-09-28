@@ -8,7 +8,28 @@ import { PolicySection, CaseSection } from "./components/sources";
 import { ScriptSection } from "./components/scripts";
 import { Checklist } from "./components/shared";
 export default function Home() {
- const {requestVersion,draft,setDraft,messages,facts,setFacts,extractionMode,safetyNotice,result,setResult,error,isLoading,copiedScriptId,transcript,remember,setRemember,reanalyzeFacts,submitIntake,resetClaim,copyScript} = useClaimConversation();
+  const {
+    requestVersion,
+    draft,
+    setDraft,
+    messages,
+    facts,
+    setFacts,
+    extractionMode,
+    safetyNotice,
+    result,
+    setResult,
+    error,
+    isLoading,
+    copiedScriptId,
+    transcript,
+    remember,
+    setRemember,
+    reanalyzeFacts,
+    submitIntake,
+    resetClaim,
+    copyScript,
+  } = useClaimConversation();
   return (
     <main className="min-h-screen">
       <section className="border-b border-ink/10 bg-paper">
@@ -22,9 +43,9 @@ export default function Home() {
                 Build the case file before making the ask.
               </h1>
               <p className="max-w-2xl text-sm leading-6 text-ink/65 md:text-base">
-                Describe the disruption naturally. The intake will identify missing facts before
-                selecting who to contact, then searching official sources, reviewed cases, and
-                reusable scripts.
+                Describe the disruption naturally. The intake will identify
+                missing facts before selecting who to contact, then searching
+                official sources, reviewed cases, and reusable scripts.
               </p>
             </div>
             <button
@@ -38,13 +59,23 @@ export default function Home() {
 
           <div className="overflow-hidden rounded-xl border border-ink/10 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-ink/10 bg-ink px-5 py-3 text-white">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em]">Intake transcript</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em]">
+                Intake transcript
+              </p>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium">
-                {isLoading ? "Reviewing details" : result ? "Analysis ready" : "Collecting facts"}
+                {isLoading
+                  ? "Reviewing details"
+                  : result
+                    ? "Analysis ready"
+                    : "Collecting facts"}
               </span>
             </div>
 
-            <div ref={transcript} className="max-h-96 space-y-4 overflow-y-auto px-5 py-5 md:px-7" aria-live="polite">
+            <div
+              ref={transcript}
+              className="max-h-96 space-y-4 overflow-y-auto px-5 py-5 md:px-7"
+              aria-live="polite"
+            >
               {messages.map((item, index) => (
                 <article
                   className="grid gap-2 md:grid-cols-[92px_1fr]"
@@ -93,7 +124,14 @@ export default function Home() {
             </form>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-ink/65"><input type="checkbox" checked={remember} onChange={event => setRemember(event.target.checked)} />Keep this case and the last 20 messages on this device</label>
+          <label className="flex items-center gap-2 text-sm text-ink/65">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(event) => setRemember(event.target.checked)}
+            />
+            Keep this case and the last 20 messages on this device
+          </label>
           {error ? (
             <div className="rounded-lg border border-coral/30 bg-white px-4 py-3 text-sm font-medium text-coral">
               {error}
@@ -104,9 +142,13 @@ export default function Home() {
               className="rounded-lg border border-coral/30 bg-coral/5 px-4 py-3 text-sm leading-6 text-ink"
               role="alert"
             >
-              <p className="font-semibold text-coral">Professional-help boundary</p>
+              <p className="font-semibold text-coral">
+                Professional-help boundary
+              </p>
               <p className="mt-1">{safetyNotice.message}</p>
-              <p className="mt-1 text-xs text-ink/55">This is not legal advice.</p>
+              <p className="mt-1 text-xs text-ink/55">
+                This is not legal advice.
+              </p>
             </div>
           ) : null}
         </div>
@@ -114,11 +156,18 @@ export default function Home() {
 
       <section className="mx-auto grid w-full max-w-6xl gap-5 px-5 py-6 md:px-8 lg:grid-cols-[320px_1fr]">
         <aside className="flex flex-col gap-4">
-          <ClaimSnapshot
-            facts={facts}
-            extractionMode={extractionMode}
-          />
-          {facts && <FactEditor facts={facts} disabled={isLoading} onChange={next => { setFacts(next); setResult(null); }} onAnalyze={reanalyzeFacts} />}
+          <ClaimSnapshot facts={facts} extractionMode={extractionMode} />
+          {facts && (
+            <FactEditor
+              facts={facts}
+              disabled={isLoading}
+              onChange={(next) => {
+                setFacts(next);
+                setResult(null);
+              }}
+              onAnalyze={reanalyzeFacts}
+            />
+          )}
           <SummaryPanel result={result} />
           {result ? <SuggestedAsks asks={result.suggestedAsks} /> : null}
         </aside>
@@ -137,14 +186,23 @@ export default function Home() {
                 assessments={result.policyAssessments}
               />
               <CaseSection cases={result.similarCases} />
-              <Checklist title="Evidence checklist" items={result.evidenceChecklist} />
+              <Checklist
+                title="Evidence checklist"
+                items={result.evidenceChecklist}
+              />
               <ScriptSection
                 scripts={result.scripts}
                 copiedScriptId={copiedScriptId}
                 onCopy={copyScript}
               />
               <Checklist title="Cautions" items={result.cautions} />
-              {facts && <OutcomeSection key={requestVersion.current} facts={facts} result={result} />}
+              {facts && (
+                <OutcomeSection
+                  key={requestVersion.current}
+                  facts={facts}
+                  result={result}
+                />
+              )}
             </>
           )}
         </div>

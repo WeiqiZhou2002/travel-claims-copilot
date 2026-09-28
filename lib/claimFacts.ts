@@ -122,16 +122,24 @@ const issueTypes: ClaimIssueType[] = [
   "airline_delay",
   "airline_cancellation",
   "denied_boarding",
-  "unknown"
+  "unknown",
 ];
 const providerTypes: ClaimProviderType[] = ["hotel", "airline", "unknown"];
-const regions: ClaimRegion[] = ["EU_EEA_CH", "UK", "US", "CA", "AU", "CN", "other"];
+const regions: ClaimRegion[] = [
+  "EU_EEA_CH",
+  "UK",
+  "US",
+  "CA",
+  "AU",
+  "CN",
+  "other",
+];
 const disruptionTypes: ClaimDisruptionType[] = [
   "hotel_walk",
   "delay",
   "cancellation",
   "denied_boarding",
-  "unknown"
+  "unknown",
 ];
 const disruptionReasons: ClaimDisruptionReason[] = [
   "crew",
@@ -140,17 +148,17 @@ const disruptionReasons: ClaimDisruptionReason[] = [
   "weather",
   "late_inbound_aircraft",
   "other_controllable",
-  "unknown"
+  "unknown",
 ];
 const disruptionReasonStatuses: ClaimDisruptionReasonStatus[] = [
   "not_provided",
   "reported",
-  "unavailable"
+  "unavailable",
 ];
 const deniedBoardingKinds: ClaimDeniedBoardingKind[] = [
   "voluntary",
   "involuntary",
-  "unknown"
+  "unknown",
 ];
 const bookingChannels: ClaimBookingChannel[] = [
   "direct",
@@ -158,19 +166,19 @@ const bookingChannels: ClaimBookingChannel[] = [
   "portal",
   "travel_agent",
   "corporate_travel",
-  "unknown"
+  "unknown",
 ];
 const journeyStages: ClaimJourneyStage[] = [
   "pre_trip",
   "at_airport",
   "en_route",
   "completed",
-  "unknown"
+  "unknown",
 ];
 const disruptionTimings: ClaimDisruptionTiming[] = [
   "planned_schedule_change",
   "close_in_irrops",
-  "unknown"
+  "unknown",
 ];
 const ticketTypes: ClaimTicketType[] = ["cash", "award", "unknown"];
 const recoveryPriorities: ClaimRecoveryPriority[] = [
@@ -179,12 +187,15 @@ const recoveryPriorities: ClaimRecoveryPriority[] = [
   "nonstop",
   "same_airport",
   "same_cabin",
-  "preserve_trip_length"
+  "preserve_trip_length",
 ];
 const confidenceLevels: ClaimFacts["confidence"][] = ["low", "medium", "high"];
 
 const nullableStringSchema = {
-  anyOf: [{ type: "string", maxLength: MAX_FACT_STRING_LENGTH }, { type: "null" }]
+  anyOf: [
+    { type: "string", maxLength: MAX_FACT_STRING_LENGTH },
+    { type: "null" },
+  ],
 } as const;
 const locationSchema = {
   type: "object",
@@ -193,9 +204,9 @@ const locationSchema = {
     city: nullableStringSchema,
     airport: nullableStringSchema,
     country: nullableStringSchema,
-    region: { anyOf: [{ type: "string", enum: regions }, { type: "null" }] }
+    region: { anyOf: [{ type: "string", enum: regions }, { type: "null" }] },
   },
-  required: ["city", "airport", "country", "region"]
+  required: ["city", "airport", "country", "region"],
 } as const;
 
 export const claimFactsJsonSchema = {
@@ -211,14 +222,16 @@ export const claimFactsJsonSchema = {
     operatingCarrier: nullableStringSchema,
     disruptingCarrier: nullableStringSchema,
     operatingCarrierRegion: {
-      anyOf: [{ type: "string", enum: regions }, { type: "null" }]
+      anyOf: [{ type: "string", enum: regions }, { type: "null" }],
     },
     origin: locationSchema,
     destination: locationSchema,
     disruptionType: { type: "string", enum: disruptionTypes },
     disruptionReason: { type: "string", enum: disruptionReasons },
     disruptionReasonStatus: { type: "string", enum: disruptionReasonStatuses },
-    arrivalDelayMinutes: { anyOf: [{ type: "integer", minimum: 0 }, { type: "null" }] },
+    arrivalDelayMinutes: {
+      anyOf: [{ type: "integer", minimum: 0 }, { type: "null" }],
+    },
     isOvernight: { anyOf: [{ type: "boolean" }, { type: "null" }] },
     deniedBoardingKind: { type: "string", enum: deniedBoardingKinds },
     bookingChannel: { type: "string", enum: bookingChannels },
@@ -231,17 +244,29 @@ export const claimFactsJsonSchema = {
     autoRebookedItinerary: nullableStringSchema,
     recoveryPriorities: {
       type: "array",
-      items: { type: "string", enum: recoveryPriorities }
+      items: { type: "string", enum: recoveryPriorities },
     },
-    preferredAlternatives: { type: "array", maxItems: MAX_FACT_ARRAY_ITEMS, items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH } },
+    preferredAlternatives: {
+      type: "array",
+      maxItems: MAX_FACT_ARRAY_ITEMS,
+      items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH },
+    },
     hasConnectionsOrReturnSegments: {
-      anyOf: [{ type: "boolean" }, { type: "null" }]
+      anyOf: [{ type: "boolean" }, { type: "null" }],
     },
     loyaltyStatus: nullableStringSchema,
-    expenses: { type: "array", maxItems: MAX_FACT_ARRAY_ITEMS, items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH } },
-    evidence: { type: "array", maxItems: MAX_FACT_ARRAY_ITEMS, items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH } },
+    expenses: {
+      type: "array",
+      maxItems: MAX_FACT_ARRAY_ITEMS,
+      items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH },
+    },
+    evidence: {
+      type: "array",
+      maxItems: MAX_FACT_ARRAY_ITEMS,
+      items: { type: "string", maxLength: MAX_FACT_STRING_LENGTH },
+    },
     userGoal: nullableStringSchema,
-    confidence: { type: "string", enum: confidenceLevels }
+    confidence: { type: "string", enum: confidenceLevels },
   },
   required: [
     "acceptedAlternative",
@@ -276,8 +301,8 @@ export const claimFactsJsonSchema = {
     "expenses",
     "evidence",
     "userGoal",
-    "confidence"
-  ]
+    "confidence",
+  ],
 } as const;
 
 export function emptyClaimLocation(): ClaimLocation {
@@ -318,7 +343,7 @@ export function emptyClaimFacts(): ClaimFacts {
     expenses: [],
     evidence: [],
     userGoal: null,
-    confidence: "low"
+    confidence: "low",
   };
 }
 
@@ -330,7 +355,7 @@ function parseEnum<T extends string>(
   value: unknown,
   allowed: readonly T[],
   path: string,
-  errors: string[]
+  errors: string[],
 ): T | undefined {
   if (typeof value === "string" && allowed.includes(value as T)) {
     return value as T;
@@ -340,7 +365,11 @@ function parseEnum<T extends string>(
   return undefined;
 }
 
-function parseNullableString(value: unknown, path: string, errors: string[]): string | null {
+function parseNullableString(
+  value: unknown,
+  path: string,
+  errors: string[],
+): string | null {
   if (value === null) {
     return null;
   }
@@ -353,8 +382,19 @@ function parseNullableString(value: unknown, path: string, errors: string[]): st
   return null;
 }
 
-function parseStringArray(value: unknown, path: string, errors: string[]): string[] {
-  if (!Array.isArray(value) || value.length > MAX_FACT_ARRAY_ITEMS || value.some((item) => typeof item !== "string" || item.length > MAX_FACT_STRING_LENGTH)) {
+function parseStringArray(
+  value: unknown,
+  path: string,
+  errors: string[],
+): string[] {
+  if (
+    !Array.isArray(value) ||
+    value.length > MAX_FACT_ARRAY_ITEMS ||
+    value.some(
+      (item) =>
+        typeof item !== "string" || item.length > MAX_FACT_STRING_LENGTH,
+    )
+  ) {
     errors.push(`${path} must be an array of strings`);
     return [];
   }
@@ -365,7 +405,7 @@ function parseStringArray(value: unknown, path: string, errors: string[]): strin
 function parseOptionalNullableString(
   value: unknown,
   path: string,
-  errors: string[]
+  errors: string[],
 ): string | null {
   return value === undefined ? null : parseNullableString(value, path, errors);
 }
@@ -373,7 +413,7 @@ function parseOptionalNullableString(
 function parseOptionalBoolean(
   value: unknown,
   path: string,
-  errors: string[]
+  errors: string[],
 ): boolean | null {
   if (value === undefined || value === null) {
     return null;
@@ -388,7 +428,7 @@ function parseOptionalBoolean(
 
 function parseRecoveryPriorities(
   value: unknown,
-  errors: string[]
+  errors: string[],
 ): ClaimRecoveryPriority[] {
   if (value === undefined) {
     return [];
@@ -400,27 +440,37 @@ function parseRecoveryPriorities(
 
   const parsed = value
     .map((item, index) =>
-      parseEnum(item, recoveryPriorities, `recoveryPriorities[${index}]`, errors)
+      parseEnum(
+        item,
+        recoveryPriorities,
+        `recoveryPriorities[${index}]`,
+        errors,
+      ),
     )
     .filter((item): item is ClaimRecoveryPriority => Boolean(item));
   return Array.from(new Set(parsed));
 }
 
-function parseLocation(value: unknown, path: string, errors: string[]): ClaimLocation {
+function parseLocation(
+  value: unknown,
+  path: string,
+  errors: string[],
+): ClaimLocation {
   if (!isRecord(value)) {
     errors.push(`${path} must be an object`);
     return emptyClaimLocation();
   }
 
-  const region = value.region === null
-    ? null
-    : parseEnum(value.region, regions, `${path}.region`, errors) ?? null;
+  const region =
+    value.region === null
+      ? null
+      : (parseEnum(value.region, regions, `${path}.region`, errors) ?? null);
 
   return {
     city: parseNullableString(value.city, `${path}.city`, errors),
     airport: parseNullableString(value.airport, `${path}.airport`, errors),
     country: parseNullableString(value.country, `${path}.country`, errors),
-    region
+    region,
   };
 }
 
@@ -430,115 +480,179 @@ export function parseClaimFacts(value: unknown): ClaimFactsParseResult {
   }
 
   const errors: string[] = [];
-  const arrivalDelayMinutes = value.arrivalDelayMinutes === null
-    ? null
-    : typeof value.arrivalDelayMinutes === "number" &&
-        Number.isInteger(value.arrivalDelayMinutes) &&
-        value.arrivalDelayMinutes >= 0
-      ? value.arrivalDelayMinutes
-      : (errors.push("arrivalDelayMinutes must be a non-negative integer or null"), null);
-  const isOvernight = value.isOvernight === null || typeof value.isOvernight === "boolean"
-    ? value.isOvernight
-    : (errors.push("isOvernight must be a boolean or null"), null);
+  const arrivalDelayMinutes =
+    value.arrivalDelayMinutes === null
+      ? null
+      : typeof value.arrivalDelayMinutes === "number" &&
+          Number.isInteger(value.arrivalDelayMinutes) &&
+          value.arrivalDelayMinutes >= 0
+        ? value.arrivalDelayMinutes
+        : (errors.push(
+            "arrivalDelayMinutes must be a non-negative integer or null",
+          ),
+          null);
+  const isOvernight =
+    value.isOvernight === null || typeof value.isOvernight === "boolean"
+      ? value.isOvernight
+      : (errors.push("isOvernight must be a boolean or null"), null);
 
   const facts: ClaimFacts = {
-    riskContext: value.riskContext === undefined ? [] : parseStringArray(value.riskContext, "riskContext", errors),
-    acceptedAlternative: parseOptionalBoolean(value.acceptedAlternative, "acceptedAlternative", errors),
-    issueType: parseEnum(value.issueType, issueTypes, "issueType", errors) ?? "unknown",
+    riskContext:
+      value.riskContext === undefined
+        ? []
+        : parseStringArray(value.riskContext, "riskContext", errors),
+    acceptedAlternative: parseOptionalBoolean(
+      value.acceptedAlternative,
+      "acceptedAlternative",
+      errors,
+    ),
+    issueType:
+      parseEnum(value.issueType, issueTypes, "issueType", errors) ?? "unknown",
     providerType:
-      parseEnum(value.providerType, providerTypes, "providerType", errors) ?? "unknown",
+      parseEnum(value.providerType, providerTypes, "providerType", errors) ??
+      "unknown",
     provider: parseNullableString(value.provider, "provider", errors),
     validatingCarrier: parseOptionalNullableString(
       value.validatingCarrier,
       "validatingCarrier",
-      errors
+      errors,
     ),
     marketingCarrier: parseOptionalNullableString(
       value.marketingCarrier,
       "marketingCarrier",
-      errors
+      errors,
     ),
-    operatingCarrier: parseNullableString(value.operatingCarrier, "operatingCarrier", errors),
+    operatingCarrier: parseNullableString(
+      value.operatingCarrier,
+      "operatingCarrier",
+      errors,
+    ),
     disruptingCarrier: parseOptionalNullableString(
       value.disruptingCarrier,
       "disruptingCarrier",
-      errors
+      errors,
     ),
     operatingCarrierRegion:
       value.operatingCarrierRegion === null
         ? null
-        : parseEnum(
+        : (parseEnum(
             value.operatingCarrierRegion,
             regions,
             "operatingCarrierRegion",
-            errors
-          ) ?? null,
+            errors,
+          ) ?? null),
     origin: parseLocation(value.origin, "origin", errors),
     destination: parseLocation(value.destination, "destination", errors),
     disruptionType:
-      parseEnum(value.disruptionType, disruptionTypes, "disruptionType", errors) ?? "unknown",
+      parseEnum(
+        value.disruptionType,
+        disruptionTypes,
+        "disruptionType",
+        errors,
+      ) ?? "unknown",
     disruptionReason:
-      parseEnum(value.disruptionReason, disruptionReasons, "disruptionReason", errors) ?? "unknown",
+      parseEnum(
+        value.disruptionReason,
+        disruptionReasons,
+        "disruptionReason",
+        errors,
+      ) ?? "unknown",
     disruptionReasonStatus:
       value.disruptionReasonStatus === undefined
         ? "not_provided"
-        : parseEnum(
+        : (parseEnum(
             value.disruptionReasonStatus,
             disruptionReasonStatuses,
             "disruptionReasonStatus",
-            errors
-          ) ?? "not_provided",
+            errors,
+          ) ?? "not_provided"),
     arrivalDelayMinutes,
     isOvernight,
     deniedBoardingKind:
-      parseEnum(value.deniedBoardingKind, deniedBoardingKinds, "deniedBoardingKind", errors) ??
-      "unknown",
+      parseEnum(
+        value.deniedBoardingKind,
+        deniedBoardingKinds,
+        "deniedBoardingKind",
+        errors,
+      ) ?? "unknown",
     bookingChannel:
-      parseEnum(value.bookingChannel, bookingChannels, "bookingChannel", errors) ?? "unknown",
+      parseEnum(
+        value.bookingChannel,
+        bookingChannels,
+        "bookingChannel",
+        errors,
+      ) ?? "unknown",
     bookingProvider: parseOptionalNullableString(
       value.bookingProvider,
       "bookingProvider",
-      errors
+      errors,
     ),
     journeyStage:
       value.journeyStage === undefined
         ? "unknown"
-        : parseEnum(value.journeyStage, journeyStages, "journeyStage", errors) ?? "unknown",
+        : (parseEnum(
+            value.journeyStage,
+            journeyStages,
+            "journeyStage",
+            errors,
+          ) ?? "unknown"),
     disruptionTiming:
       value.disruptionTiming === undefined
         ? "unknown"
-        : parseEnum(
+        : (parseEnum(
             value.disruptionTiming,
             disruptionTimings,
             "disruptionTiming",
-            errors
-          ) ?? "unknown",
+            errors,
+          ) ?? "unknown"),
     ticketType:
       value.ticketType === undefined
         ? "unknown"
-        : parseEnum(value.ticketType, ticketTypes, "ticketType", errors) ?? "unknown",
-    awardProgram: parseOptionalNullableString(value.awardProgram, "awardProgram", errors),
-    autoRebooked: parseOptionalBoolean(value.autoRebooked, "autoRebooked", errors),
+        : (parseEnum(value.ticketType, ticketTypes, "ticketType", errors) ??
+          "unknown"),
+    awardProgram: parseOptionalNullableString(
+      value.awardProgram,
+      "awardProgram",
+      errors,
+    ),
+    autoRebooked: parseOptionalBoolean(
+      value.autoRebooked,
+      "autoRebooked",
+      errors,
+    ),
     autoRebookedItinerary: parseOptionalNullableString(
       value.autoRebookedItinerary,
       "autoRebookedItinerary",
-      errors
+      errors,
     ),
-    recoveryPriorities: parseRecoveryPriorities(value.recoveryPriorities, errors),
+    recoveryPriorities: parseRecoveryPriorities(
+      value.recoveryPriorities,
+      errors,
+    ),
     preferredAlternatives:
       value.preferredAlternatives === undefined
         ? []
-        : parseStringArray(value.preferredAlternatives, "preferredAlternatives", errors),
+        : parseStringArray(
+            value.preferredAlternatives,
+            "preferredAlternatives",
+            errors,
+          ),
     hasConnectionsOrReturnSegments: parseOptionalBoolean(
       value.hasConnectionsOrReturnSegments,
       "hasConnectionsOrReturnSegments",
-      errors
+      errors,
     ),
-    loyaltyStatus: parseNullableString(value.loyaltyStatus, "loyaltyStatus", errors),
+    loyaltyStatus: parseNullableString(
+      value.loyaltyStatus,
+      "loyaltyStatus",
+      errors,
+    ),
     expenses: parseStringArray(value.expenses, "expenses", errors),
     evidence: parseStringArray(value.evidence, "evidence", errors),
     userGoal: parseNullableString(value.userGoal, "userGoal", errors),
-    confidence: parseEnum(value.confidence, confidenceLevels, "confidence", errors) ?? "low"
+    confidence:
+      parseEnum(value.confidence, confidenceLevels, "confidence", errors) ??
+      "low",
   };
 
   if (errors.length > 0) {
@@ -550,41 +664,59 @@ export function parseClaimFacts(value: unknown): ClaimFactsParseResult {
 
 export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
   const normalized = enrichClaimJurisdiction(facts);
-  const disruptionType = normalized.disruptionType === "unknown"
-    ? normalized.issueType === "hotel_walk"
-      ? "hotel_walk"
-      : normalized.issueType === "airline_delay"
-        ? "delay"
-        : normalized.issueType === "airline_cancellation"
-          ? "cancellation"
-          : normalized.issueType === "denied_boarding"
-            ? "denied_boarding"
-            : "unknown"
-    : normalized.disruptionType;
-  const providerType = normalized.providerType === "unknown"
-    ? normalized.issueType === "hotel_walk"
-      ? "hotel"
-      : normalized.issueType !== "unknown"
-        ? "airline"
-        : "unknown"
-    : normalized.providerType;
-  const disruptionReasonStatus = normalized.disruptionReason !== "unknown"
-    ? "reported"
-    : normalized.disruptionReasonStatus === "unavailable"
-      ? "unavailable"
-      : "not_provided";
+  const disruptionType =
+    normalized.disruptionType === "unknown"
+      ? normalized.issueType === "hotel_walk"
+        ? "hotel_walk"
+        : normalized.issueType === "airline_delay"
+          ? "delay"
+          : normalized.issueType === "airline_cancellation"
+            ? "cancellation"
+            : normalized.issueType === "denied_boarding"
+              ? "denied_boarding"
+              : "unknown"
+      : normalized.disruptionType;
+  const providerType =
+    normalized.providerType === "unknown"
+      ? normalized.issueType === "hotel_walk"
+        ? "hotel"
+        : normalized.issueType !== "unknown"
+          ? "airline"
+          : "unknown"
+      : normalized.providerType;
+  const disruptionReasonStatus =
+    normalized.disruptionReason !== "unknown"
+      ? "reported"
+      : normalized.disruptionReasonStatus === "unavailable"
+        ? "unavailable"
+        : "not_provided";
 
   return {
     ...normalized,
     providerType,
     provider: canonicalizeProviderName(normalized.provider, providerType),
-    validatingCarrier: canonicalizeProviderName(normalized.validatingCarrier, "airline"),
-    marketingCarrier: canonicalizeProviderName(normalized.marketingCarrier, "airline"),
-    operatingCarrier: canonicalizeProviderName(normalized.operatingCarrier, "airline"),
-    operatingCarrierRegion: normalized.operatingCarrier ? findExactProviderMatch(normalized.operatingCarrier, "airline")?.operatingCarrierRegion ?? normalized.operatingCarrierRegion : null,
-    disruptingCarrier: canonicalizeProviderName(normalized.disruptingCarrier, "airline"),
+    validatingCarrier: canonicalizeProviderName(
+      normalized.validatingCarrier,
+      "airline",
+    ),
+    marketingCarrier: canonicalizeProviderName(
+      normalized.marketingCarrier,
+      "airline",
+    ),
+    operatingCarrier: canonicalizeProviderName(
+      normalized.operatingCarrier,
+      "airline",
+    ),
+    operatingCarrierRegion: normalized.operatingCarrier
+      ? (findExactProviderMatch(normalized.operatingCarrier, "airline")
+          ?.operatingCarrierRegion ?? normalized.operatingCarrierRegion)
+      : null,
+    disruptingCarrier: canonicalizeProviderName(
+      normalized.disruptingCarrier,
+      "airline",
+    ),
     disruptionType,
-    disruptionReasonStatus
+    disruptionReasonStatus,
   };
 }
 
@@ -616,8 +748,11 @@ export function getMissingClaimFields(facts: ClaimFacts): ClaimFactField[] {
     if (!hasLocation(normalized.destination)) {
       missing.push("destination");
     }
-    if (normalized.issueType === "airline_delay" && normalized.arrivalDelayMinutes === null &&
-        normalized.journeyStage === "completed") {
+    if (
+      normalized.issueType === "airline_delay" &&
+      normalized.arrivalDelayMinutes === null &&
+      normalized.journeyStage === "completed"
+    ) {
       missing.push("arrivalDelayMinutes");
     }
     if (

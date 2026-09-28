@@ -12,7 +12,7 @@ export async function GET() {
   const scenarios = buildScenarioSummaries(
     policies as Policy[],
     await loadCaseLibrary(),
-    scripts as Script[]
+    scripts as Script[],
   );
 
   return NextResponse.json({ scenarios });

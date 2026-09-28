@@ -1,15 +1,18 @@
-import type { AnalysisResult,SuggestedAsks } from "../../lib/types";
-import { evidenceCoverageStyles,issueLabels } from "./labels";
+import type { AnalysisResult, SuggestedAsks } from "../../lib/types";
+import { evidenceCoverageStyles, issueLabels } from "./labels";
 export function SummaryPanel({ result }: { result: AnalysisResult | null }) {
   return (
     <div className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-ink/60">Result</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-ink/60">
+        Result
+      </h2>
       {result ? (
         <div className="mt-4 flex flex-col gap-4">
           <div>
             <p className="text-sm text-ink/60">Issue type</p>
             <p className="mt-1 text-xl font-semibold text-ink">
-              {issueLabels[result.issueType] ?? result.issueType.replaceAll("_", " ")}
+              {issueLabels[result.issueType] ??
+                result.issueType.replaceAll("_", " ")}
             </p>
           </div>
           <div className="flex items-center justify-between gap-3">
@@ -21,7 +24,8 @@ export function SummaryPanel({ result }: { result: AnalysisResult | null }) {
             </span>
           </div>
           <p className="text-xs leading-5 text-ink/55">
-            This describes source coverage and unresolved checks—not the likelihood of a payout.
+            This describes source coverage and unresolved checks—not the
+            likelihood of a payout.
           </p>
           <div className="grid gap-2 border-t border-ink/5 pt-3 text-sm">
             <div className="flex items-start justify-between gap-3">
@@ -93,7 +97,7 @@ export function SuggestedAsks({ asks }: { asks: SuggestedAsks }) {
   const tiers = [
     ["Conservative", asks.conservative],
     ["Standard", asks.standard],
-    ["Aggressive", asks.aggressive]
+    ["Aggressive", asks.aggressive],
   ] as const;
 
   return (
@@ -105,7 +109,12 @@ export function SuggestedAsks({ asks }: { asks: SuggestedAsks }) {
         {tiers.map(([label, items]) => (
           <div key={label}>
             <h3 className="text-sm font-semibold text-ink">{label}</h3>
-            {items.length === 0 && <p className="mt-2 text-sm text-ink/60">No additional request is supported by the current facts and local sources.</p>}
+            {items.length === 0 && (
+              <p className="mt-2 text-sm text-ink/60">
+                No additional request is supported by the current facts and
+                local sources.
+              </p>
+            )}
             <ul className="mt-2 space-y-2 text-sm leading-6 text-ink/70">
               {items.map((item) => (
                 <li className="border-l-2 border-mint/40 pl-3" key={item}>
@@ -119,4 +128,3 @@ export function SuggestedAsks({ asks }: { asks: SuggestedAsks }) {
     </div>
   );
 }
-

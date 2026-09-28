@@ -3,11 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Travel Claims Copilot",
-  description: "A local demo for travel dispute claim analysis."
+  description: "A local demo for travel dispute claim analysis.",
 };
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {

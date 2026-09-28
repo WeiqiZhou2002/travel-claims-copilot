@@ -9,7 +9,7 @@ import type {
   ExtractedFacts,
   PolicyRegion,
   Policy,
-  Script
+  Script,
 } from "./types";
 
 export { generateAnalysis } from "./generator";
@@ -18,14 +18,14 @@ export {
   isMvpIssueType,
   issueLabels,
   MVP_ISSUE_TYPES,
-  normalizeIssueType
+  normalizeIssueType,
 } from "./issueTaxonomy";
 export {
   buildRetrievalQuery,
   retrieveKnowledge,
   searchCases,
   searchPolicies,
-  searchScripts
+  searchScripts,
 } from "./retrieval";
 export { rankCases, rankPolicies, rankScripts } from "./retrievalScoring";
 export { buildScenarioSummaries } from "./scenarios";
@@ -34,26 +34,32 @@ function policyRegionsFromClaimFacts(facts: ClaimFacts): PolicyRegion[] {
   return Array.from(
     new Set(
       [facts.origin.region, facts.destination.region].filter(
-        (region): region is NonNullable<typeof region> => Boolean(region)
-      )
-    )
+        (region): region is NonNullable<typeof region> => Boolean(region),
+      ),
+    ),
   );
 }
 
 export function claimFactsToExtractedFacts(
   facts: ClaimFacts,
-  description = ""
+  description = "",
 ): ExtractedFacts {
   return {
     description,
     journeyStage: facts.journeyStage,
-    ticketingProvider: facts.bookingProvider ?? facts.validatingCarrier ?? undefined,
+    ticketingProvider:
+      facts.bookingProvider ?? facts.validatingCarrier ?? undefined,
     acceptedAlternative: facts.acceptedAlternative,
     issueType: facts.issueType,
-    provider: facts.providerType === "airline" ? facts.operatingCarrier ?? facts.provider ?? undefined : facts.provider ?? undefined,
-    providerType: facts.providerType === "unknown" ? undefined : facts.providerType,
+    provider:
+      facts.providerType === "airline"
+        ? (facts.operatingCarrier ?? facts.provider ?? undefined)
+        : (facts.provider ?? undefined),
+    providerType:
+      facts.providerType === "unknown" ? undefined : facts.providerType,
     country: facts.origin.country ?? facts.destination.country ?? undefined,
-    bookingChannel: facts.bookingChannel === "unknown" ? undefined : facts.bookingChannel,
+    bookingChannel:
+      facts.bookingChannel === "unknown" ? undefined : facts.bookingChannel,
     loyaltyStatus: facts.loyaltyStatus ?? undefined,
     disruptionReason: facts.disruptionReason,
     arrivalDelayMinutes: facts.arrivalDelayMinutes ?? undefined,
@@ -67,7 +73,7 @@ export function claimFactsToExtractedFacts(
     controllability: controllabilityFromReason(facts.disruptionReason),
     confidence: facts.confidence,
     signals: [],
-    source: "llm"
+    source: "llm",
   };
 }
 
@@ -76,18 +82,21 @@ export function buildAnalysisFromFacts(
   policies: Policy[],
   cases: Case[],
   scripts: Script[],
-  description = ""
+  description = "",
 ): AnalysisResult {
   const extractedFacts = claimFactsToExtractedFacts(facts, description);
   const retrieval = retrieveKnowledge(extractedFacts, policies, cases, scripts);
   const analysis = generateAnalysis(retrieval.facts, retrieval);
   const handlingPlaybook = buildHandlingPlaybook(facts);
   if (facts.journeyStage === "completed") {
-    handlingPlaybook.askLadder = [...analysis.suggestedAsks.conservative, ...analysis.suggestedAsks.standard];
+    handlingPlaybook.askLadder = [
+      ...analysis.suggestedAsks.conservative,
+      ...analysis.suggestedAsks.standard,
+    ];
   }
 
   return {
     ...analysis,
-    handlingPlaybook
+    handlingPlaybook,
   };
 }

@@ -17,13 +17,15 @@ export type IssueType =
 
 export type MvpIssueType = Extract<
   IssueType,
-  | "hotel_walk"
-  | "airline_cancellation"
-  | "airline_delay"
-  | "denied_boarding"
+  "hotel_walk" | "airline_cancellation" | "airline_delay" | "denied_boarding"
 >;
 
-export type ProviderType = "hotel" | "airline" | "credit_card" | "ota" | "government";
+export type ProviderType =
+  | "hotel"
+  | "airline"
+  | "credit_card"
+  | "ota"
+  | "government";
 export type PolicyRegion =
   | "EU_EEA_CH"
   | "UK"
@@ -181,7 +183,12 @@ export type AnalyzeOptions = {
 
 export type ExtractedFacts = {
   ticketingProvider?: string;
-  journeyStage?: "pre_trip" | "at_airport" | "en_route" | "completed" | "unknown";
+  journeyStage?:
+    | "pre_trip"
+    | "at_airport"
+    | "en_route"
+    | "completed"
+    | "unknown";
   acceptedAlternative?: boolean | null;
   description: string;
   issueType: IssueType;
@@ -300,7 +307,10 @@ export type HandlingContactRole =
   | "unknown";
 
 export type HandlingGuidanceSource = {
-  sourceType: "industry_guidance" | "community_guide" | "official_policy_required";
+  sourceType:
+    | "industry_guidance"
+    | "community_guide"
+    | "official_policy_required";
   title: string;
   url: string | null;
 };
@@ -327,7 +337,14 @@ export type HandlingPlaybook = {
 };
 
 export type RemedyDecision = {
-  id: "refund" | "rebooking" | "care" | "fixed_compensation" | "hotel_guarantee" | "voluntary_offer" | "goodwill";
+  id:
+    | "refund"
+    | "rebooking"
+    | "care"
+    | "fixed_compensation"
+    | "hotel_guarantee"
+    | "voluntary_offer"
+    | "goodwill";
   status: "needs_verification" | "not_supported";
   title: string;
   explanation: string;

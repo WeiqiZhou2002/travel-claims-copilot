@@ -31,7 +31,7 @@ const goldenScenarios: GoldenScenario[] = [
     expectedIssue: "hotel_walk",
     expectedProvider: "Marriott",
     expectedPolicyId: "marriott_ultimate_reservation_guarantee",
-    expectedTopCaseId: undefined
+    expectedTopCaseId: undefined,
   },
   {
     name: "United controllable cancellation",
@@ -40,7 +40,7 @@ const goldenScenarios: GoldenScenario[] = [
     expectedIssue: "airline_cancellation",
     expectedProvider: "United",
     expectedPolicyId: "dot_airline_cancellation_delay_dashboard",
-    expectedTopCaseId: undefined
+    expectedTopCaseId: undefined,
   },
   {
     name: "American mechanical delay",
@@ -49,7 +49,7 @@ const goldenScenarios: GoldenScenario[] = [
     expectedIssue: "airline_delay",
     expectedProvider: "American Airlines",
     expectedPolicyId: "dot_airline_cancellation_delay_dashboard",
-    expectedTopCaseId: "uscf_aa127_mechanical_delay_overnight_2026_07"
+    expectedTopCaseId: "uscf_aa127_mechanical_delay_overnight_2026_07",
   },
   {
     name: "Delta voluntary bump",
@@ -58,7 +58,7 @@ const goldenScenarios: GoldenScenario[] = [
     expectedIssue: "denied_boarding",
     expectedProvider: "Delta",
     expectedPolicyId: "dot_bumping_oversales",
-    expectedTopCaseId: "uscf_delta_voluntary_bump_2026_01"
+    expectedTopCaseId: "uscf_delta_voluntary_bump_2026_01",
   },
   {
     name: "EU-region Air France delay",
@@ -67,8 +67,8 @@ const goldenScenarios: GoldenScenario[] = [
     expectedIssue: "airline_delay",
     expectedProvider: "Air France",
     expectedPolicyId: "eu261_regulation_261_2004",
-    expectedTopCaseId: "uscf_lh_eu261_claim_2022_05"
-  }
+    expectedTopCaseId: "uscf_lh_eu261_claim_2022_05",
+  },
 ];
 
 describe.each(goldenScenarios)("golden retrieval: $name", (scenario) => {
@@ -86,17 +86,23 @@ describe.each(goldenScenarios)("golden retrieval: $name", (scenario) => {
     const second = retrieveKnowledge(facts, policies, cases, scripts);
 
     expect(first.officialBasis.map((policy) => policy.policy_id)).toContain(
-      scenario.expectedPolicyId
+      scenario.expectedPolicyId,
     );
     expect(first.similarCases[0]?.case_id).toBe(scenario.expectedTopCaseId);
     expect(first.officialBasis.length).toBeLessThanOrEqual(3);
     expect(first.similarCases.length).toBeLessThanOrEqual(3);
     expect(first.scripts.length).toBeGreaterThan(0);
     expect(first.scripts.length).toBeLessThanOrEqual(2);
-    expect(first.similarCases.every((item) => item.review_status === "approved")).toBe(true);
-    expect(first.similarCases.every((item) => item.source_type !== "synthetic_example")).toBe(true);
+    expect(
+      first.similarCases.every((item) => item.review_status === "approved"),
+    ).toBe(true);
+    expect(
+      first.similarCases.every(
+        (item) => item.source_type !== "synthetic_example",
+      ),
+    ).toBe(true);
     expect(first.similarCases.map((item) => item.case_id)).toEqual(
-      second.similarCases.map((item) => item.case_id)
+      second.similarCases.map((item) => item.case_id),
     );
   });
 });
@@ -104,7 +110,7 @@ describe.each(goldenScenarios)("golden retrieval: $name", (scenario) => {
 describe("classification safeguards", () => {
   it("does not treat a travel-document problem as oversales denied boarding", () => {
     const facts = classifyInput(
-      "An AA passenger renewed EVUS after waiting at check-in, missed the baggage cutoff, and was rebooked without a financial loss."
+      "An AA passenger renewed EVUS after waiting at check-in, missed the baggage cutoff, and was rebooked without a financial loss.",
     );
 
     expect(facts.issueType).toBe("unknown");
@@ -112,7 +118,7 @@ describe("classification safeguards", () => {
 
   it("keeps weather separate from the cancellation incident type", () => {
     const facts = classifyInput(
-      "My American Airlines flight was cancelled because of severe weather at the airport."
+      "My American Airlines flight was cancelled because of severe weather at the airport.",
     );
 
     expect(facts.issueType).toBe("airline_cancellation");
@@ -120,7 +126,9 @@ describe("classification safeguards", () => {
   });
 
   it("classifies an unexplained cancellation while keeping its reason unknown", () => {
-    const facts = classifyInput("United cancelled my flight and did not give me a reason.");
+    const facts = classifyInput(
+      "United cancelled my flight and did not give me a reason.",
+    );
 
     expect(facts.issueType).toBe("airline_cancellation");
     expect(facts.confidence).toBe("medium");
@@ -128,10 +136,10 @@ describe("classification safeguards", () => {
 
   it("distinguishes voluntary and involuntary bumping", () => {
     const voluntary = classifyInput(
-      "The Delta flight is oversold and the gate is asking for volunteers."
+      "The Delta flight is oversold and the gate is asking for volunteers.",
     );
     const involuntary = classifyInput(
-      "The oversold flight involuntarily bumped me even though I did not volunteer."
+      "The oversold flight involuntarily bumped me even though I did not volunteer.",
     );
 
     expect(voluntary.deniedBoardingKind).toBe("voluntary");
@@ -140,7 +148,7 @@ describe("classification safeguards", () => {
 
   it("does not confuse a hotel walk with airline denied boarding", () => {
     const facts = classifyInput(
-      "The Marriott hotel front desk said the property was oversold and had no room for my confirmed reservation."
+      "The Marriott hotel front desk said the property was oversold and had no room for my confirmed reservation.",
     );
 
     expect(facts.issueType).toBe("hotel_walk");
@@ -148,7 +156,7 @@ describe("classification safeguards", () => {
 
   it("extracts provider and loyalty metadata from a Chinese hotel description", () => {
     const facts = classifyInput(
-      "我是万豪钛金会员，通过官网预订喜来登，到店后前台说酒店超售没有房间。"
+      "我是万豪钛金会员，通过官网预订喜来登，到店后前台说酒店超售没有房间。",
     );
 
     expect(facts.issueType).toBe("hotel_walk");
@@ -159,7 +167,7 @@ describe("classification safeguards", () => {
 
   it("recognizes a Chinese voluntary-bump description", () => {
     const facts = classifyInput(
-      "达美航班超售，登机口正在征集自愿改签到第二天航班的乘客。"
+      "达美航班超售，登机口正在征集自愿改签到第二天航班的乘客。",
     );
 
     expect(facts.issueType).toBe("denied_boarding");
@@ -172,70 +180,74 @@ describe("retrieval quality controls", () => {
   it("matches a Chinese Marriott alias to Marriott policy and cases only", () => {
     const facts = {
       ...classifyInput("我订了万豪酒店，但是到店无房。"),
-      provider: "万豪酒店"
+      provider: "万豪酒店",
     };
     const retrieval = retrieveKnowledge(facts, policies, cases, scripts);
 
     expect(retrieval.officialBasis.map((policy) => policy.policy_id)).toContain(
-      "marriott_ultimate_reservation_guarantee"
+      "marriott_ultimate_reservation_guarantee",
     );
     expect(retrieval.similarCases).toEqual([]);
-    expect(retrieval.similarCases.every((item) => item.provider === "Marriott")).toBe(
-      true
-    );
+    expect(
+      retrieval.similarCases.every((item) => item.provider === "Marriott"),
+    ).toBe(true);
   });
 
   it("selects official policies by incident, jurisdiction, provider, and controllability", () => {
     const euCancellation = retrieveKnowledge(
       classifyInput(
-        "My Air France flight from Paris was cancelled because of a mechanical issue."
+        "My Air France flight from Paris was cancelled because of a mechanical issue.",
       ),
       policies,
       cases,
-      scripts
+      scripts,
     );
     const usControllableCancellation = retrieveKnowledge(
       classifyInput("United cancelled my flight because the crew timed out."),
       policies,
       cases,
-      scripts
+      scripts,
     );
     const usWeatherCancellation = retrieveKnowledge(
       classifyInput("United cancelled my flight because of severe weather."),
       policies,
       cases,
-      scripts
+      scripts,
     );
 
     expect(euCancellation.query.policyRegions).toEqual(["EU_EEA_CH"]);
-    expect(euCancellation.officialBasis.map((policy) => policy.policy_id)).toEqual([
-      "eu261_regulation_261_2004"
-    ]);
+    expect(
+      euCancellation.officialBasis.map((policy) => policy.policy_id),
+    ).toEqual(["eu261_regulation_261_2004"]);
     expect(euCancellation.scripts[0]?.script_id).toBe("eu261_claim_email_en");
     expect(
       euCancellation.scripts.some((script) =>
-        script.applicable_regions.includes("EU_EEA_CH")
-      )
+        script.applicable_regions.includes("EU_EEA_CH"),
+      ),
     ).toBe(true);
     expect(
-      usControllableCancellation.officialBasis.map((policy) => policy.policy_id)
+      usControllableCancellation.officialBasis.map(
+        (policy) => policy.policy_id,
+      ),
     ).toContain("dot_airline_cancellation_delay_dashboard");
     expect(
       usControllableCancellation.scripts.every((script) =>
-        script.applicable_regions.includes("global")
-      )
+        script.applicable_regions.includes("global"),
+      ),
     ).toBe(true);
     expect(usWeatherCancellation.officialBasis).toEqual([]);
   });
 
   it("explains why the provider-specific case ranks first", () => {
     const facts = classifyInput(
-      "My American Airlines flight was delayed overnight by a mechanical problem."
+      "My American Airlines flight was delayed overnight by a mechanical problem.",
     );
     const retrieval = retrieveKnowledge(facts, policies, cases, scripts);
     const ranking = rankCases(retrieval.query, cases);
 
-    expect(ranking[0]?.item.case_id).toBe("uscf_aa127_mechanical_delay_overnight_2026_07");
+    expect(ranking[0]?.item.case_id).toBe(
+      "uscf_aa127_mechanical_delay_overnight_2026_07",
+    );
     expect(ranking[0]?.reasons).toContain("exact_issue_match");
     expect(ranking[0]?.reasons).toContain("carrier_match");
     expect(ranking[0]?.reasons).toContain("disruption_reason_match");
@@ -243,7 +255,7 @@ describe("retrieval quality controls", () => {
 
   it("does not resolve excluded cases by direct case id", () => {
     const facts = classifyInput("", {
-      caseId: "uscf_aa128_denied_boarding_cbp_evus_2026_04"
+      caseId: "uscf_aa128_denied_boarding_cbp_evus_2026_04",
     });
     const retrieval = retrieveKnowledge(facts, policies, cases, scripts);
 
@@ -255,7 +267,7 @@ describe("retrieval quality controls", () => {
     const summaries = buildScenarioSummaries(policies, cases, scripts);
 
     expect(summaries.map((summary) => summary.issueType).sort()).toEqual(
-      [...MVP_ISSUE_TYPES].sort()
+      [...MVP_ISSUE_TYPES].sort(),
     );
   });
 });
