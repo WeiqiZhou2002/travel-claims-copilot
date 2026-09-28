@@ -34,6 +34,16 @@ type CheckedDateContext = {
   onStaleSource?: (message: string) => void;
 };
 
+const SCRIPT_REMEDIES = [
+  "refund",
+  "rebooking",
+  "care",
+  "fixed_compensation",
+  "hotel_guarantee",
+  "voluntary_offer",
+  "goodwill"
+] as const;
+
 const MVP_INCIDENTS = [
   "hotel_walk",
   "airline_delay",
@@ -278,6 +288,7 @@ function parseCases(value: unknown): Case[] {
         "source_url",
         "provider_type",
         "provider",
+        "carrier",
         "brand_or_airline",
         "issue_type",
         "location_country",
@@ -309,13 +320,20 @@ function parseCases(value: unknown): Case[] {
       `${label}.source_url`,
       sourceType === "synthetic_example"
     );
-    enumValue(
+    const providerType = enumValue(
       record.provider_type,
       ["hotel", "airline", "credit_card", "ota"],
       `${label}.provider_type`
     );
+    // Airline cases record the ticketing provider and the operating carrier separately; either
+    // may be unknown for a community report.
+    ["provider", "carrier"].forEach((field) => {
+      if (record[field] !== null) stringValue(record[field], `${label}.${field}`);
+    });
+    if (providerType !== "airline" && record.carrier !== null) {
+      throw new Error(`${label}.carrier is only valid for airline cases.`);
+    }
     [
-      "provider",
       "brand_or_airline",
       "issue_type",
       "location_country",
@@ -429,6 +447,16 @@ function parseScripts(value: unknown): Script[] {
       `${label}.required_controllability`
     );
     stringValue(record.provider, `${label}.provider`);
+    if (record.remedy !== undefined) {
+      enumValue(record.remedy, SCRIPT_REMEDIES, `${label}.remedy`);
+    }
+    if (record.required_denied_boarding_kind !== undefined) {
+      enumValue(
+        record.required_denied_boarding_kind,
+        ["voluntary", "involuntary"],
+        `${label}.required_denied_boarding_kind`
+      );
+    }
     enumValue(
       record.channel,
       [

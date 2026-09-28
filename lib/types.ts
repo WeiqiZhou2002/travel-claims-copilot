@@ -47,6 +47,8 @@ export type PolicyControllability = Controllability | "any";
 export type ApplicabilityStatus = "met" | "unknown" | "not_met";
 export type PolicyConditionKind = "scope" | "remedy";
 export type PolicyConditionCode =
+  | "eligibility_details"
+  | "source_freshness"
   | "incident"
   | "route"
   | "provider"
@@ -108,7 +110,12 @@ export type Case = {
   source_name: string;
   source_url: string;
   provider_type: Exclude<ProviderType, "government">;
-  provider: string;
+  /** Airline cases: original ticketing/booking provider; hotels: hotel group. */
+  provider: string | null;
+  /** Operating airline of the disrupted segment, never the replacement airline. */
+  carrier: string | null;
+  legacy_provider?: string;
+  role_notes?: string[];
   brand_or_airline: string;
   issue_type: string;
   location_country: string;
@@ -128,6 +135,8 @@ export type Case = {
 };
 
 export type Script = {
+  remedy?: RemedyDecision["id"];
+  required_denied_boarding_kind?: "voluntary" | "involuntary";
   script_id: string;
   source_ids: string[];
   incident_types: MvpIssueType[];
@@ -155,6 +164,9 @@ export type AnalyzeOptions = {
 };
 
 export type ExtractedFacts = {
+  ticketingProvider?: string;
+  journeyStage?: "pre_trip" | "at_airport" | "en_route" | "completed" | "unknown";
+  acceptedAlternative?: boolean | null;
   description: string;
   issueType: IssueType;
   provider?: string;
@@ -169,6 +181,8 @@ export type ExtractedFacts = {
     | "weather"
     | "late_inbound_aircraft"
     | "other_controllable"
+    | "passenger_side"
+    | "other_reported"
     | "unknown";
   arrivalDelayMinutes?: number;
   isOvernight?: boolean;
@@ -186,6 +200,10 @@ export type ExtractedFacts = {
 };
 
 export type RetrievalQuery = {
+  ticketingProvider?: string;
+  carrier?: string;
+  journeyStage?: ExtractedFacts["journeyStage"];
+  acceptedAlternative?: boolean | null;
   description: string;
   issueType: IssueType;
   provider?: string;
@@ -206,6 +224,10 @@ export type RetrievalQuery = {
 };
 
 export type RetrievalMatchReason =
+  | "ticketing_provider_match"
+  | "carrier_match"
+  | "provider_carrier_pair_match"
+  | "route_scope_unknown"
   | "exact_issue_match"
   | "issue_alias_match"
   | "provider_exact_match"
@@ -359,7 +381,24 @@ export type ProviderFeedbackResult = {
   warning?: string;
 };
 
+export type RemedyDecision = {
+  id:
+    | "refund"
+    | "rebooking"
+    | "care"
+    | "fixed_compensation"
+    | "hotel_guarantee"
+    | "voluntary_offer"
+    | "goodwill";
+  status: "needs_verification" | "not_supported";
+  title: string;
+  explanation: string;
+  sourceIds: string[];
+  request: string;
+};
+
 export type AnalysisResult = {
+  remedies: RemedyDecision[];
   issueType: IssueType;
   policyRegions: PolicyRegion[];
   legalRegimes: LegalRegime[];
@@ -386,7 +425,8 @@ export type ScenarioSummary = {
   providers: string[];
   sampleCase?: {
     caseId: string;
-    provider: string;
+    provider: string | null;
+    carrier: string | null;
     brandOrAirline: string;
     facts: string;
   };

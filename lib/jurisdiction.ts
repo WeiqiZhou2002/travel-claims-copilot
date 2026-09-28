@@ -37,7 +37,11 @@ const knownPlaces: KnownPlace[] = [
     region: "EU_EEA_CH",
     terms: ["ireland", "dublin", "dub", "爱尔兰", "都柏林"]
   },
-  { country: "Norway", region: "EU_EEA_CH", terms: ["norway", "oslo", "osl", "挪威", "奥斯陆"] },
+  {
+    country: "Norway",
+    region: "EU_EEA_CH",
+    terms: ["norway", "oslo", "osl", "挪威", "奥斯陆"]
+  },
   {
     country: "Iceland",
     region: "EU_EEA_CH",
@@ -72,7 +76,8 @@ const knownPlaces: KnownPlace[] = [
       "美国",
       "纽约",
       "洛杉矶",
-      "芝加哥"
+      "芝加哥",
+      "麦迪逊"
     ]
   },
   {
@@ -185,6 +190,20 @@ function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
 
+function knownTermMatches(value: string, term: string): boolean {
+  if (value === term) {
+    return true;
+  }
+  if (/^[a-z0-9]+$/i.test(term) && term.length <= 3) {
+    return false;
+  }
+  if (/^[ -~]+$/.test(term)) {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, "i").test(value);
+  }
+  return value.includes(term);
+}
+
 export function isEuOperatingCarrier(carrier: string | null | undefined): boolean {
   return euOperatingCarriers.has(normalize(carrier ?? ""));
 }
@@ -204,10 +223,28 @@ function findKnownPlace(location: ClaimLocation): KnownPlace | undefined {
     .map(normalize);
 
   return knownPlaces.find((place) =>
-    place.terms.some((term) =>
-      values.some((value) => value === term || (term.length > 3 && value.includes(term)))
-    )
+    place.terms.some((term) => values.some((value) => knownTermMatches(value, term)))
   );
+}
+
+function findMarkedTermIndex(text: string, marker: string, term: string): number {
+  const needle = `${marker}${normalize(term)}`;
+  let searchFrom = 0;
+
+  while (searchFrom < text.length) {
+    const index = text.indexOf(needle, searchFrom);
+    if (index < 0) {
+      return -1;
+    }
+
+    const nextCharacter = text[index + needle.length];
+    if (!nextCharacter || !/[a-z0-9]/i.test(nextCharacter)) {
+      return index;
+    }
+    searchFrom = index + 1;
+  }
+
+  return -1;
 }
 
 function findPlaceAfterMarker(text: string, markers: string[]): ClaimLocation | undefined {
@@ -217,7 +254,7 @@ function findPlaceAfterMarker(text: string, markers: string[]): ClaimLocation | 
       markers.map((marker) => ({
         place,
         term,
-        index: normalizedText.indexOf(`${marker}${normalize(term)}`)
+        index: findMarkedTermIndex(normalizedText, marker, term)
       }))
     )
   );
@@ -276,12 +313,16 @@ export function assessEu261Candidate(facts: ClaimFacts): Eu261CandidateAssessmen
   }
 
   if (enriched.destination.region !== "EU_EEA_CH") {
-    return { isCandidate: false, needsOperatingCarrierCheck: false, reasons: [] };
+    return {
+      isCandidate: false,
+      needsOperatingCarrierCheck: false,
+      reasons: []
+    };
   }
 
   if (
     enriched.operatingCarrierRegion === "EU_EEA_CH" ||
-    isEuOperatingCarrier(enriched.operatingCarrier ?? enriched.provider)
+    isEuOperatingCarrier(enriched.operatingCarrier)
   ) {
     return {
       isCandidate: true,
@@ -314,13 +355,17 @@ export function assessUk261Candidate(facts: ClaimFacts): Uk261CandidateAssessmen
   }
 
   if (enriched.destination.region !== "UK") {
-    return { isCandidate: false, needsOperatingCarrierCheck: false, reasons: [] };
+    return {
+      isCandidate: false,
+      needsOperatingCarrierCheck: false,
+      reasons: []
+    };
   }
 
   if (
     enriched.operatingCarrierRegion === "UK" ||
     enriched.operatingCarrierRegion === "EU_EEA_CH" ||
-    isUkOrEuOperatingCarrier(enriched.operatingCarrier ?? enriched.provider)
+    isUkOrEuOperatingCarrier(enriched.operatingCarrier)
   ) {
     return {
       isCandidate: true,

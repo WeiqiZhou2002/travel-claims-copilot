@@ -1,3 +1,4 @@
+import { stubIntakeModel } from "./model-stub";
 import { expect, test, type Page } from "./offline-test";
 
 async function submit(page: Page, message: string): Promise<void> {
@@ -6,6 +7,7 @@ async function submit(page: Page, message: string): Promise<void> {
 }
 
 test.beforeEach(async ({ page }) => {
+  await stubIntakeModel(page);
   await page.goto("/");
 });
 

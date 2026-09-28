@@ -10,8 +10,9 @@
     "channel": "front_desk",
     "tone": "polite_firm",
     "language": "en",
-    "template": "I have a confirmed reservation with my Marriott Bonvoy number attached. Since the property is unable to honor the reservation, could you please apply Marriott's Ultimate Reservation Guarantee, arrange comparable nearby accommodation, cover transportation, and confirm the applicable compensation in writing?",
-    "when_to_use": "Use at the front desk when a Marriott property says it cannot honor a confirmed reservation."
+    "template": "Please confirm whether my booking and membership meet Marriott's Ultimate Reservation Guarantee conditions. Please explain available nearby accommodation, transport support and any applicable guarantee remedy in writing.",
+    "when_to_use": "Use at the front desk when a Marriott property says it cannot honor a confirmed reservation.",
+    "remedy": "hotel_guarantee"
   },
   {
     "script_id": "airline_controllable_delay_hotel_en",
@@ -24,8 +25,9 @@
     "channel": "airport_counter",
     "tone": "polite_firm",
     "language": "en",
-    "template": "Can you please confirm whether this delay or cancellation is within the airline's control? If so, I would like hotel accommodation, transportation to and from the hotel, meal vouchers, and rebooking on the earliest available flight, consistent with the airline's customer service commitment.",
-    "when_to_use": "Use at the airport when a controllable airline delay or cancellation requires an overnight stay."
+    "template": "Please confirm the disruption reason and the assistance available under your current customer service commitment. Which meal, accommodation and transport support applies to my waiting time and any overnight need? Please explain any eligibility conditions in writing.",
+    "when_to_use": "Use at the airport when a controllable airline delay or cancellation requires an overnight stay.",
+    "remedy": "care"
   },
   {
     "script_id": "hotel_walk_escalation_email_en",
@@ -38,7 +40,7 @@
     "channel": "corporate_escalation",
     "tone": "polite_firm",
     "language": "en",
-    "template": "I arrived with a confirmed reservation, but the property could not provide the booked room. Please review the attached confirmation and receipts, explain the applicable reservation guarantee, and address the alternate accommodation, transportation, and documented out-of-pocket costs. I understand that any additional goodwill depends on the brand terms and the facts of this stay.",
+    "template": "Please review my reported reservation problem, confirm the booking status, and explain available alternate accommodation and transport support. Please identify the evidence needed to review any documented expenses or applicable guarantee. Additional goodwill is a separate discretionary request.",
     "when_to_use": "Use after a hotel walk when the property did not fully resolve relocation or documented expenses."
   },
   {
@@ -52,8 +54,9 @@
     "channel": "email",
     "tone": "polite_firm",
     "language": "en",
-    "template": "My flight was cancelled and I was told the cause was within the airline's control. Please confirm the cancellation reason in writing and review the attached hotel, meal, and transportation receipts against the commitments in your customer service plan. I am requesting reimbursement only for documented reasonable expenses and any other remedy that your published commitment provides.",
-    "when_to_use": "Use after a controllable cancellation when airport vouchers were unavailable or documented expenses remain unresolved."
+    "template": "Please confirm the cancellation reason in writing and identify the evidence required to review reasonable expenses against your published customer service commitment. Please explain which assistance applies and provide a case number.",
+    "when_to_use": "Use after a controllable cancellation when airport vouchers were unavailable or documented expenses remain unresolved.",
+    "remedy": "care"
   },
   {
     "script_id": "denied_boarding_volunteer_gate_en",
@@ -66,12 +69,14 @@
     "channel": "airport_counter",
     "tone": "polite_firm",
     "language": "en",
-    "template": "Before I decide whether to volunteer, please confirm the compensation amount and form, every restriction, a confirmed replacement itinerary rather than standby, and whether meals, hotel, and transportation are included if the new flight is overnight. Please also tell me the compensation that would apply if I were involuntarily bumped.",
-    "when_to_use": "Use when an oversold flight is seeking volunteers and you have not yet agreed to give up your seat."
+    "template": "Please confirm the terms of the voluntary offer in writing: compensation form and restrictions, a confirmed replacement itinerary, and whether meals, hotel and transportation are included. Please explain the applicable rights before any agreement is accepted.",
+    "when_to_use": "Use when an oversold flight is seeking volunteers and you have not yet agreed to give up your seat.",
+    "required_denied_boarding_kind": "voluntary"
   },
   {
     "script_id": "denied_boarding_involuntary_email_en",
     "source_ids": ["dot_bumping_oversales"],
+    "required_denied_boarding_kind": "involuntary",
     "incident_types": ["denied_boarding"],
     "applicable_regions": ["US"],
     "applicability_rule": "origin_region",
@@ -80,8 +85,9 @@
     "channel": "email",
     "tone": "firm",
     "language": "en",
-    "template": "I had a confirmed reservation, met the check-in and gate deadlines, and did not volunteer to give up my seat. Please provide the written statement of denied-boarding rights, the boarding-priority basis used, my confirmed alternate itinerary, and an assessment of any denied boarding compensation that applies under the US DOT oversales rules.",
-    "when_to_use": "Use after involuntary denied boarding caused by oversales on a flight departing from a US airport."
+    "template": "Please confirm the reason for the reported involuntary denial of boarding and whether it was caused by oversales. Please provide the written rights statement, boarding priority rules and eligibility assessment, including reservation status, check-in and gate times, alternate arrival time and any exclusions.",
+    "when_to_use": "Use after involuntary denied boarding caused by oversales on a flight departing from a US airport.",
+    "remedy": "fixed_compensation"
   },
   {
     "script_id": "eu261_claim_email_en",
@@ -94,7 +100,7 @@
     "channel": "email",
     "tone": "polite_firm",
     "language": "en",
-    "template": "Please assess this itinerary under Regulation (EC) No 261/2004. My scheduled arrival was [time] and my actual arrival was [time]. Please provide the disruption reason in writing and review my request for rerouting or refund, care expenses, and fixed compensation only to the extent each remedy applies. I have attached the full itinerary, boarding documents, timing evidence, and receipts.",
+    "template": "Please confirm the rules applicable to this itinerary and disruption, the conditions still requiring verification, and the evidence needed for review.",
     "when_to_use": "Use for a potentially qualifying EU261 delay, cancellation, or missed connection after assembling the full itinerary and arrival evidence."
   },
   {
@@ -108,7 +114,7 @@
     "channel": "regulator_complaint",
     "tone": "firm",
     "language": "en",
-    "template": "I asked the operating airline to assess the attached itinerary and disruption under Regulation (EC) No 261/2004, but the response did not address [eligibility / disruption reason / care expenses]. I am requesting review by the competent authority. Attached are the airline correspondence, complete itinerary, scheduled and actual arrival evidence, and receipts.",
+    "template": "Please confirm the appropriate complaint process and the airline response required before an escalation under Regulation (EC) No 261/2004. Please identify the supporting itinerary, timing, correspondence and expense records needed for review.",
     "when_to_use": "Use only after identifying the competent authority and giving the airline a reasonable opportunity to respond."
   },
   {
@@ -122,7 +128,7 @@
     "channel": "email",
     "tone": "polite_firm",
     "language": "en",
-    "template": "Please assess this itinerary under UK261. My scheduled arrival was [time] and my actual arrival was [time]. Please confirm the disruption reason and review the applicable care expenses, rerouting or refund rights, and fixed compensation only to the extent each requirement is met. I have attached my itinerary, boarding documents, timing evidence, and receipts.",
+    "template": "Please confirm the rules applicable to this itinerary and disruption, the conditions still requiring verification, and the evidence needed for review.",
     "when_to_use": "Use for a potentially qualifying UK261 delay or cancellation after confirming the route and operating carrier."
   },
   {
@@ -136,12 +142,13 @@
     "channel": "email",
     "tone": "polite_firm",
     "language": "en",
-    "template": "Please assess my delay or cancellation under Canada's Air Passenger Protection Regulations. Please state whether you classify the cause as within the carrier's control, required for safety, or outside the carrier's control, and provide the facts supporting that classification. I am requesting the rebooking or refund, assistance expenses, and inconvenience compensation only to the extent the APPR conditions are met. My itinerary, timing evidence, notices, and receipts are attached.",
+    "template": "Please confirm the rules applicable to this itinerary and disruption, the conditions still requiring verification, and the evidence needed for review.",
     "when_to_use": "Use for a flight to, from, or within Canada after collecting the airline's stated cause and final arrival time."
   },
   {
     "script_id": "us_dot_refund_request_en",
     "source_ids": ["us_dot_automatic_ticket_refunds"],
+    "remedy": "refund",
     "incident_types": ["airline_delay", "airline_cancellation"],
     "applicable_regions": ["US"],
     "applicability_rule": "origin_or_destination_region",
@@ -150,7 +157,7 @@
     "channel": "email",
     "tone": "polite_firm",
     "language": "en",
-    "template": "The airline cancelled or significantly changed my flight to, from, or within the United States. I did not accept the alternative transportation, travel credit, voucher, or other compensation offered. Please issue the refund owed under the US DOT refund rules to my original form of payment and confirm the amount and processing date in writing.",
+    "template": "Please assess whether my unused travel qualifies for a refund under the US DOT rules. Please confirm the cancellation or change, and reconcile your records of any alternative transportation, voucher or credit accepted or used. If a refund is due, please confirm its amount, payment method and processing date.",
     "when_to_use": "Use only when the flight meets the US route scope and you did not accept or use the offered alternative."
   },
   {
@@ -164,7 +171,7 @@
     "channel": "email",
     "tone": "polite_firm",
     "language": "en",
-    "template": "Please review this disruption under the consumer guarantees in the Australian Consumer Law. The replacement offered was [details and timing], and I do not believe the service was supplied within a reasonable time because [brief facts]. I am requesting an appropriate replacement or refund and reimbursement of documented replacement travel only if the applicable conditions are met. My booking, notices, alternative itinerary, and receipts are attached.",
+    "template": "Please review this disruption under applicable Australian Consumer Law guarantees. Please explain the replacement offered, whether its timing meets the applicable requirements, and what evidence you need to assess any available remedy.",
     "when_to_use": "Use for a qualifying Australian travel service when the replacement timing may not have been reasonable."
   },
   {
@@ -181,7 +188,7 @@
     "channel": "email",
     "tone": "polite_firm",
     "language": "zh",
-    "template": "请书面说明本次航班延误或取消的具体原因，并按适用的《航班正常管理规定》《公共航空运输旅客服务管理规定》及贵司运输总条件，审核我的非自愿退改签、餐食住宿和已留存票据的合理支出。请同时提供航班延误或取消证明，并说明贵司认定属于承运人原因还是非承运人原因。",
+    "template": "请确认本次事件适用的规则及尚需核实的条件，并说明所需材料。",
     "when_to_use": "用于始发地或承运人符合中国民航规定适用范围的航班延误或取消。"
   },
   {
@@ -195,7 +202,7 @@
     "channel": "email",
     "tone": "firm",
     "language": "zh",
-    "template": "本次因航班超售导致我自愿放弃行程或被拒绝登机。请提供书面证明，并说明贵司是否完成征集自愿者程序、适用的优先登机规则，以及运输总条件中公布的补偿和服务标准。请同时按适用规定为我办理后续行程或非自愿退票。",
+    "template": "请确认本次拒载的具体原因、是否属于超售以及是否自愿接受替代方案，并说明适用规则、所需证据和可提供的后续安排。",
     "when_to_use": "用于符合中国民航规定适用范围的超售自愿改签或非自愿拒载。"
   }
 ]

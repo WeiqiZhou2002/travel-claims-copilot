@@ -21,7 +21,7 @@ type GoldenScenario = {
   expectedIssue: IssueType;
   expectedProvider?: string;
   expectedPolicyId: string;
-  expectedTopCaseId: string;
+  expectedTopCaseId?: string;
 };
 
 const goldenScenarios: GoldenScenario[] = [
@@ -32,7 +32,7 @@ const goldenScenarios: GoldenScenario[] = [
     expectedIssue: "hotel_walk",
     expectedProvider: "Marriott",
     expectedPolicyId: "marriott_ultimate_reservation_guarantee",
-    expectedTopCaseId: "marriott_walk_synthetic_001"
+    expectedTopCaseId: undefined
   },
   {
     name: "United controllable cancellation",
@@ -41,7 +41,7 @@ const goldenScenarios: GoldenScenario[] = [
     expectedIssue: "airline_cancellation",
     expectedProvider: "United",
     expectedPolicyId: "dot_airline_cancellation_delay_dashboard",
-    expectedTopCaseId: "united_crew_delay_synthetic_001"
+    expectedTopCaseId: undefined
   },
   {
     name: "American mechanical delay",
@@ -95,6 +95,7 @@ describe.each(goldenScenarios)("golden retrieval: $name", (scenario) => {
     expect(first.scripts.length).toBeGreaterThan(0);
     expect(first.scripts.length).toBeLessThanOrEqual(2);
     expect(first.similarCases.every((item) => item.review_status === "approved")).toBe(true);
+    expect(first.similarCases.every((item) => item.source_type !== "synthetic_example")).toBe(true);
     expect(first.similarCases.map((item) => item.case_id)).toEqual(
       second.similarCases.map((item) => item.case_id)
     );
@@ -177,9 +178,7 @@ describe("retrieval quality controls", () => {
     expect(retrieval.officialBasis.map((policy) => policy.policy_id)).toContain(
       "marriott_ultimate_reservation_guarantee"
     );
-    expect(retrieval.similarCases.map((item) => item.case_id)).toEqual([
-      "marriott_walk_synthetic_001"
-    ]);
+    expect(retrieval.similarCases).toEqual([]);
     expect(retrieval.similarCases.every((item) => item.provider === "Marriott")).toBe(true);
   });
 
@@ -231,7 +230,7 @@ describe("retrieval quality controls", () => {
 
     expect(ranking[0]?.item.case_id).toBe("uscf_aa127_mechanical_delay_overnight_2026_07");
     expect(ranking[0]?.reasons).toContain("exact_issue_match");
-    expect(ranking[0]?.reasons).toContain("provider_exact_match");
+    expect(ranking[0]?.reasons).toContain("carrier_match");
     expect(ranking[0]?.reasons).toContain("disruption_reason_match");
   });
 

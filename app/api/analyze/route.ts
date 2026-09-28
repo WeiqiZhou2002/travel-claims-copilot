@@ -3,14 +3,13 @@ import { NextResponse } from "next/server";
 import cases from "../../../data/cases.json";
 import policies from "../../../data/policies.json";
 import scripts from "../../../data/scripts.json";
-import { buildAnalysisFromFacts, buildAnalysisResult } from "../../../lib/analyze";
+import { buildAnalysisFromFacts } from "../../../lib/analyze";
 import { createAnalyzeRouteHandler } from "../../../lib/api/analyze-route-handler";
-import { toApiErrorResponse, withRequestId } from "../../../lib/api/api-response";
 import { getMissingClaimFields, parseClaimFacts } from "../../../lib/claimFacts";
-import { classifyInput } from "../../../lib/classifier";
-import { MAX_ANALYZE_DESCRIPTION_LENGTH, requestBodyExceedsLimit } from "../../../lib/inputLimits";
-import { isMvpIssueType, normalizeIssueType } from "../../../lib/issueTaxonomy";
-import { assessHighRiskClaim } from "../../../lib/safety";
+import { MAX_ANALYZE_DESCRIPTION_LENGTH, readBoundedJson } from "../../../lib/inputLimits";
+import { IntakeError, processIntake } from "../../../lib/intake";
+import { acquireIntakeCapacity } from "../../../lib/intakeCapacity";
+import { assessClaimSafety, assessHighRiskClaim } from "../../../lib/safety";
 import type { Case, Policy, Script } from "../../../lib/types";
 
 const canonicalAnalyzePost = createAnalyzeRouteHandler();
@@ -36,38 +35,26 @@ function withNoStore(response: Response): Response {
   return response;
 }
 
+function analysisFromFacts(
+  facts: Parameters<typeof buildAnalysisFromFacts>[0],
+  description: string
+) {
+  return buildAnalysisFromFacts(
+    facts,
+    policies as Policy[],
+    cases as Case[],
+    scripts as Script[],
+    description
+  );
+}
+
 async function legacyAnalyzePost(request: Request): Promise<Response> {
-  if (requestBodyExceedsLimit(request)) {
-    return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
+  const parsedBody = await readBoundedJson(request);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: parsedBody.status });
   }
-
-  const body = (await request.json().catch(() => null)) as {
-    caseId?: unknown;
-    description?: unknown;
-    issueType?: unknown;
-    selectedIssueType?: unknown;
-    facts?: unknown;
-  } | null;
+  const body = parsedBody.value;
   const description = typeof body?.description === "string" ? body.description.trim() : "";
-  const caseId = typeof body?.caseId === "string" ? body.caseId.trim() : "";
-  const issueType = normalizeIssueType(body?.issueType ?? body?.selectedIssueType);
-  const suppliedIssueSelector =
-    isRecord(body) &&
-    (Object.prototype.hasOwnProperty.call(body, "issueType") ||
-      Object.prototype.hasOwnProperty.call(body, "selectedIssueType"));
-  const selectedCase = caseId
-    ? (cases as Case[]).find((item) => item.case_id === caseId)
-    : undefined;
-  const selectedCaseIssue = selectedCase ? normalizeIssueType(selectedCase.issue_type) : undefined;
-  const describedIssue = description ? classifyInput(description).issueType : "unknown";
-
-  if (
-    (suppliedIssueSelector && (!issueType || !isMvpIssueType(issueType))) ||
-    (selectedCase && (!selectedCaseIssue || !isMvpIssueType(selectedCaseIssue))) ||
-    (describedIssue !== "unknown" && !isMvpIssueType(describedIssue))
-  ) {
-    return toApiErrorResponse("unprocessable_request", withRequestId());
-  }
 
   if (description.length > MAX_ANALYZE_DESCRIPTION_LENGTH) {
     return NextResponse.json(
@@ -92,6 +79,10 @@ async function legacyAnalyzePost(request: Request): Promise<Response> {
       );
     }
 
+    const factSafety = assessClaimSafety(description, parsedFacts.data);
+    if (factSafety) {
+      return NextResponse.json({ error: factSafety.message, safety: factSafety }, { status: 422 });
+    }
     const missingFields = getMissingClaimFields(parsedFacts.data);
     if (missingFields.length > 0) {
       return NextResponse.json(
@@ -104,33 +95,44 @@ async function legacyAnalyzePost(request: Request): Promise<Response> {
       );
     }
 
-    return NextResponse.json(
-      buildAnalysisFromFacts(
-        parsedFacts.data,
-        policies as Policy[],
-        cases as Case[],
-        scripts as Script[],
-        description
-      )
-    );
+    return NextResponse.json(analysisFromFacts(parsedFacts.data, description));
   }
 
-  if (!description && !issueType && !caseId) {
+  if (!description) {
     return NextResponse.json(
-      { error: "Please provide a travel dispute description, issueType, or caseId." },
+      { error: "Please provide structured facts or describe your situation." },
       { status: 400 }
     );
   }
 
-  const result = await buildAnalysisResult(
-    description,
-    policies as Policy[],
-    cases as Case[],
-    scripts as Script[],
-    { caseId: caseId || undefined, issueType }
-  );
-
-  return NextResponse.json(result);
+  // A free-text description goes through the same LLM intake; there is no rule-based fallback.
+  const release = acquireIntakeCapacity();
+  if (!release) {
+    return NextResponse.json(
+      { error: "Intake is busy. Please retry shortly." },
+      { status: 429, headers: { "Retry-After": "60" } }
+    );
+  }
+  try {
+    const intake = await processIntake(description);
+    if (intake.status !== "ready") {
+      return NextResponse.json(
+        { error: intake.safety?.message ?? "More facts are needed.", ...intake },
+        { status: 422 }
+      );
+    }
+    return NextResponse.json(analysisFromFacts(intake.facts, description));
+  } catch (error) {
+    if (error instanceof IntakeError) {
+      return NextResponse.json(
+        { error: error.message, failureCategory: error.category },
+        { status: error.status }
+      );
+    }
+    return NextResponse.json({ error: "分析暂时失败，请稍后重试。" }, { status: 503 });
+  } finally {
+    release();
+  }
 }
 
 export async function POST(request: Request): Promise<Response> {

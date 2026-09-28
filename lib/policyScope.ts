@@ -4,7 +4,7 @@ import {
   isEuOperatingCarrier,
   isUkOrEuOperatingCarrier
 } from "./jurisdiction";
-import { findProviderMatch, providersMatch } from "./provider";
+import { findExactProviderMatch, providersMatch } from "./provider";
 import type {
   ApplicabilityStatus,
   Controllability,
@@ -45,7 +45,8 @@ export function controllabilityFromReason(
   if (reason === "crew" || reason === "mechanical" || reason === "other_controllable") {
     return "controllable";
   }
-  if (reason === "weather") {
+  // Controllability is from the airline perspective, not a finding of legal fault.
+  if (reason === "weather" || reason === "passenger_side") {
     return "uncontrollable";
   }
   return "unknown";
@@ -53,7 +54,7 @@ export function controllabilityFromReason(
 
 export function policyRegionsFromCountry(country: string | undefined): PolicyRegion[] {
   const normalized = country?.trim().toLowerCase();
-  if (!normalized) {
+  if (!normalized || normalized === "unknown") {
     return [];
   }
   if (euCountries.has(normalized)) {
@@ -123,7 +124,7 @@ export function applicabilityRuleMatches(
   const hasExplicitRoute = Boolean(query.originRegion || query.destinationRegion);
   const originMatches = includesRouteRegion(applicableRegions, query.originRegion);
   const destinationMatches = includesRouteRegion(applicableRegions, query.destinationRegion);
-  const carrier = query.operatingCarrier ?? query.provider;
+  const carrier = query.operatingCarrier;
 
   if (rule === "origin_region") {
     return hasExplicitRoute ? originMatches : coarseRegionMatch(applicableRegions, query);
@@ -189,10 +190,10 @@ function evaluateRouteScope(policy: Policy, query: RouteScopeQuery): PolicyCondi
   const { applicability_rule: rule, applicable_regions: regions } = policy;
   const origin = query.originRegion;
   const destination = query.destinationRegion;
-  const carrier = query.operatingCarrier ?? query.provider;
+  const carrier = query.operatingCarrier;
   const carrierRegion =
     query.operatingCarrierRegion ??
-    (carrier ? findProviderMatch(carrier, "airline")?.operatingCarrierRegion : undefined);
+    (carrier ? findExactProviderMatch(carrier, "airline")?.operatingCarrierRegion : undefined);
   const originMatches = includesRouteRegion(regions, origin);
   const destinationMatches = includesRouteRegion(regions, destination);
 
@@ -417,7 +418,9 @@ function evaluateProviderScope(policy: Policy, query: RetrievalQuery): PolicyCon
     );
   }
 
-  if (!query.provider) {
+  const responsibleProvider =
+    policy.legal_regime === "US_AIRLINE_COMMITMENT" ? query.operatingCarrier : query.provider;
+  if (!responsibleProvider) {
     return condition(
       "provider",
       "Provider scope",
@@ -427,15 +430,15 @@ function evaluateProviderScope(policy: Policy, query: RetrievalQuery): PolicyCon
   }
 
   const matches = policy.applicable_providers.some((provider) =>
-    providersMatch(provider, query.provider)
+    providersMatch(provider, responsibleProvider)
   );
   return condition(
     "provider",
     "Provider scope",
     matches ? "met" : "not_met",
     matches
-      ? `${query.provider} matches the source's provider scope.`
-      : `${query.provider} is outside the source's listed providers.`
+      ? `${responsibleProvider} matches the source's provider scope.`
+      : `${responsibleProvider} is outside the source's listed providers.`
   );
 }
 
@@ -469,11 +472,46 @@ function evaluateControllability(policy: Policy, query: RetrievalQuery): PolicyC
   );
 }
 
+export const passengerSideCompensationExplanation =
+  "The passenger reports a document, check-in or conduct reason; mandatory involuntary denied-boarding compensation generally does not apply. Rebooking or refund under the fare rules may still be relevant.";
+
 function evaluateRemedyConditions(
   policy: Policy,
   query: RetrievalQuery
 ): PolicyConditionAssessment[] {
-  const conditions: PolicyConditionAssessment[] = [];
+  const conditions: PolicyConditionAssessment[] = [
+    condition(
+      "eligibility_details",
+      "Other remedy requirements",
+      "unknown",
+      policy.applicable_conditions.join("; "),
+      "remedy"
+    )
+  ];
+  if (
+    policy.legal_regime === "provider_policy" &&
+    /not (?:a )?member|non.member|不是会员|非会员/i.test(query.loyaltyStatus ?? "")
+  ) {
+    conditions[0] = condition(
+      "eligibility_details",
+      "Membership requirement",
+      "not_met",
+      "Reported non-member status does not meet this member guarantee's requirements.",
+      "remedy"
+    );
+  }
+  if (
+    policy.legal_regime === "US_DOT_REFUND" &&
+    (query.journeyStage === "completed" || query.acceptedAlternative === true)
+  ) {
+    conditions[0] = condition(
+      "eligibility_details",
+      "Unused travel and alternatives",
+      "not_met",
+      "This journey was completed or an alternative was accepted. Review any other unused segment separately.",
+      "remedy"
+    );
+  }
 
   if (
     (policy.legal_regime === "EU261" || policy.legal_regime === "UK261") &&
@@ -495,18 +533,35 @@ function evaluateRemedyConditions(
     );
   }
 
-  if (policy.legal_regime === "US_DOT_DENIED_BOARDING" && query.issueType === "denied_boarding") {
+  if (
+    ["US_DOT_DENIED_BOARDING", "EU261", "UK261", "CA_APPR"].includes(policy.legal_regime) &&
+    query.issueType === "denied_boarding"
+  ) {
     const kind = query.deniedBoardingKind;
+    const passengerSide = query.disruptionReason === "passenger_side";
+    const dot = policy.legal_regime === "US_DOT_DENIED_BOARDING";
     conditions.push(
       condition(
         "denied_boarding_kind",
         "Mandatory denied-boarding compensation",
-        !kind || kind === "unknown" ? "unknown" : kind === "involuntary" ? "met" : "not_met",
-        !kind || kind === "unknown"
-          ? "Voluntary versus involuntary denied boarding must be confirmed."
-          : kind === "involuntary"
-            ? "The passenger reports involuntary denied boarding."
-            : "The passenger reports a voluntary bump, which uses negotiated terms instead of mandatory involuntary compensation.",
+        passengerSide
+          ? "not_met"
+          : !kind || kind === "unknown"
+            ? "unknown"
+            : kind === "involuntary"
+              ? dot && query.disruptionReason === "oversales"
+                ? "met"
+                : "unknown"
+              : "not_met",
+        passengerSide
+          ? passengerSideCompensationExplanation
+          : !kind || kind === "unknown"
+            ? "Voluntary versus involuntary denied boarding must be confirmed."
+            : kind === "involuntary"
+              ? dot
+                ? "The passenger reports involuntary denied boarding; oversales must also be confirmed. Other eligibility conditions remain to be verified."
+                : "The passenger reports involuntary denied boarding; reasonable refusal grounds and other eligibility conditions remain to be verified."
+              : "The passenger reports a voluntary bump, which uses negotiated terms instead of mandatory involuntary compensation.",
         "remedy"
       )
     );

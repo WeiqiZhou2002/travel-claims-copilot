@@ -207,6 +207,8 @@ function candidateHasDisruptionReason(
       "前序航班晚到",
       "进港飞机晚到"
     ],
+    passenger_side: ["passport", "visa", "travel documents", "证件", "护照", "签证", "迟到值机"],
+    other_reported: [],
     other_controllable: ["controllable", "airline control", "航司原因", "可控原因"]
   };
 
@@ -269,19 +271,57 @@ function legacyRankCases(
     query.providerType === "hotel" ? canonicalHotelGroup(query.provider) : undefined;
   const candidates = cases.filter((item) => {
     if (skipEligibility) return true;
-    if (item.review_status !== "approved" || !aliases.has(item.issue_type)) {
+    if (
+      item.review_status !== "approved" ||
+      item.source_type === "synthetic_example" ||
+      !aliases.has(item.issue_type)
+    ) {
       return false;
+    }
+    const candidateReason = [item.facts, item.actual_outcome].join(" ");
+    if (
+      query.disruptionReason &&
+      query.disruptionReason !== "unknown" &&
+      query.disruptionReason !== "other_reported"
+    ) {
+      const opposite =
+        query.disruptionReason === "weather"
+          ? (["crew", "mechanical"] as const)
+          : (["weather"] as const);
+      if (
+        opposite.some((reason) => candidateHasDisruptionReason(reason, candidateReason)) &&
+        !candidateHasDisruptionReason(query.disruptionReason, candidateReason)
+      )
+        return false;
+    }
+    if (query.deniedBoardingKind && query.deniedBoardingKind !== "unknown") {
+      const kind = detectDeniedBoardingKind(candidateReason);
+      if (kind !== "unknown" && kind !== query.deniedBoardingKind) return false;
     }
     if (queryHotelGroup) {
       const caseHotelGroup =
         canonicalHotelGroup(item.provider) ?? canonicalHotelGroup(item.brand_or_airline);
       return item.provider_type === "hotel" && caseHotelGroup === queryHotelGroup;
     }
-    if (item.provider_type !== "airline" || query.policyRegions.length === 0) {
-      return true;
+    if (item.provider_type !== "airline") return true;
+    // Without route geography, a shared incident alone is too weak a basis
+    // for borrowing another airline's outcome from a different jurisdiction.
+    if (query.policyRegions.length === 0) {
+      return (
+        providersMatch(query.carrier, item.carrier) ||
+        providersMatch(query.ticketingProvider, item.provider)
+      );
     }
 
     const caseRegions = policyRegionsFromCountry(item.location_country);
+    // A newly imported case may not have normalized geography yet. Only a
+    // matching issuer/carrier pair can rescue it, as a conditional analogue.
+    if (caseRegions.length === 0) {
+      return (
+        providersMatch(query.carrier, item.carrier) &&
+        providersMatch(query.ticketingProvider, item.provider)
+      );
+    }
     return caseRegions.some((region) => query.policyRegions.includes(region));
   });
 
@@ -289,6 +329,7 @@ function legacyRankCases(
     let result: ScoredRetrievalItem<Case> = { item, score: 0, reasons: [] };
     const candidateText = [
       item.provider,
+      item.carrier,
       item.brand_or_airline,
       item.facts,
       item.actual_outcome,
@@ -297,7 +338,23 @@ function legacyRankCases(
     ].join(" ");
 
     result = addIssueScore(result, query, item.issue_type);
-    result = addProviderScore(result, query.provider, item.provider);
+    if (item.provider_type === "airline") {
+      const issuerMatches = providersMatch(query.ticketingProvider, item.provider);
+      const carrierMatches = providersMatch(query.carrier, item.carrier);
+      if (issuerMatches) result = addScore(result, 20, "ticketing_provider_match");
+      if (carrierMatches) result = addScore(result, 20, "carrier_match");
+      if (issuerMatches && carrierMatches) {
+        result = addScore(result, 10, "provider_carrier_pair_match");
+      }
+      if (
+        query.policyRegions.length > 0 &&
+        policyRegionsFromCountry(item.location_country).length === 0
+      ) {
+        result = addScore(result, -10, "route_scope_unknown");
+      }
+    } else {
+      result = addProviderScore(result, query.provider, item.provider ?? "");
+    }
 
     if (query.providerType === item.provider_type) {
       result = addScore(result, 8, "provider_type_match");
@@ -414,6 +471,18 @@ function legacyRankScripts(
 ): ScoredRetrievalItem<Script>[] {
   const candidates = scripts.filter((script) => {
     if (skipEligibility) return true;
+    if (
+      query.disruptionReason === "passenger_side" &&
+      script.required_denied_boarding_kind === "involuntary"
+    )
+      return false;
+    if (
+      script.required_denied_boarding_kind &&
+      script.required_denied_boarding_kind !== query.deniedBoardingKind
+    )
+      return false;
+    // Escalation needs a previous provider response, which intake does not yet verify.
+    if (script.channel === "regulator_complaint") return false;
     const incidentMatches = script.incident_types.some(
       (incidentType) => incidentType === query.issueType
     );
@@ -488,6 +557,7 @@ function queryFromContext(context: ResolvedClaimContext): RetrievalQuery {
     isOvernight: context.resolutionFacts.isOvernight ?? undefined,
     deniedBoardingKind: context.resolutionFacts.deniedBoardingKind ?? undefined,
     operatingCarrier: context.normalizedOperatingCarrier.value ?? undefined,
+    carrier: context.normalizedOperatingCarrier.value ?? undefined,
     operatingCarrierRegion: context.jurisdiction.operatingCarrierRegion.value ?? undefined,
     originRegion: origin,
     destinationRegion: destination,
@@ -528,7 +598,10 @@ export function caseComparabilityKey(context: ResolvedClaimContext, item: Case):
     scenariosForIncident(item.issue_type).includes(active)
   );
   if (!scenario) return null;
-  const provider = comparableProviderKey(item.provider);
+  // Airline cases compare the operating carrier; their provider is the ticketing source.
+  const provider = comparableProviderKey(
+    item.provider_type === "airline" ? item.carrier : item.provider
+  );
   const currentProvider = comparableProviderKey(currentProviderForRetrieval(context));
   if (provider && currentProvider && provider !== currentProvider) return null;
   return `${scenario}:${provider && currentProvider ? provider : "any"}`;

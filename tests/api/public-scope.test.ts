@@ -50,14 +50,12 @@ describe("public scenario scope", () => {
     ]);
   });
 
-  it.each([
-    { description: "My flight was cancelled." },
-    { issueType: "airline_cancellation" },
-    { caseId: "uscf_aa127_mechanical_delay_overnight_2026_07" }
-  ])("keeps the established legacy analyze contract", async (body) => {
-    const response = await analyzeRequest(body);
+  it("routes a free-text legacy description through LLM intake instead of rules", async () => {
+    const response = await analyzeRequest({ description: "My flight was cancelled." });
 
-    expect(response.status).toBe(200);
+    // No model is configured in tests; the route fails clearly rather than classifying by rules.
+    expect(response.status).toBe(503);
+    expect((await response.json()).failureCategory).toBe("not_configured");
   });
 
   it("rejects malformed legacy structured facts", async () => {
@@ -70,22 +68,25 @@ describe("public scenario scope", () => {
     ["baggage", { description: "My baggage has not arrived." }],
     ["insurance", { description: "My Amex travel protection claim was denied." }],
     ["property loss", { description: "I need help with a lost item at my hotel." }],
-    ["unrelated hotel", { description: "The hotel charged incorrect billing on my folio." }],
-    ["dormant case", { caseId: "uscf_delta_baggage_delay_2026_03" }]
-  ])("rejects legacy %s input before analysis", async (_label, body) => {
+    ["unrelated hotel", { description: "The hotel charged incorrect billing on my folio." }]
+  ])("never analyzes legacy %s input without model facts", async (_label, body) => {
     const response = await analyzeRequest(body);
 
-    await expectUnprocessable(response);
+    expect(response.status).toBe(503);
   });
 
-  it.each(["constructor", "toString", "__proto__"])(
-    "rejects inherited legacy selector %s",
-    async (issueType) => {
-      const response = await analyzeRequest({ issueType });
+  it.each([
+    { issueType: "airline_cancellation" },
+    { caseId: "uscf_aa127_mechanical_delay_overnight_2026_07" },
+    { caseId: "uscf_delta_baggage_delay_2026_03" },
+    { issueType: "constructor" },
+    { issueType: "toString" },
+    { issueType: "__proto__" }
+  ])("no longer analyzes a bare legacy selector %o", async (body) => {
+    const response = await analyzeRequest(body);
 
-      await expectUnprocessable(response);
-    }
-  );
+    expect(response.status).toBe(400);
+  });
 
   it.each([
     ["issueType", "baggage_delay"],

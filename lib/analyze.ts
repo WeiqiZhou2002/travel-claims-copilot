@@ -1,28 +1,11 @@
-import { deterministicFactExtractor } from "./classifier";
 import { buildActionPlan } from "./actionPlan";
 import { generateAnalysis } from "./generator";
 import { buildHandlingPlaybook } from "./handlingPlaybook";
 import { controllabilityFromReason } from "./policyScope";
 import { retrieveKnowledge } from "./retrieval";
 import type { ClaimFacts } from "./claimFacts";
-import type {
-  AnalysisResult,
-  AnalyzeOptions,
-  Case,
-  ExtractedFacts,
-  PolicyRegion,
-  Policy,
-  Script
-} from "./types";
-import type { FactExtractor } from "./classifier";
+import type { AnalysisResult, Case, ExtractedFacts, PolicyRegion, Policy, Script } from "./types";
 
-export {
-  classifyInput,
-  classifyIssue,
-  DeterministicFactExtractor,
-  deterministicFactExtractor
-} from "./classifier";
-export type { FactExtractor } from "./classifier";
 export { generateAnalysis } from "./generator";
 export {
   getIssueAliases,
@@ -54,8 +37,14 @@ function policyRegionsFromClaimFacts(facts: ClaimFacts): PolicyRegion[] {
 export function claimFactsToExtractedFacts(facts: ClaimFacts, description = ""): ExtractedFacts {
   return {
     description,
+    journeyStage: facts.journeyStage,
+    ticketingProvider: facts.bookingProvider ?? facts.validatingCarrier ?? undefined,
+    acceptedAlternative: facts.acceptedAlternative,
     issueType: facts.issueType,
-    provider: facts.provider ?? facts.operatingCarrier ?? undefined,
+    provider:
+      facts.providerType === "airline"
+        ? (facts.operatingCarrier ?? facts.provider ?? undefined)
+        : (facts.provider ?? undefined),
     providerType: facts.providerType === "unknown" ? undefined : facts.providerType,
     country: facts.origin.country ?? facts.destination.country ?? undefined,
     bookingChannel: facts.bookingChannel === "unknown" ? undefined : facts.bookingChannel,
@@ -64,7 +53,7 @@ export function claimFactsToExtractedFacts(facts: ClaimFacts, description = ""):
     arrivalDelayMinutes: facts.arrivalDelayMinutes ?? undefined,
     isOvernight: facts.isOvernight ?? undefined,
     deniedBoardingKind: facts.deniedBoardingKind,
-    operatingCarrier: facts.operatingCarrier ?? facts.provider ?? undefined,
+    operatingCarrier: facts.operatingCarrier ?? undefined,
     operatingCarrierRegion: facts.operatingCarrierRegion ?? undefined,
     originRegion: facts.origin.region ?? undefined,
     destinationRegion: facts.destination.region ?? undefined,
@@ -74,25 +63,6 @@ export function claimFactsToExtractedFacts(facts: ClaimFacts, description = ""):
     signals: [],
     source: "llm"
   };
-}
-
-export type AnalysisDependencies = {
-  factExtractor?: FactExtractor;
-};
-
-export async function buildAnalysisResult(
-  description: string,
-  policies: Policy[],
-  cases: Case[],
-  scripts: Script[],
-  options: AnalyzeOptions = {},
-  dependencies: AnalysisDependencies = {}
-): Promise<AnalysisResult> {
-  const factExtractor = dependencies.factExtractor ?? deterministicFactExtractor;
-  const facts = await factExtractor.extract(description, options);
-  const retrieval = retrieveKnowledge(facts, policies, cases, scripts);
-
-  return generateAnalysis(retrieval.facts, retrieval);
 }
 
 export function buildAnalysisFromFacts(
@@ -106,6 +76,12 @@ export function buildAnalysisFromFacts(
   const retrieval = retrieveKnowledge(extractedFacts, policies, cases, scripts);
   const analysis = generateAnalysis(retrieval.facts, retrieval);
   const handlingPlaybook = buildHandlingPlaybook(facts);
+  if (facts.journeyStage === "completed") {
+    handlingPlaybook.askLadder = [
+      ...analysis.suggestedAsks.conservative,
+      ...analysis.suggestedAsks.standard
+    ];
+  }
 
   return {
     ...analysis,
