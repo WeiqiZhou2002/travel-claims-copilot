@@ -81,6 +81,7 @@ Rules:
 - Classify the incident as airline_delay or airline_cancellation independently from policy jurisdiction.
 - Airline oversales or bumping is denied_boarding; distinguish voluntary from involuntary when stated.
 - Weather is not a controllable airline reason.
+- other_controllable means a reported cause within the AIRLINE'S control, never a passenger-controlled problem. Invalid passports/visas, missing travel documents, late check-in and passenger conduct do not fit this cause enum: return disruptionReason unknown, never other_controllable or oversales. Do not infer airline fault merely because an airline made the decision.
 - A late inbound aircraft is a reported reason, not by itself a finding that the circumstances were within airline control.
 - Route regions determine which policies may apply; do not encode EU261 or another legal regime as the issue type.
 - Return only the schema-defined structured output.`;
