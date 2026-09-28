@@ -1,3 +1,4 @@
+import { passengerSideCompensationExplanation } from "./policyScope";
 import type {
   LegalRegime,
   RemedyDecision,
@@ -33,7 +34,10 @@ export function assessRemedies(retrieval: RetrievalResult): RemedyDecision[] {
           ? "not_supported"
           : "needs_verification",
       explanation:
-        ids.length === 0 && id !== "goodwill" && id !== "voluntary_offer"
+        !excluded &&
+        ids.length === 0 &&
+        id !== "goodwill" &&
+        id !== "voluntary_offer"
           ? "No matching official basis in the reviewed local data. This is not a finding that no rights exist."
           : explanation,
       request,
@@ -113,12 +117,14 @@ export function assessRemedies(retrieval: RetrievalResult): RemedyDecision[] {
       "fixed_compensation",
       "Compensation eligibility",
       compensationSources,
-      voluntary || shortEuDelay,
-      voluntary
-        ? "A voluntary offer is negotiated separately from mandatory involuntary-denial compensation."
-        : shortEuDelay
-          ? "The reported arrival delay is below the evaluated EU/UK delay threshold; care remains a separate question."
-          : "Eligibility remains unconfirmed: check arrival timing, cause and exceptions, cancellation notice, or oversales and check-in requirements as applicable. No amount is determined.",
+      q.disruptionReason === "passenger_side" || voluntary || shortEuDelay,
+      q.disruptionReason === "passenger_side"
+        ? passengerSideCompensationExplanation
+        : voluntary
+          ? "A voluntary offer is negotiated separately from mandatory involuntary-denial compensation."
+          : shortEuDelay
+            ? "The reported arrival delay is below the evaluated EU/UK delay threshold; care remains a separate question."
+            : "Eligibility remains unconfirmed: check arrival timing, cause and exceptions, cancellation notice, or oversales and check-in requirements as applicable. No amount is determined.",
       "Request an assessment of compensation only after confirming every applicable eligibility condition and exception.",
     );
     if (voluntary)
