@@ -496,3 +496,9 @@ Let users submit outcomes:
 - final compensation or resolution
 
 This outcome data can later improve case ranking and script suggestions.
+
+## DP 审核工作台
+
+本地运行后访问 `/review`，读取研究批次并逐条核对、编辑、补证或批准入库。已批准版本即时进入新请求的案例检索；保存修改、撤回或排除会移除发布版本。
+
+存储、备份及后续远程 agent / 数据库接入说明见 [docs/dp-review.md](docs/dp-review.md)。当前审核接口仅适用于本机，不应直接暴露到公网。

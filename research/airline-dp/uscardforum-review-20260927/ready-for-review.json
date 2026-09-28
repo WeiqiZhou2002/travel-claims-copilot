@@ -1,0 +1,2857 @@
+[
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-484406-dfw",
+    "title": "AA 取消后重出票异常：7500 里程及食宿补偿",
+    "reporter": "dfw",
+    "source_type": "community_dp",
+    "event": {
+      "description": "原 PVG–DFW 航班取消；改经日本后因出票问题被 JL 拒载，再滞留三天。",
+      "occurred_at": {
+        "text": "原航班 1/24；改签 1/27 至 1/30（2026 年帖内上下文）",
+        "normalized": "2026-01-24",
+        "precision": "day"
+      },
+      "provider": null,
+      "carrier": "American Airlines",
+      "airline_reported": "AA；改签后 JL",
+      "route": {
+        "origin": "PVG",
+        "destination": "DFW",
+        "text": "PVG–DFW；改签经日本，日本机场未披露"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": {
+      "description": "原取消归因暴雪；后续出票错误由作者转述客服承认。",
+      "attributed_to": "airline",
+      "evidence_ids": [
+        "e2"
+      ]
+    },
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "邮件申诉，强调天气取消与后续出票错误应分开处理。",
+        "channel": "email",
+        "evidence_ids": [
+          "e3"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "先按天气拒绝食宿赔付，给予里程。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "miles",
+              "description": "善意里程",
+              "amount": 7500,
+              "currency_or_program": "AAdvantage",
+              "unit": "每账户",
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "final",
+          "description": "复核后作者报告获得酒店及餐饮补偿。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "expense_reimbursement",
+              "description": "酒店及餐饮；金额未从文本确认",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e5"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e5"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/484406",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-02-17 19:09",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "主楼及 #2–14；重点 #1、3",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1；#3 本人发布的申诉邮件"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "dfw；#1；#3 本人发布的申诉邮件",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "dfw；#1、3",
+        "excerpt": null,
+        "supports": [
+          "cause"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "dfw；#3",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "dfw；#1、3",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e5",
+        "source_id": "s1",
+        "locator": "dfw；#1、3",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "event.provider"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "只统计航司处置；CSP 保险不计入。未读取截图中的金额。原出票方不因 AA 处理改签而回填。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-528095-alzuhod",
+    "title": "AA 错失衔接：拒绝食宿，升级投诉后获小额补偿",
+    "reporter": "Alzuhod",
+    "source_type": "community_dp",
+    "event": {
+      "description": "BUF–PHL 延误后未赶上 SEA 航班，被改经 ORD 过夜。",
+      "occurred_at": {
+        "text": "作者称最近返家；8/28 已等数日投诉回复，具体乘机日未披露",
+        "normalized": null,
+        "precision": "relative"
+      },
+      "provider": "Capital One Travel",
+      "carrier": "American Airlines",
+      "airline_reported": "AA",
+      "route": {
+        "origin": "BUF",
+        "destination": "SEA",
+        "text": "BUF–PHL–SEA；替代 PHL–ORD–SEA"
+      },
+      "issue_type": "airline_delay",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": {
+      "description": "AA 书面归因为空管限制。",
+      "attributed_to": "airline",
+      "evidence_ids": [
+        "e2"
+      ]
+    },
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": "2026-09-01 更新",
+        "description": "两轮邮件无果后转交 AA 高层投诉。",
+        "channel": "email",
+        "evidence_ids": [
+          "e3"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "改签经 ORD，拒绝提供酒店及食宿。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "经 ORD 过夜",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e4"
+              ]
+            },
+            {
+              "kind": "care",
+              "description": "酒店及食宿",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "rejected",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "final",
+          "description": "升级后作者报告获 credit 和里程。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "voucher",
+              "description": "AA credit",
+              "amount": 25,
+              "currency_or_program": "USD",
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e5"
+              ]
+            },
+            {
+              "kind": "miles",
+              "description": "里程",
+              "amount": 5000,
+              "currency_or_program": "AAdvantage",
+              "unit": "每人",
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e5"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e5"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/528095",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-08-28 00:15",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "主楼更新至 2026-09-01；#2–12",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1、2、5"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "Alzuhod；#1、2、5",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "Alzuhod；#1、5",
+        "excerpt": null,
+        "supports": [
+          "cause"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "Alzuhod；#1 9/1 更新",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "Alzuhod；#1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e5",
+        "source_id": "s1",
+        "locator": "Alzuhod；#1 9/1 更新",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "$25 的人数单位未明确；不默认每人。保险结果未纳入。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-496402-jerry66",
+    "title": "DL281 取消返家后，积分退款被拒",
+    "reporter": "Jerry66",
+    "source_type": "community_dp",
+    "event": {
+      "description": "已飞抵 SEA 后 DL281 取消；后续等候方案约四天，五人选择返家。",
+      "occurred_at": {
+        "text": "上个月（相对 2026-04-04 发帖）",
+        "normalized": "2026-03",
+        "precision": "month"
+      },
+      "provider": null,
+      "carrier": "Delta Air Lines",
+      "airline_reported": "Delta / DL281",
+      "route": {
+        "origin": "SEA",
+        "destination": "PVG",
+        "text": "受影响 SEA–PVG；前段出发城市未披露"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": {
+      "description": "作者归因西雅图暴雪。",
+      "attributed_to": "passenger",
+      "evidence_ids": [
+        "e2"
+      ]
+    },
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "要求先返家再退款；按电话指引提交退款申请。",
+        "channel": "phone",
+        "evidence_ids": [
+          "e3"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "not_reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "提供四天后候补；柜台称可退款，未提供食宿。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "四天后候补",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "offered",
+              "evidence_ids": [
+                "e4"
+              ]
+            },
+            {
+              "kind": "refund",
+              "description": "柜台所称退款",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "promised",
+              "evidence_ids": [
+                "e4"
+              ]
+            },
+            {
+              "kind": "care",
+              "description": "食宿未提供",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "rejected",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "intermediate",
+          "description": "退款部门随后拒绝退还积分。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "refund",
+              "description": "积分退款",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "rejected",
+              "evidence_ids": [
+                "e5"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e5"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/496402",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-04-04 01:18",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "#1–20；作者 #1、7、8、10、12、13、19",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1、7、10、12"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "Jerry66；#1、7、10、12",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "Jerry66；#1",
+        "excerpt": null,
+        "supports": [
+          "cause"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "Jerry66；#7、8、12",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "Jerry66；#12、13",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e5",
+        "source_id": "s1",
+        "locator": "Jerry66；#1、8",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "event.provider"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "23 万是五人原票积分总量，不是赔偿额。柜台承诺与退款部门拒绝按先后保留；未获最终解决更新。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-477236-gcjy",
+    "title": "JL12 取消：拒绝降舱后在羽田完成改签",
+    "reporter": "GCJY",
+    "source_type": "community_dp",
+    "event": {
+      "description": "CTS–HND–DFW 行程的 1/24 JL12 取消，曾被改成经 SFO 的经济舱。",
+      "occurred_at": {
+        "text": "原定 2026-01-24 HND–DFW；1/22 收到取消通知",
+        "normalized": "2026-01-24",
+        "precision": "day"
+      },
+      "provider": null,
+      "carrier": "Japan Airlines",
+      "airline_reported": "JL；同行两票由 AA / AS 分别兑换",
+      "route": {
+        "origin": "HND",
+        "destination": "DFW",
+        "text": "受影响 HND–DFW；全程 CTS–HND–DFW"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": {
+      "description": "取消邮件称 DFW 极端天气。",
+      "attributed_to": "airline",
+      "evidence_ids": [
+        "e2"
+      ]
+    },
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "联系出票方及日航，拒绝降舱；赴 HND F14 柜台处理。",
+        "channel": "phone_and_airport",
+        "evidence_ids": [
+          "e3"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "CTS 柜台先提 AA 高经/经济舱，后要求找出票方。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "AA 替代舱位",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "withdrawn",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "intermediate",
+          "description": "先改经 SFO 的经济舱。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "经 SFO 经济舱",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e5"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e5"
+          ]
+        },
+        {
+          "response_id": "r3",
+          "order": 3,
+          "time_text": null,
+          "phase": "final",
+          "description": "HND 改为 1/25 JL12，并告知延至 1/26。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "JL12 后续航班",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e6"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e6"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/477236",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-01-22 15:14",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "主楼三次更新；#2–20",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1；#13"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "GCJY；#1；#13",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "GCJY；#1",
+        "excerpt": null,
+        "supports": [
+          "cause"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "GCJY；#1 更新 2",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "GCJY；#1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e5",
+        "source_id": "s1",
+        "locator": "GCJY；#1 更新 1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e6",
+        "source_id": "s1",
+        "locator": "GCJY；#1 更新 2",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[2]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "event.provider"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "未明确本人对应 AA 还是 AS，provider 留空。最终舱等与实际到达时间未明确。$991 为保险报销，排除。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-473103-mrmitchelldevis",
+    "title": "VS 出 KLM 联程取消：多次改签后实际乘 BA 到 PIT",
+    "reporter": "mrmitchelldevis",
+    "source_type": "community_dp",
+    "event": {
+      "description": "KL1001 取消，影响 VS 里程兑换的 AMS–LHR–MIA 联程。",
+      "occurred_at": {
+        "text": "原计划 Jan 9，2026 年帖内上下文",
+        "normalized": "2026-01-09",
+        "precision": "day"
+      },
+      "provider": "Virgin Atlantic",
+      "carrier": "KLM",
+      "airline_reported": "VS 出票；KL1001",
+      "route": {
+        "origin": "AMS",
+        "destination": "LHR",
+        "text": "受影响 AMS–LHR；原兑换行程 AMS–LHR–MIA"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": {
+      "description": "作者称阿姆斯特丹天气导致取消。",
+      "attributed_to": "passenger",
+      "evidence_ids": [
+        "e2"
+      ]
+    },
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "两次致电 AF 要求调整，并到机场值机。",
+        "channel": "phone_and_airport",
+        "evidence_ids": [
+          "e3"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "自动改为 KL627 AMS–MIA 商务。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "KL627",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "intermediate",
+          "description": "客服称已换 KL1005+VS117，但作者遇到航段显示及值机异常。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "KL1005+VS117",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "promised",
+              "evidence_ids": [
+                "e5"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e5"
+          ]
+        },
+        {
+          "response_id": "r3",
+          "order": 3,
+          "time_text": null,
+          "phase": "final",
+          "description": "再改 KL1005+BA171+AA；作者实际搭 BA 到 PIT。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "KL/BA/AA 替代行程",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e6"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e6"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/473103",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-01-09 00:30",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "#1–20；重点 #1、14、15、19",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "mrmitchelldevis；#1",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "mrmitchelldevis；#1",
+        "excerpt": null,
+        "supports": [
+          "cause"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "mrmitchelldevis；#1、15",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "mrmitchelldevis；#1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e5",
+        "source_id": "s1",
+        "locator": "mrmitchelldevis；#1、14",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e6",
+        "source_id": "s1",
+        "locator": "mrmitchelldevis；#1、15",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[2]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "#19 对同步问题有修正，未把作者早期系统猜测认定为故障原因。未飞 PIT–MIA 不转化为建议。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-493023-soulhom",
+    "title": "AS 出 QR：先绕 ORD，后签转 TK",
+    "reporter": "soulhom",
+    "source_type": "community_dp",
+    "event": {
+      "description": "5 月初 MLE–DOH–SFO 的后段取消。",
+      "occurred_at": {
+        "text": "原旅行时间 2026 年 5 月初；4/1 本人确认取消",
+        "normalized": "2026-05",
+        "precision": "month"
+      },
+      "provider": "Alaska Airlines",
+      "carrier": "Qatar Airways",
+      "airline_reported": "AS 出 QR",
+      "route": {
+        "origin": "DOH",
+        "destination": "SFO",
+        "text": "受影响 DOH–SFO；全程 MLE–DOH–SFO"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1",
+        "e5"
+      ]
+    },
+    "cause": null,
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "多次致电 AS。",
+        "channel": "phone",
+        "evidence_ids": [
+          "e2"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "先改经 DOH、ORD。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "MLE–DOH–ORD–SFO",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e3"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e3"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "final",
+          "description": "4/28 更新改为土航经 IST。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "TK：MLE–IST–SFO",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/493023",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-03-22 06:19",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "首页 #1–20；重点各报告者本人楼层",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1（含 4/28 更新）"
+      },
+      {
+        "url": "https://www.uscardforum.com/t/topic/493023?page=2",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-04-01 至 2026-05-12（相关回复）",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "第二页 #21–40",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s2",
+        "post_locator": "第二页 #21–40"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "soulhom；#1（含 4/28 更新）",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "soulhom；#1",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s2",
+        "locator": "soulhom；#22、24",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "soulhom；#1 更新",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e5",
+        "source_id": "s2",
+        "locator": "soulhom；#22、24",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.issue_type"
+        ],
+        "note": "本人明确报告 DOH–SFO 已取消。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "cause"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "#1 初发帖仅疑似取消，确认取消证据在第二页 #22、24；不据战争讨论填写原因。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-493023-xiaodaobay",
+    "title": "QR 取消 SFO 出发：改 SEA，选座收费另待确认",
+    "reporter": "xiaodaobay",
+    "source_type": "community_dp",
+    "event": {
+      "description": "6 月 SFO–DOH 取消。",
+      "occurred_at": {
+        "text": "6 月份；2026 年讨论上下文",
+        "normalized": "2026-06",
+        "precision": "month"
+      },
+      "provider": "Qatar Airways",
+      "carrier": "Qatar Airways",
+      "airline_reported": "QR",
+      "route": {
+        "origin": "SFO",
+        "destination": "DOH",
+        "text": "SFO–DOH；另购 DOH–MLE，不合并为联程"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1",
+        "e4"
+      ]
+    },
+    "cause": null,
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "致电美国客服要求改出发地。",
+        "channel": "phone",
+        "evidence_ids": [
+          "e2"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "not_reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "已改为 SEA–DOH，R 舱；选座需付费。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "SEA–DOH",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e3"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e3"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/493023",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-03-22 06:19",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "首页 #1–20；重点各报告者本人楼层",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#8、15；取消及处置见第二页"
+      },
+      {
+        "url": "https://www.uscardforum.com/t/topic/493023?page=2",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-04-01 至 2026-05-12（相关回复）",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "第二页 #21–40",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s2",
+        "post_locator": "第二页 #21–40"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "xiaodaobay；#8、15；取消及处置见第二页",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s2",
+        "locator": "xiaodaobay；#25、27",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s2",
+        "locator": "xiaodaobay；#27、30",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s2",
+        "locator": "xiaodaobay；#25",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.issue_type"
+        ],
+        "note": "本人确认取消。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "cause"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "未见选座费减免结果与实际成行更新；同帖另两人各有独立 DP。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-493023-minalinsky",
+    "title": "QR 取消 SFO 出发：仅提供 DFW 出发选项",
+    "reporter": "minalinsky",
+    "source_type": "community_dp",
+    "event": {
+      "description": "6/5 SFO–DOH–MLE 已被取消。",
+      "occurred_at": {
+        "text": "6.5；2026 年上下文",
+        "normalized": "2026-06-05",
+        "precision": "day"
+      },
+      "provider": null,
+      "carrier": "Qatar Airways",
+      "airline_reported": "QR",
+      "route": {
+        "origin": "SFO",
+        "destination": "MLE",
+        "text": "SFO–DOH–MLE"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": null,
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "致电询问替代行程。",
+        "channel": "phone",
+        "evidence_ids": [
+          "e2"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "not_reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "仅提供 DFW–DOH–MLE 改签选项。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "DFW 出发",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "offered",
+              "evidence_ids": [
+                "e3"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e3"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "intermediate",
+          "description": "作者补充需自行解决前往 DFW。",
+          "after_action_id": null,
+          "measures": [],
+          "evidence_ids": [
+            "e4"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/493023",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-03-22 06:19",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "首页 #1–20；重点各报告者本人楼层",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#20"
+      },
+      {
+        "url": "https://www.uscardforum.com/t/topic/493023?page=2",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-04-01 至 2026-05-12（相关回复）",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "第二页 #21–40",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s2",
+        "post_locator": "第二页 #21–40"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "minalinsky；#20",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "minalinsky；#20",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "minalinsky；#20",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s2",
+        "locator": "minalinsky；#23",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "cause",
+        "event.provider"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "后续仍讨论日期选择；未把 offered 写成已改签。",
+        "QR 不承担 SFO–DFW 的直接依据是第二页 #23。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-126649-frozenz0717-outbound",
+    "title": "Porter 延误错失衔接：住宿与代金券",
+    "reporter": "FrozenZ0717",
+    "source_type": "community_dp",
+    "event": {
+      "description": "EWR–YTZ 延误错失去 YQB 衔接，滞留多伦多。",
+      "occurred_at": {
+        "text": "5/28；文中称距发帖七个月",
+        "normalized": "2022-05-28",
+        "precision": "day"
+      },
+      "provider": null,
+      "carrier": "Porter Airlines",
+      "airline_reported": "Porter",
+      "route": {
+        "origin": "EWR",
+        "destination": "YQB",
+        "text": "EWR–YTZ–YQB"
+      },
+      "issue_type": "airline_delay",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": {
+      "description": "作者称天气导致机组短缺。",
+      "attributed_to": "passenger",
+      "evidence_ids": [
+        "e2"
+      ]
+    },
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "争取额外补偿。",
+        "channel": null,
+        "evidence_ids": [
+          "e3"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "安排候补及 Fairmont 住宿。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "care",
+              "description": "住宿",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "final",
+          "description": "另给予航空代金券。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "voucher",
+              "description": "航空代金券",
+              "amount": 50,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e5"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e5"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/126649",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2022-12-30 16:39",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "#1–20；重点 #1、12、15",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1 去程段"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "FrozenZ0717；#1 去程段",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "FrozenZ0717；#1",
+        "excerpt": null,
+        "supports": [
+          "cause"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "FrozenZ0717；#1",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "FrozenZ0717；#1、15",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e5",
+        "source_id": "s1",
+        "locator": "FrozenZ0717；#1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "event.provider"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "历史样本。币种未明确，不推定 USD 或 CAD；餐费金额作者记忆不确定，不填数值。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-126649-frozenz0717-return",
+    "title": "AC 返程取消：拒赔并给折扣码",
+    "reporter": "FrozenZ0717",
+    "source_type": "community_dp",
+    "event": {
+      "description": "YUL–EWR 先延误后取消，滞留蒙特利尔一晚。",
+      "occurred_at": {
+        "text": "6/1；同帖 2022 年行程",
+        "normalized": "2022-06-01",
+        "precision": "day"
+      },
+      "provider": "Air Canada",
+      "carrier": "Air Canada",
+      "airline_reported": "AC",
+      "route": {
+        "origin": "YUL",
+        "destination": "EWR",
+        "text": "YUL–EWR"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": {
+      "description": "作者称天气；AC 以天气拒赔。",
+      "attributed_to": "airline",
+      "evidence_ids": [
+        "e2"
+      ]
+    },
+    "passenger_actions": null,
+    "airline_handling": {
+      "initial_status": "not_reported",
+      "final_status": "not_reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "unknown",
+          "description": "拒绝赔偿，给出 25% 折扣码。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "cash_compensation",
+              "description": "赔偿请求",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "rejected",
+              "evidence_ids": [
+                "e3"
+              ]
+            },
+            {
+              "kind": "other",
+              "description": "25% 折扣码；是否使用未披露",
+              "amount": 25,
+              "currency_or_program": "percent",
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e3"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e3"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/126649",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2022-12-30 16:39",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "#1–20；重点 #1、12、15",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1 返程段；#9"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "FrozenZ0717；#1 返程段；#9",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "FrozenZ0717；#1",
+        "excerpt": null,
+        "supports": [
+          "cause"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "FrozenZ0717；#1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "passenger_actions"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "历史样本。与同作者 5/28 事件日期、航司及航线不同，分为独立 DP；保险不计入。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-469439-qaz158aaa",
+    "title": "AA 机组问题延误：安排次日衔接及食宿",
+    "reporter": "qaz158aaa",
+    "source_type": "community_dp",
+    "event": {
+      "description": "LAX–DFW 延误两小时，错失后续衔接并改到次日。",
+      "occurred_at": {
+        "text": "今天；相对 2025-12-28 页面时间，当地日期未校验",
+        "normalized": null,
+        "precision": "relative"
+      },
+      "provider": null,
+      "carrier": "American Airlines",
+      "airline_reported": "AA",
+      "route": {
+        "origin": "LAX",
+        "destination": "DFW",
+        "text": "已识别 LAX–DFW；后续目的地未披露"
+      },
+      "issue_type": "airline_delay",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": {
+      "description": "本段机组缺位；前序原因在原帖称换机、后续总结称天气，保留差异。",
+      "attributed_to": "passenger",
+      "evidence_ids": [
+        "e2",
+        "e5"
+      ]
+    },
+    "passenger_actions": null,
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "改签到次日并提供酒店和餐券。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "次日衔接",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e3"
+              ]
+            },
+            {
+              "kind": "care",
+              "description": "酒店及餐券",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e3"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e3"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "final",
+          "description": "关联总结报告 AA 另给 credit 与积分。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "voucher",
+              "description": "AA credit",
+              "amount": 100,
+              "currency_or_program": "USD",
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e4"
+              ]
+            },
+            {
+              "kind": "miles",
+              "description": "AA 积分",
+              "amount": 5000,
+              "currency_or_program": "AAdvantage",
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/469439",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2025-12-28 02:50",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "#1–2",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1"
+      },
+      {
+        "url": "https://www.uscardforum.com/t/topic/478003",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2026-01-24 23:17",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "主楼总结及其原帖链接；提取主楼 AA 条目",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s2",
+        "post_locator": "主楼总结及其原帖链接；提取主楼 AA 条目"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "qaz158aaa；#1",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "qaz158aaa；#1",
+        "excerpt": null,
+        "supports": [
+          "cause"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "qaz158aaa；#1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s2",
+        "locator": "qaz158aaa；#1 第4项 AA",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e5",
+        "source_id": "s2",
+        "locator": "qaz158aaa；#1 第4项 AA",
+        "excerpt": null,
+        "supports": [
+          "cause",
+          "review.conflicts"
+        ],
+        "note": "后续总结将前序原因写为 weather。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "passenger_actions",
+        "event.provider"
+      ],
+      "conflicts": [
+        {
+          "field": "cause",
+          "severity": "noncritical",
+          "detail": "前序原因：原帖 equipment change；关联总结 weather。当前航段 crew unavailable 一致；不据此判断可控性。",
+          "evidence_ids": [
+            "e2",
+            "e5"
+          ]
+        }
+      ],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "第二来源明确链接本帖；没有把保险报销混为航司赔款。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-352934-xiaoerge",
+    "title": "Finnair 取消 LAX–HEL：改经伦敦",
+    "reporter": "小二哥",
+    "source_type": "community_dp",
+    "event": {
+      "description": "原定傍晚去 HEL 的 Finnair 航班被取消。",
+      "occurred_at": {
+        "text": "今天傍晚；2025-02-11 原帖，相对时间保留",
+        "normalized": null,
+        "precision": "relative"
+      },
+      "provider": null,
+      "carrier": "Finnair",
+      "airline_reported": "FINN AIR / AY",
+      "route": {
+        "origin": "LAX",
+        "destination": "HEL",
+        "text": "原 LAX–HEL；替代 LAX–LHR–HEL"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": null,
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "接受替代路线，到 BA 柜台出示相关证件办理值机。",
+        "channel": "airport",
+        "evidence_ids": [
+          "e2"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "not_reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "自动改为 BA 执飞首段、AY 后段，经 LHR。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "LAX–LHR–HEL",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e3"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e3"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "intermediate",
+          "description": "BA 柜台核对证件后办理值机。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "other",
+              "description": "值机",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/352934",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2025-02-11 10:33",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "#1–20；重点 #1、4、18；第4页访问失败",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "小二哥；#1",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "小二哥；#4、18",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "小二哥；#1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "小二哥；#18",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "cause",
+        "event.provider"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "历史样本。搜索出现第4页赔款更新，但原页无法读取，未作为到账证据；后续需复核。未复制评论中的签证规则。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-407456-itworks",
+    "title": "AA95 临时取消：官网换经伦敦行程",
+    "reporter": "itworks",
+    "source_type": "community_dp",
+    "event": {
+      "description": "6/28 MAD–JFK 在起飞前约十小时取消，已办值机。",
+      "occurred_at": {
+        "text": "06/28；2025 年帖子上下文",
+        "normalized": "2025-06-28",
+        "precision": "day"
+      },
+      "provider": "American Airlines",
+      "carrier": "American Airlines",
+      "airline_reported": "AA95",
+      "route": {
+        "origin": "MAD",
+        "destination": "JFK",
+        "text": "MAD–JFK"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": null,
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "在 AA 官网选择替代航班。",
+        "channel": "website",
+        "evidence_ids": [
+          "e2"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "not_reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "作者报告已换成 Iberia 经伦敦的行程。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "Iberia 经 LHR；具体实际执飞待核",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e3"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e3"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/407456",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2025-06-27 22:15",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "#1–20；重点 #1、3、9、19",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1、3、9（确认 AA95）"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "itworks；#1、3、9（确认 AA95）",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "itworks；#19",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "itworks；#19",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "cause"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "历史样本。原因只有评论者查询结果，cause 留空；评论中的 600 欧元不是已获得赔款。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-467467-randomperson-ac",
+    "title": "AC 取消：从三天后改签到次日",
+    "reporter": "RandomPerson",
+    "source_type": "community_dp",
+    "event": {
+      "description": "蒙特利尔去温哥华的 AC 航班在值机后取消，影响另购 ZIPAIR 行程。",
+      "occurred_at": {
+        "text": "今天；相对 2025-12-21 06:54 页面时间，当地日期不明确",
+        "normalized": null,
+        "precision": "relative"
+      },
+      "provider": null,
+      "carrier": "Air Canada",
+      "airline_reported": "AC",
+      "route": {
+        "origin": "Montreal",
+        "destination": "Vancouver",
+        "text": "蒙特利尔–温哥华"
+      },
+      "issue_type": "airline_cancellation",
+      "evidence_ids": [
+        "e1"
+      ]
+    },
+    "cause": null,
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "机场排队无果后致电 AC。",
+        "channel": "phone_and_airport",
+        "evidence_ids": [
+          "e2"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "自动安排三天后，机场人员称无法改签。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "三天后替代",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e3"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e3"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "final",
+          "description": "电话客服改为次日直飞，并完成值机。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "次日直飞温哥华",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/467467",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2025-12-21 06:54",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "#1–20；仅提取 AC 事件，ZIPAIR 后续另案未纳入",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "RandomPerson；#1",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "RandomPerson；#1",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "RandomPerson；#1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "RandomPerson；#1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "cause",
+        "event.provider"
+      ],
+      "conflicts": [],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "#7 周一表述与主楼三天后不完全吻合，保留相对时间，未计算具体日期。ZIPAIR 的 $500 与 AC 无关，未混入。"
+      ]
+    }
+  },
+  {
+    "schema_version": "0.3",
+    "dp_id": "uscf-103731-anon17276958",
+    "title": "LH 让座改道：经日本抵美并提供现金卡",
+    "reporter": "anon17276958",
+    "source_type": "community_dp",
+    "event": {
+      "description": "曼谷返美途中自愿让座，原在线座位被撤销，改经日本。",
+      "occurred_at": {
+        "text": "本月罢工背景下当前返美行程；9/3 发帖时仍在更新旅程",
+        "normalized": null,
+        "precision": "relative"
+      },
+      "provider": null,
+      "carrier": "Lufthansa",
+      "airline_reported": "LH；替代 TG/NH",
+      "route": {
+        "origin": "BKK",
+        "destination": "ORD",
+        "text": "BKK–ORD；原中转点未披露，替代经 NRT"
+      },
+      "issue_type": "denied_boarding",
+      "evidence_ids": [
+        "e1"
+      ],
+      "boarding_context": "voluntary"
+    },
+    "cause": {
+      "description": "作者将超售与 LH 罢工联系，未经独立证实。",
+      "attributed_to": "passenger",
+      "evidence_ids": [
+        "e2"
+      ]
+    },
+    "passenger_actions": [
+      {
+        "action_id": "a1",
+        "order": 1,
+        "time_text": null,
+        "description": "主动接受改道但不接受次日出发；就舱等与补偿交涉。",
+        "channel": "airport",
+        "evidence_ids": [
+          "e3"
+        ]
+      }
+    ],
+    "airline_handling": {
+      "initial_status": "reported",
+      "final_status": "reported",
+      "responses": [
+        {
+          "response_id": "r1",
+          "order": 1,
+          "time_text": null,
+          "phase": "initial",
+          "description": "先提供 TG 接 JL 的经 NRT 行程。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "TG/JL",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "offered",
+              "evidence_ids": [
+                "e4"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e4"
+          ]
+        },
+        {
+          "response_id": "r2",
+          "order": 2,
+          "time_text": null,
+          "phase": "intermediate",
+          "description": "最终改 TG 接 NH，并安排 300 欧元现金卡。",
+          "after_action_id": "a1",
+          "measures": [
+            {
+              "kind": "rebooking",
+              "description": "TG/NH 经 NRT",
+              "amount": null,
+              "currency_or_program": null,
+              "unit": null,
+              "fulfillment": "received",
+              "evidence_ids": [
+                "e5"
+              ]
+            },
+            {
+              "kind": "cash_compensation",
+              "description": "现金卡；未单独报告兑现",
+              "amount": 300,
+              "currency_or_program": "EUR",
+              "unit": null,
+              "fulfillment": "promised",
+              "evidence_ids": [
+                "e5"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e5"
+          ]
+        },
+        {
+          "response_id": "r3",
+          "order": 3,
+          "time_text": null,
+          "phase": "final",
+          "description": "后续就降舱提出 160 EUR 或 250 USD 券的选择。",
+          "after_action_id": null,
+          "measures": [
+            {
+              "kind": "cash_compensation",
+              "description": "降舱补偿选项",
+              "amount": 160,
+              "currency_or_program": "EUR",
+              "unit": null,
+              "fulfillment": "offered",
+              "evidence_ids": [
+                "e6"
+              ]
+            },
+            {
+              "kind": "voucher",
+              "description": "替代选项，与现金二选一",
+              "amount": 250,
+              "currency_or_program": "USD",
+              "unit": null,
+              "fulfillment": "offered",
+              "evidence_ids": [
+                "e6"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "e6"
+          ]
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://www.uscardforum.com/t/topic/103731",
+        "forum": "USCardForum / 美卡论坛",
+        "posted_at": "2022-09-03 04:02",
+        "observed_at": "2026-09-27T11:46:30.884776+00:00",
+        "reading_scope": "#1–20；重点主楼及 #7、20",
+        "access_method": "web_search_and_page_text",
+        "limitation": "读取工具返回的原帖文本；未检视附图、未独立核验作者经历；页面可能为缓存。发帖时间时区未知。",
+        "source_id": "s1",
+        "post_locator": "#1；#20 当场更新"
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "e1",
+        "source_id": "s1",
+        "locator": "anon17276958；#1；#20 当场更新",
+        "excerpt": null,
+        "supports": [
+          "event.description",
+          "event.occurred_at",
+          "event.provider",
+          "event.carrier",
+          "event.airline_reported",
+          "event.route",
+          "event.issue_type"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e2",
+        "source_id": "s1",
+        "locator": "anon17276958；#1",
+        "excerpt": null,
+        "supports": [
+          "cause"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e3",
+        "source_id": "s1",
+        "locator": "anon17276958；#1",
+        "excerpt": null,
+        "supports": [
+          "passenger_actions[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e4",
+        "source_id": "s1",
+        "locator": "anon17276958；#1 Round 1",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[0]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e5",
+        "source_id": "s1",
+        "locator": "anon17276958；#1 Round 4–8",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[1]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      },
+      {
+        "evidence_id": "e6",
+        "source_id": "s1",
+        "locator": "anon17276958；#1 末尾更新",
+        "excerpt": null,
+        "supports": [
+          "airline_handling.responses[2]"
+        ],
+        "note": "依据定位处作者自述概括，未复制原帖全文。"
+      }
+    ],
+    "review": {
+      "record_status": "complete",
+      "workflow_status": "ready_for_review",
+      "review_status": "needs_review",
+      "missing_required": [],
+      "missing_optional": [
+        "event.provider"
+      ],
+      "conflicts": [
+        {
+          "field": "boarding_type",
+          "severity": "noncritical",
+          "detail": "作者主动让座，但称拿到 involuntary denied boarding 文件；仅按自述保留，不认定法定非自愿拒载。",
+          "evidence_ids": [
+            "e1"
+          ]
+        }
+      ],
+      "duplicate_of": null,
+      "rationale": "四部分中的 R 项有可定位自述；仍需人工审核。",
+      "verification": "第一手论坛自述，未独立核验；不代表政策或赔偿承诺。",
+      "notes": [
+        "历史样本；boarding_context=voluntary。两种降舱补偿不相加；未见所选方式及到账证明。"
+      ]
+    }
+  }
+]

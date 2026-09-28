@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import cases from "../../../data/cases.json";
+import { loadCaseLibrary } from "../../../lib/case-library";
 import policies from "../../../data/policies.json";
 import scripts from "../../../data/scripts.json";
 import { buildAnalysisFromFacts, buildAnalysisResult } from "../../../lib/analyze";
@@ -11,7 +11,7 @@ import {
 } from "../../../lib/inputLimits";
 import { normalizeIssueType } from "../../../lib/issueTaxonomy";
 import { assessClaimSafety, assessHighRiskClaim } from "../../../lib/safety";
-import type { Case, Policy, Script } from "../../../lib/types";
+import type { Policy, Script } from "../../../lib/types";
 
 export async function POST(request: Request) {
   const parsedBody = await readBoundedJson(request);
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       buildAnalysisFromFacts(
         parsedFacts.data,
         policies as Policy[],
-        cases as Case[],
+        await loadCaseLibrary(),
         scripts as Script[],
         description
       )
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
   const result = await buildAnalysisResult(
     description,
     policies as Policy[],
-    cases as Case[],
+    await loadCaseLibrary(),
     scripts as Script[],
     { caseId: caseId || undefined, issueType }
   );

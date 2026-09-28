@@ -162,3 +162,9 @@ AnalysisResult includes `remedies`; suggested requests and script filtering use 
 - successful_script_id: string
 - user_rating: "useful" | "not_useful" | "unclear"
 - notes: string
+
+## DP 人工审核与发布
+
+采集 DP v0.3 与产品检索用 Case 分开保存。审核记录保存 original、current、version、history 及 publication，状态为 pending / needs_evidence / approved / excluded。只有通过证据门槛并由人工确认的版本才生成 Case 发布快照；修改、撤回或排除立即移除快照。provider 与 carrier 分别保留，不相互回填。
+
+本地持久化位于 `.local/dp-review/store.json`，产品通过 `loadCaseLibrary` 合并种子案例与已发布快照。具体契约、远程数据库边界和恢复流程见 [DP 审核工作台](docs/dp-review.md)。

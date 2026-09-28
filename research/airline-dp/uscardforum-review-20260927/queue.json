@@ -1,0 +1,304 @@
+[
+  {
+    "url": "https://www.uscardforum.com/t/topic/103731",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-103731-anon17276958: reported",
+    "linked_dp_ids": [
+      "uscf-103731-anon17276958"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/126649",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-126649-frozenz0717-outbound: reported；uscf-126649-frozenz0717-return: not_reported",
+    "linked_dp_ids": [
+      "uscf-126649-frozenz0717-outbound",
+      "uscf-126649-frozenz0717-return"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/216182",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-216182-fureddo: pending",
+    "linked_dp_ids": [
+      "uscf-216182-fureddo"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/230221",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-216182-fureddo: pending",
+    "linked_dp_ids": [
+      "uscf-216182-fureddo"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/331713?page=2",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-331713-7700: pending",
+    "linked_dp_ids": [
+      "uscf-331713-7700"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/352934",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-352934-xiaoerge: not_reported",
+    "linked_dp_ids": [
+      "uscf-352934-xiaoerge"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/407456",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-407456-itworks: not_reported",
+    "linked_dp_ids": [
+      "uscf-407456-itworks"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/467467",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-467467-randomperson-ac: reported",
+    "linked_dp_ids": [
+      "uscf-467467-randomperson-ac"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/469439",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-469439-qaz158aaa: reported",
+    "linked_dp_ids": [
+      "uscf-469439-qaz158aaa"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/473103",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-473103-mrmitchelldevis: reported",
+    "linked_dp_ids": [
+      "uscf-473103-mrmitchelldevis"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/477236",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-477236-gcjy: reported",
+    "linked_dp_ids": [
+      "uscf-477236-gcjy"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/478003",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-469439-qaz158aaa: reported",
+    "linked_dp_ids": [
+      "uscf-469439-qaz158aaa"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/484406",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-484406-dfw: reported",
+    "linked_dp_ids": [
+      "uscf-484406-dfw"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/493023",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-493023-soulhom: reported；uscf-493023-xiaodaobay: not_reported；uscf-493023-minalinsky: not_reported",
+    "linked_dp_ids": [
+      "uscf-493023-soulhom",
+      "uscf-493023-xiaodaobay",
+      "uscf-493023-minalinsky"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/493023?page=2",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-493023-soulhom: reported；uscf-493023-xiaodaobay: not_reported；uscf-493023-minalinsky: not_reported",
+    "linked_dp_ids": [
+      "uscf-493023-soulhom",
+      "uscf-493023-xiaodaobay",
+      "uscf-493023-minalinsky"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/496402",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-496402-jerry66: not_reported",
+    "linked_dp_ids": [
+      "uscf-496402-jerry66"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/528095",
+    "discovered_by_query": "主题搜索或已读取帖子内链接，见 manifest.query_log",
+    "state": "extracted",
+    "reason": "已整理作者自述；待人工审核",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "uscf-528095-alzuhod: reported",
+    "linked_dp_ids": [
+      "uscf-528095-alzuhod"
+    ]
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/440995",
+    "discovered_by_query": "web search",
+    "state": "followup",
+    "reason": "事件具体时间缺失；不能用发帖日代替。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "缺失项见 reason；不计入候选数量",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/417139",
+    "discovered_by_query": "web search",
+    "state": "followup",
+    "reason": "缺完整可识别航线；补充图像尚未检查。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "缺失项见 reason；不计入候选数量",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/465348",
+    "discovered_by_query": "web search",
+    "state": "followup",
+    "reason": "缺航线；主楼报销更新主要是保险。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "缺失项见 reason；不计入候选数量",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/491250",
+    "discovered_by_query": "web search",
+    "state": "followup",
+    "reason": "缺航线；是否完成值机及超售原因存在争议。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "缺失项见 reason；不计入候选数量",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/414188",
+    "discovered_by_query": "web search",
+    "state": "followup",
+    "reason": "原事件航线不够明确；回复的其他事件也未补齐时间。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "缺失项见 reason；不计入候选数量",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/456279?page=20",
+    "discovered_by_query": "web search",
+    "state": "followup",
+    "reason": "#403 有取消与改签，但南航究竟是原办理方还是承运方未明确。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "缺失项见 reason；不计入候选数量",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/464599",
+    "discovered_by_query": "web search",
+    "state": "followup",
+    "reason": "主楼已改为教训总结，当前已读楼层缺受影响航线。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "缺失项见 reason；不计入候选数量",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/365099",
+    "discovered_by_query": "web search / 同主题原站与 CDN 阅读尝试",
+    "state": "blocked",
+    "reason": "网页读取返回 Cache miss 或 not accessible；搜索摘要未作为证据。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "原页可访问后再读；不据搜索结果补写事实",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/468417",
+    "discovered_by_query": "web search / 同主题原站与 CDN 阅读尝试",
+    "state": "blocked",
+    "reason": "网页读取返回 Cache miss 或 not accessible；搜索摘要未作为证据。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "原页可访问后再读；不据搜索结果补写事实",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www.uscardforum.com/t/topic/352934?page=4",
+    "discovered_by_query": "web search / 同主题原站与 CDN 阅读尝试",
+    "state": "blocked",
+    "reason": "网页读取返回 Cache miss 或 not accessible；搜索摘要未作为证据。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "原页可访问后再读；不据搜索结果补写事实",
+    "linked_dp_ids": [
+      "uscf-352934-xiaoerge"
+    ]
+  },
+  {
+    "url": "https://www-cdn.uscardforum.com/t/topic/365099",
+    "discovered_by_query": "web search / 同主题原站与 CDN 阅读尝试",
+    "state": "blocked",
+    "reason": "网页读取返回 Cache miss 或 not accessible；搜索摘要未作为证据。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "原页可访问后再读；不据搜索结果补写事实",
+    "linked_dp_ids": []
+  },
+  {
+    "url": "https://www-cdn.uscardforum.com/t/topic/468417",
+    "discovered_by_query": "web search / 同主题原站与 CDN 阅读尝试",
+    "state": "blocked",
+    "reason": "网页读取返回 Cache miss 或 not accessible；搜索摘要未作为证据。",
+    "last_observed_at": "2026-09-27T11:48:12.371780+00:00",
+    "resume_locator": "原页可访问后再读；不据搜索结果补写事实",
+    "linked_dp_ids": []
+  }
+]
