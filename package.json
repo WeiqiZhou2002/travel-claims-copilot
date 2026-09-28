@@ -19,6 +19,7 @@
     "test:e2e:rehearsals": "node scripts/run-e2e-rehearsals.mjs",
     "eval:live": "tsx evals/run-live-eval.ts",
     "eval:intake": "node scripts/eval-intake.mjs",
+    "publish:cases": "node scripts/publish-reviewed-cases.mjs",
     "scan:secrets": "node scripts/scan-secrets.mjs",
     "release:source-review": "node scripts/check-source-reachability.mjs",
     "release:security-review": "node scripts/check-release-security.mjs",

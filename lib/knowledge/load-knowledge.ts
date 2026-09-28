@@ -1,7 +1,7 @@
-import casesJson from "../../data/cases.json";
 import carrierCommitmentsJson from "../../data/carrier-commitments.json";
 import policiesJson from "../../data/policies.json";
 import scriptsJson from "../../data/scripts.json";
+import { productionCaseLibraryRaw } from "../case-library";
 import type { KnowledgeSnapshot } from "./knowledge-contract";
 import { parseKnowledgeSnapshot, type RawKnowledgeSnapshot } from "./knowledge-schema";
 
@@ -23,7 +23,8 @@ function currentUtcDate(): string {
 export function productionKnowledgeRaw(): RawKnowledgeSnapshot {
   return structuredClone({
     policies: policiesJson,
-    cases: casesJson,
+    // Seed cases plus the exported human-reviewed DP release.
+    cases: productionCaseLibraryRaw(),
     scripts: scriptsJson,
     carrierCommitments: carrierCommitmentsJson
   });

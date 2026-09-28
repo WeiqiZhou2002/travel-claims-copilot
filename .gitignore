@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 .worktrees/
 .superpowers/
+
+# Local DP review database; back up before moving machines.
+.local/

@@ -1,0 +1,618 @@
+"use client";
+
+import { useState } from "react";
+import { approvalIssues, parseDP, safeSourceUrl } from "../../lib/dp-review/validation";
+import { projectCase } from "../../lib/dp-review/service";
+import type { DP, ReviewAction, ReviewRecord } from "../../lib/dp-review/types";
+import { api, issueLabels, statusLabels } from "./client";
+import { Choice, Responses, TextField } from "./fields";
+
+function changedPaths(a: unknown, b: unknown, p = ""): string[] {
+  if (JSON.stringify(a) === JSON.stringify(b)) return [];
+  if (
+    a &&
+    b &&
+    typeof a === "object" &&
+    typeof b === "object" &&
+    !Array.isArray(a) &&
+    !Array.isArray(b)
+  )
+    return [...new Set([...Object.keys(a), ...Object.keys(b)])].flatMap((k) =>
+      changedPaths(
+        (a as Record<string, unknown>)[k],
+        (b as Record<string, unknown>)[k],
+        p ? `${p}.${k}` : k
+      )
+    );
+  return [p];
+}
+export default function Editor({
+  record,
+  onSaved,
+  onDirty
+}: {
+  record: ReviewRecord;
+  onSaved: (r: ReviewRecord) => Promise<void>;
+  onDirty: (v: boolean) => void;
+}) {
+  const [dp, setDP] = useState<DP>(record.current);
+  const [note, setNote] = useState("");
+  const [checked, setChecked] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [raw, setRaw] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const changed = JSON.stringify(dp) !== JSON.stringify(record.current);
+  const issues = approvalIssues(dp);
+  const preview = projectCase(dp);
+  function update(edit: (d: DP) => void) {
+    const next = structuredClone(dp);
+    edit(next);
+    setDP(next);
+    setChecked(false);
+    onDirty(true);
+  }
+  async function act(action: ReviewAction) {
+    if (raw !== null) {
+      setError("请先应用或取消完整记录编辑。");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const result = await api<{ record: ReviewRecord }>(
+        `/api/review/records/${encodeURIComponent(record.id)}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            action,
+            expectedVersion: record.version,
+            dp,
+            note,
+            sourceChecked: checked
+          })
+        }
+      );
+      await onSaved(result.record);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "保存失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <>
+      <section className="dp-editor">
+        <header className="editor-heading">
+          <div>
+            <span className="eyebrow">
+              案例档案 <span className="mono">/ v{record.version}</span>
+            </span>
+            <h2>{dp.title ?? dp.event.description}</h2>
+            <p className="mono record-id">{record.id}</p>
+          </div>
+          <span className={`status-chip ${record.status}`}>{statusLabels[record.status]}</span>
+        </header>
+        <div className="editor-scroll">
+          <fieldset disabled={busy} className="editor-fieldset">
+            {record.status === "approved" ? (
+              <p className="review-notice">
+                当前版本已审核通过。修改将取消审核资格；已部署版本需重新导出并部署才能撤回。
+              </p>
+            ) : null}
+            <section className="dp-section">
+              <h3>
+                <span>01</span> 异常事件 <em>必填 R</em>
+              </h3>
+              <TextField
+                label="案例标题"
+                value={dp.title}
+                onChange={(v) =>
+                  update((draft) => {
+                    draft.title = v;
+                  })
+                }
+              />
+              <TextField
+                label="事件描述"
+                multiline
+                value={dp.event.description}
+                onChange={(v) =>
+                  update((draft) => {
+                    draft.event.description = v;
+                  })
+                }
+              />
+              <div className="dp-grid">
+                <TextField
+                  label="出票 / 订票方 provider"
+                  value={dp.event.provider}
+                  onChange={(v) =>
+                    update((draft) => {
+                      draft.event.provider = v.trim() || null;
+                    })
+                  }
+                />
+                <TextField
+                  label="原实际承运方 carrier"
+                  value={dp.event.carrier}
+                  onChange={(v) =>
+                    update((draft) => {
+                      draft.event.carrier = v.trim() || null;
+                    })
+                  }
+                />
+              </div>
+              <p className="field-hint">未知留空；改签后的航司写在回应中。</p>
+              <div className="dp-grid">
+                <TextField
+                  label="事件时间原文"
+                  value={dp.event.occurred_at.text}
+                  onChange={(v) =>
+                    update((draft) => {
+                      draft.event.occurred_at.text = v;
+                    })
+                  }
+                />
+                <Choice
+                  label="时间精度"
+                  value={dp.event.occurred_at.precision}
+                  options={{
+                    day: "日",
+                    month: "月",
+                    year: "年",
+                    relative: "相对时间",
+                    unknown: "未知"
+                  }}
+                  onChange={(v) =>
+                    update((draft) => {
+                      draft.event.occurred_at.precision = v;
+                    })
+                  }
+                />
+                <TextField
+                  label="出发地"
+                  value={dp.event.route.origin}
+                  onChange={(v) =>
+                    update((draft) => {
+                      draft.event.route.origin = v || null;
+                    })
+                  }
+                />
+                <TextField
+                  label="目的地"
+                  value={dp.event.route.destination}
+                  onChange={(v) =>
+                    update((draft) => {
+                      draft.event.route.destination = v || null;
+                    })
+                  }
+                />
+              </div>
+              <TextField
+                label="航线说明"
+                value={dp.event.route.text}
+                onChange={(v) =>
+                  update((draft) => {
+                    draft.event.route.text = v;
+                  })
+                }
+              />
+              <Choice
+                label="事件类型"
+                value={dp.event.issue_type}
+                options={issueLabels}
+                onChange={(v) =>
+                  update((draft) => {
+                    draft.event.issue_type = v;
+                  })
+                }
+              />
+            </section>
+            <section className="dp-section">
+              <h3>
+                <span>02</span> 事件原因 <em className="optional">可选 O</em>
+              </h3>
+              {dp.cause ? (
+                <>
+                  <TextField
+                    label="归因陈述"
+                    multiline
+                    value={dp.cause.description}
+                    onChange={(v) =>
+                      update((draft) => {
+                        if (draft.cause) draft.cause.description = v;
+                      })
+                    }
+                  />
+                  <Choice
+                    label="是谁的说法"
+                    value={dp.cause.attributed_to}
+                    options={{
+                      airline: "航司（作者转述）",
+                      passenger: "当事人判断",
+                      other: "其他",
+                      unknown: "未知"
+                    }}
+                    onChange={(v) =>
+                      update((draft) => {
+                        if (draft.cause) draft.cause.attributed_to = v;
+                      })
+                    }
+                  />
+                  <button
+                    className="text-button"
+                    onClick={() =>
+                      update((draft) => {
+                        draft.cause = null;
+                      })
+                    }
+                  >
+                    改为未披露
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="empty-note">原文未披露原因，不影响完整性。</p>
+                  <button
+                    className="text-button"
+                    onClick={() =>
+                      update((draft) => {
+                        draft.cause = {
+                          description: "",
+                          attributed_to: "unknown",
+                          evidence_ids: []
+                        };
+                      })
+                    }
+                  >
+                    ＋ 添加有来源支持的原因
+                  </button>
+                </>
+              )}
+            </section>
+            <section className="dp-section">
+              <h3>
+                <span>03</span> 当事人做法 <em className="optional">可选 O</em>
+              </h3>
+              {dp.passenger_actions?.length ? (
+                dp.passenger_actions.map((a, i) => (
+                  <div className="action-block" key={a.action_id}>
+                    <TextField
+                      label={`${i + 1}. ${a.channel ?? "渠道未披露"} · ${a.action_id}`}
+                      multiline
+                      value={a.description}
+                      onChange={(v) =>
+                        update((draft) => {
+                          draft.passenger_actions![i].description = v;
+                        })
+                      }
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="empty-note">未记录行动。评论者的建议不等于本人采取的行动。</p>
+              )}
+            </section>
+            <section className="dp-section">
+              <h3>
+                <span>04</span> 航司回应与处置 <em>必填 R</em>
+              </h3>
+              <div className="dp-grid">
+                <Choice
+                  label="初始处置是否披露"
+                  value={dp.airline_handling.initial_status}
+                  options={{
+                    reported: "已披露",
+                    not_reported: "未披露",
+                    unknown: "未知"
+                  }}
+                  onChange={(v) =>
+                    update((draft) => {
+                      draft.airline_handling.initial_status = v;
+                    })
+                  }
+                />
+                <Choice
+                  label="最终处理状态"
+                  value={dp.airline_handling.final_status}
+                  options={{
+                    reported: "已披露",
+                    pending: "作者明确仍等待",
+                    not_reported: "未见后续",
+                    unknown: "未知"
+                  }}
+                  onChange={(v) =>
+                    update((draft) => {
+                      draft.airline_handling.final_status = v;
+                    })
+                  }
+                />
+              </div>
+              <Responses dp={dp} update={update} />
+            </section>
+            <section className="dp-section">
+              <h3>
+                <span>05</span> 核对与审核
+              </h3>
+              {dp.review.notes?.length ? (
+                <ul className="review-notes">
+                  {dp.review.notes.map((n, i) => (
+                    <li key={i}>{n}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {dp.review.conflicts.map((c, i) => (
+                <div className="conflict-box" key={i}>
+                  <strong>{c.severity === "noncritical" ? "保留差异" : "关键疑点"}</strong>
+                  <p>{c.detail}</p>
+                  <button
+                    className="text-button"
+                    disabled={!note.trim()}
+                    title="先在下方填写处理依据"
+                    onClick={() =>
+                      update((draft) => {
+                        draft.review.conflicts.splice(i, 1);
+                      })
+                    }
+                  >
+                    已核对并解决（需填写审核说明）
+                  </button>
+                </div>
+              ))}
+              <TextField
+                label="关联重复 DP ID（不是重复则留空）"
+                value={dp.review.duplicate_of}
+                onChange={(v) =>
+                  update((draft) => {
+                    draft.review.duplicate_of = v || null;
+                  })
+                }
+              />
+              <Choice
+                label="内容准备状态"
+                value={dp.review.workflow_status}
+                options={{
+                  ready_for_review: "R 项齐全，可审核",
+                  needs_more_evidence: "需要补证",
+                  hold: "疑点待核对",
+                  excluded: "不收录"
+                }}
+                onChange={(v) =>
+                  update((draft) => {
+                    draft.review.workflow_status = v;
+                    draft.review.record_status =
+                      v === "ready_for_review" ? "complete" : "incomplete";
+                  })
+                }
+              />
+              {issues.length ? (
+                <div className="approval-blockers">
+                  <strong>入库前还需处理</strong>
+                  <ul>
+                    {issues.map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="gate-pass">✓ 结构与证据引用通过检查，可进入人工判断。</p>
+              )}
+              <TextField
+                label="审核说明 / 补证要求"
+                multiline
+                value={note}
+                onChange={(v) => {
+                  setNote(v);
+                  onDirty(true);
+                }}
+              />
+              <label className="review-check">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(e) => setChecked(e.target.checked)}
+                />
+                <span>我已核对原帖、证据对应关系、出票与承运角色，以及金额和履行阶段。</span>
+              </label>
+              <details className="advanced-editor">
+                <summary>完整记录编辑 · 证据、来源及其他字段</summary>
+                {raw === null ? (
+                  <button
+                    className="outline-button"
+                    onClick={() => {
+                      setRaw(JSON.stringify(dp, null, 2));
+                      onDirty(true);
+                    }}
+                  >
+                    编辑完整 JSON
+                  </button>
+                ) : (
+                  <>
+                    <textarea
+                      aria-label="完整 DP JSON"
+                      rows={16}
+                      value={raw}
+                      onChange={(e) => setRaw(e.target.value)}
+                    />
+                    <button
+                      onClick={() => {
+                        try {
+                          const next = parseDP(JSON.parse(raw));
+                          if (next.dp_id !== record.id) throw new Error("不能修改 DP ID");
+                          setDP(next);
+                          setRaw(null);
+                          setChecked(false);
+                          onDirty(true);
+                          setError("");
+                        } catch (e) {
+                          setError(e instanceof Error ? e.message : "JSON 不正确");
+                        }
+                      }}
+                    >
+                      应用到草稿
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRaw(null);
+                        onDirty(changed || Boolean(note));
+                      }}
+                    >
+                      取消 JSON 编辑
+                    </button>
+                  </>
+                )}
+              </details>
+            </section>
+          </fieldset>
+        </div>
+        <div className="editor-footer">
+          {error ? (
+            <p role="alert" className="review-alert">
+              {error}
+            </p>
+          ) : null}
+          <div className="editor-footer-meta">
+            <span>{busy ? "正在保存…" : changed ? "● 有未保存修改" : "当前版本已载入"}</span>
+            <button className="text-button" onClick={() => setPreviewOpen((v) => !v)}>
+              {previewOpen ? "收起入库预览" : "查看入库预览 ↗"}
+            </button>
+          </div>
+          {previewOpen ? (
+            <div className="publication-preview">
+              <strong>正式检索将使用以下内容</strong>
+              <p>{preview.facts}</p>
+              <p>{preview.actual_outcome}</p>
+              <small>社区案例 · 审核不提高事实置信度 · 低置信度</small>
+            </div>
+          ) : null}
+          <div className="review-buttons">
+            <button disabled={busy || raw !== null} onClick={() => act("save")}>
+              保存草稿
+            </button>
+            <button
+              disabled={busy || !note.trim() || raw !== null}
+              onClick={() => act("request_evidence")}
+            >
+              退回补证
+            </button>
+            <button disabled={busy || !note.trim() || raw !== null} onClick={() => act("exclude")}>
+              排除
+            </button>
+            {record.status === "approved" ? (
+              <button disabled={busy || !note.trim()} onClick={() => act("revoke")}>
+                撤回审核
+              </button>
+            ) : null}
+            <button
+              className="approve-button"
+              disabled={busy || issues.length > 0 || !checked || !note.trim() || raw !== null}
+              onClick={() => act("approve")}
+            >
+              审核通过 →
+            </button>
+          </div>
+        </div>
+      </section>
+      <aside className="evidence-pane">
+        <div className="evidence-heading">
+          <span className="eyebrow">SOURCE DESK</span>
+          <h2>回到原帖，核对每一步。</h2>
+          <p>仅展示实际保存的定位与摘录；未保存的原文请打开来源查看。</p>
+        </div>
+        <div className="evidence-scroll">
+          {dp.sources.map((s) => (
+            <article className="source-card" key={s.source_id}>
+              <div className="source-number">来源 {s.source_id}</div>
+              <h3>{s.forum}</h3>
+              {safeSourceUrl(s.url) ? (
+                <a href={safeSourceUrl(s.url)!} target="_blank" rel="noreferrer">
+                  打开原帖 ↗
+                </a>
+              ) : (
+                <span>没有可访问的来源链接</span>
+              )}
+              <dl>
+                <dt>阅读范围</dt>
+                <dd>{s.reading_scope}</dd>
+                <dt>楼层定位</dt>
+                <dd>{s.post_locator}</dd>
+                <dt>发布 / 采集</dt>
+                <dd>
+                  {s.posted_at ?? "未披露"}
+                  <br />
+                  {s.observed_at}
+                </dd>
+              </dl>
+              {s.limitation ? <p className="source-limit">{s.limitation}</p> : null}
+              {dp.evidence
+                .filter((e) => e.source_id === s.source_id)
+                .map((e) => (
+                  <div className="evidence-item" key={e.evidence_id}>
+                    <strong className="mono">{e.evidence_id}</strong>
+                    <p>{e.locator}</p>
+                    {e.excerpt ? (
+                      <blockquote>{e.excerpt}</blockquote>
+                    ) : (
+                      <small>无原文摘录，请按定位核对。</small>
+                    )}
+                    <div className="evidence-targets">
+                      {e.supports.map((p) => (
+                        <code key={p}>{p}</code>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </article>
+          ))}
+          <section className="history-panel">
+            <h3>审核留痕</h3>
+            <p className="review-muted">{record.history.length} 个版本 · 原始采集内容保留</p>
+            {record.history
+              .slice()
+              .reverse()
+              .map((h) => (
+                <details key={h.version}>
+                  <summary>
+                    v{h.version} ·{" "}
+                    {
+                      {
+                        import: "采集导入",
+                        save: "保存草稿",
+                        approve: "通过",
+                        request_evidence: "退回补证",
+                        exclude: "排除",
+                        revoke: "撤回"
+                      }[h.action]
+                    }
+                    <small>{h.at}</small>
+                  </summary>
+                  <p>
+                    {h.actor} · {h.note}
+                  </p>
+                  <details>
+                    <summary>查看此版本内容</summary>
+                    <pre>{JSON.stringify(h.snapshot, null, 2)}</pre>
+                  </details>
+                </details>
+              ))}
+            <details>
+              <summary>与原始采集的差异</summary>
+              <ul>
+                {changedPaths(record.original, dp).map((p) => (
+                  <li key={p}>
+                    <code>{p}</code>
+                  </li>
+                ))}
+              </ul>
+            </details>
+            <details>
+              <summary>原始采集记录</summary>
+              <pre>{JSON.stringify(record.original, null, 2)}</pre>
+            </details>
+          </section>
+        </div>
+      </aside>
+    </>
+  );
+}

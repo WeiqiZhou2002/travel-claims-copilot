@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "managedIds": [
+    "dp-0a8c022c8b6a3f70f3d8",
+    "dp-0b1832a61515cd0bbb36",
+    "dp-1c92b0d611be2a425396",
+    "dp-31994db8b0739e4c151d",
+    "dp-3577399b3de7991164d4",
+    "dp-448e12b660defe54cb9b",
+    "dp-7692981dddde90a01f32",
+    "dp-7f5d1675d2d0b666cfb4",
+    "dp-81200d1341565dd70cd1",
+    "dp-8c6d426241fc96ccea1f",
+    "dp-8ee4e6587ead4674f8aa",
+    "dp-b709b74e59b36bc64df9",
+    "dp-b7aab60058b4de405f4b",
+    "dp-c140cdb2e84cd1f8ee9a",
+    "dp-c59d41dc339168248fe5",
+    "dp-c73931d3beef0f050e9c",
+    "dp-cca2b57b889d0d249819",
+    "dp-ccc21be2bbe9e912de84",
+    "dp-e88d6c75e2e70860ab2b"
+  ],
+  "cases": [
+    {
+      "case_id": "dp-7692981dddde90a01f32",
+      "source_type": "community_dp",
+      "source_name": "USCardForum / 美卡论坛",
+      "source_url": "https://www.uscardforum.com/t/topic/528095",
+      "provider_type": "airline",
+      "provider": "Capital One Travel",
+      "carrier": "American Airlines",
+      "brand_or_airline": "American Airlines",
+      "issue_type": "airline_delay",
+      "location_country": "unknown",
+      "booking_channel": "unknown",
+      "loyalty_status": "unknown",
+      "reservation_type": "unknown",
+      "facts": "BUF–PHL 延误后未赶上 SEA 航班，被改经 ORD 过夜。；作者称最近返家；8/28 已等数日投诉回复，具体乘机日未披露；BUF–PHL–SEA；替代 PHL–ORD–SEA；AA 书面归因为空管限制。",
+      "requested_compensation": [],
+      "actual_outcome": "[初始] 改签经 ORD，拒绝提供酒店及食宿。（经 ORD 过夜：金额未披露   / 作者报告已收到；酒店及食宿：金额未披露   / 拒绝）；[最终] 升级后作者报告获 credit 和里程。（AA credit：25 USD  / 作者报告已收到；里程：5000 AAdvantage 每人 / 作者报告已收到）",
+      "evidence_used": [],
+      "escalation_path": [
+        "两轮邮件无果后转交 AA 高层投诉。"
+      ],
+      "reusable_lesson": "仅供对照已报告的处置，不代表官方政策或赔付保证。",
+      "confidence": "low",
+      "notes": "DP dp-7692981dddde90a01f32；最终阶段：reported。人工审核不代表独立事实核验。",
+      "review_status": "approved",
+      "review_notes": [
+        "$25 的人数单位未明确；不默认每人。保险结果未纳入。"
+      ],
+      "role_notes": [
+        "provider 为原办理方，carrier 为原受影响航段承运方；未知值未互相回填。"
+      ],
+      "reviewed_version": 2
+    },
+    {
+      "case_id": "dp-b7aab60058b4de405f4b",
+      "source_type": "community_dp",
+      "source_name": "USCardForum / 美卡论坛",
+      "source_url": "https://www.uscardforum.com/t/topic/484406",
+      "provider_type": "airline",
+      "provider": null,
+      "carrier": "American Airlines",
+      "brand_or_airline": "American Airlines",
+      "issue_type": "airline_cancellation",
+      "location_country": "unknown",
+      "booking_channel": "unknown",
+      "loyalty_status": "unknown",
+      "reservation_type": "unknown",
+      "facts": "原 PVG–DFW 航班取消；改经日本后因出票问题被 JL 拒载，再滞留三天。；原航班 1/24；改签 1/27 至 1/30（2026 年帖内上下文）；PVG–DFW；改签经日本，日本机场未披露；原取消归因暴雪；后续出票错误由作者转述客服承认。",
+      "requested_compensation": [],
+      "actual_outcome": "[初始] 先按天气拒绝食宿赔付，给予里程。（善意里程：7500 AAdvantage 每账户 / 作者报告已收到）；[最终] 复核后作者报告获得酒店及餐饮补偿。（酒店及餐饮；金额未从文本确认：金额未披露   / 作者报告已收到）",
+      "evidence_used": [],
+      "escalation_path": [
+        "邮件申诉，强调天气取消与后续出票错误应分开处理。"
+      ],
+      "reusable_lesson": "仅供对照已报告的处置，不代表官方政策或赔付保证。",
+      "confidence": "low",
+      "notes": "DP dp-b7aab60058b4de405f4b；最终阶段：reported。人工审核不代表独立事实核验。",
+      "review_status": "approved",
+      "review_notes": [
+        "event.provider",
+        "只统计航司处置；CSP 保险不计入。未读取截图中的金额。原出票方不因 AA 处理改签而回填。"
+      ],
+      "role_notes": [
+        "provider 为原办理方，carrier 为原受影响航段承运方；未知值未互相回填。"
+      ],
+      "reviewed_version": 2
+    }
+  ]
+}

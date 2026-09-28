@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import cases from "../../../data/cases.json";
 import policies from "../../../data/policies.json";
 import scripts from "../../../data/scripts.json";
+import { productionCaseLibraryRaw } from "../../../lib/case-library";
 import { buildAnalysisFromFacts } from "../../../lib/analyze";
 import { createAnalyzeRouteHandler } from "../../../lib/api/analyze-route-handler";
 import { getMissingClaimFields, parseClaimFacts } from "../../../lib/claimFacts";
@@ -42,7 +42,7 @@ function analysisFromFacts(
   return buildAnalysisFromFacts(
     facts,
     policies as Policy[],
-    cases as Case[],
+    productionCaseLibraryRaw() as Case[],
     scripts as Script[],
     description
   );
