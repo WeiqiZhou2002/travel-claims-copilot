@@ -215,6 +215,16 @@ function candidateHasDisruptionReason(
       "前序航班晚到",
       "进港飞机晚到",
     ],
+    passenger_side: [
+      "passport",
+      "visa",
+      "travel documents",
+      "证件",
+      "护照",
+      "签证",
+      "迟到值机",
+    ],
+    other_reported: [],
     other_controllable: [
       "controllable",
       "airline control",

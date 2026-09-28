@@ -19,6 +19,8 @@ export type ClaimDisruptionReason =
   | "weather"
   | "late_inbound_aircraft"
   | "other_controllable"
+  | "passenger_side"
+  | "other_reported"
   | "unknown";
 export type ClaimDisruptionReasonStatus =
   | "not_provided"
@@ -148,6 +150,8 @@ const disruptionReasons: ClaimDisruptionReason[] = [
   "weather",
   "late_inbound_aircraft",
   "other_controllable",
+  "passenger_side",
+  "other_reported",
   "unknown",
 ];
 const disruptionReasonStatuses: ClaimDisruptionReasonStatus[] = [
@@ -684,6 +688,8 @@ export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
           ? "airline"
           : "unknown"
       : normalized.providerType;
+  // Every concrete reason, including passenger-side and otherwise uncategorized
+  // reported causes, is an answered question rather than missing information.
   const disruptionReasonStatus =
     normalized.disruptionReason !== "unknown"
       ? "reported"
