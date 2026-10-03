@@ -84,27 +84,6 @@ describe("per-remedy assessment", () => {
     }
   );
 
-  it.each([
-    [false, "not_applicable"],
-    [null, "conditional"]
-  ] as const)("maps membershipAttached=%s to %s", async (membershipAttached, status) => {
-    const result = await runWorkflowFixture({
-      facts: {
-        incidentType: "hotel_walk",
-        providerType: "hotel",
-        provider: "Marriott",
-        operatingCarrier: null,
-        confirmedHotelReservation: true,
-        qualifyingHotelReservation: true,
-        membershipAttached,
-        wasWalked: true,
-        bookingChannel: "direct"
-      }
-    });
-
-    expect(remedyById(result, "hotel_guarantee_compensation").status).toBe(status);
-  });
-
   it("keeps remedy-specific exclusions independent", async () => {
     const eu = await runWorkflowFixture({
       facts: {
@@ -822,11 +801,11 @@ describe("complete policy applicability", () => {
   it("records the normalized provider that satisfied listed-provider scope", () => {
     const context = resolveClaimContext({
       state: claimState({
-        incidentType: "hotel_walk",
-        providerType: "hotel",
-        provider: "Sheraton",
-        confirmedHotelReservation: true,
-        wasWalked: true
+        incidentType: "airline_cancellation",
+        providerType: "airline",
+        operatingCarrier: "United Airlines",
+        origin: { airport: "JFK" },
+        destination: { airport: "LAX" }
       })
     });
     const trace = buildUnrankedRetrievalTrace(
@@ -834,10 +813,10 @@ describe("complete policy applicability", () => {
       knowledgeSnapshotFixture({
         policies: [
           policyFixture({
-            incident_types: ["hotel_walk"],
-            legal_regime: "provider_policy",
+            incident_types: ["airline_cancellation"],
+            legal_regime: "US_AIRLINE_COMMITMENT",
             applicability_rule: "listed_provider",
-            applicable_providers: ["Marriott"]
+            applicable_providers: ["United"]
           })
         ]
       })
@@ -845,7 +824,7 @@ describe("complete policy applicability", () => {
 
     expect(trace.policyApplicability[0]).toMatchObject({
       status: "applicable",
-      applicableCarrier: "Marriott"
+      applicableCarrier: "United"
     });
   });
 

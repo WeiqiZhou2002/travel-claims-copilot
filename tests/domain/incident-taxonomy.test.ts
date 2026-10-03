@@ -5,7 +5,7 @@ import { normalizeIssueType } from "../../lib/issueTaxonomy";
 
 describe("normalizeIncidentInput", () => {
   it.each([
-    ["hotel_walk", "hotel_walk"],
+    ["airline_delay", "airline_delay"],
     ["controllable_airline_delay", "airline_delay"],
     ["controllable_airline_cancellation", "airline_cancellation"]
   ] as const)("normalizes %s without deriving eligibility", (input, incident) => {
@@ -24,7 +24,7 @@ describe("normalizeIncidentInput", () => {
     });
   });
 
-  it.each(["baggage_delay", "hotel_property_loss", "insurance_claim"])(
+  it.each(["baggage_delay", "hotel_walk", "hotel_property_loss", "insurance_claim"])(
     "rejects dormant public input %s",
     (input) => expect(normalizeIncidentInput(input)).toBeNull()
   );

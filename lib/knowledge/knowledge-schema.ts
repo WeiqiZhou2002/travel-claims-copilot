@@ -39,29 +39,17 @@ const SCRIPT_REMEDIES = [
   "rebooking",
   "care",
   "fixed_compensation",
-  "hotel_guarantee",
   "voluntary_offer",
   "goodwill"
 ] as const;
 
-const MVP_INCIDENTS = [
-  "hotel_walk",
-  "airline_delay",
-  "airline_cancellation",
-  "denied_boarding"
-] as const;
+const MVP_INCIDENTS = ["airline_delay", "airline_cancellation", "denied_boarding"] as const;
 const CASE_INCIDENTS = [
   ...MVP_INCIDENTS,
   "baggage_delay",
   "airline_delay_trip_insurance",
   "airline_baggage_not_checked",
-  "airline_rebooking_mixed_carrier_delay",
-  "hotel_billing_dispute",
-  "hotel_service_issue",
-  "hotel_property_loss",
-  "hotel_relocation_before_opening",
-  "hotel_room_feature_mismatch",
-  "hotel_elite_benefit_closure"
+  "airline_rebooking_mixed_carrier_delay"
 ] as const;
 const LEGACY_LEGAL_CASE_LABELS = [
   "controllable_airline_delay",
@@ -231,7 +219,7 @@ function parsePolicies(value: unknown, dates: CheckedDateContext): Policy[] {
     stringValue(record.policy_id, `${label}.policy_id`);
     enumValue(
       record.provider_type,
-      ["hotel", "airline", "credit_card", "ota", "government"],
+      ["airline", "credit_card", "ota", "government"],
       `${label}.provider_type`
     );
     stringValue(record.provider, `${label}.provider`);
@@ -322,7 +310,7 @@ function parseCases(value: unknown): Case[] {
     );
     const providerType = enumValue(
       record.provider_type,
-      ["hotel", "airline", "credit_card", "ota"],
+      ["airline", "credit_card", "ota"],
       `${label}.provider_type`
     );
     // Airline cases record the ticketing provider and the operating carrier separately; either

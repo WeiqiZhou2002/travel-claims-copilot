@@ -34,19 +34,7 @@ export function assessRemedies(retrieval: RetrievalResult): RemedyDecision[] {
       request
     });
   };
-  if (q.issueType === "hotel_walk") {
-    const nonMember = /not (?:a )?member|non.member|不是会员|非会员/i.test(q.loyaltyStatus ?? "");
-    add(
-      "hotel_guarantee",
-      "Hotel reservation guarantee",
-      sources("provider_policy"),
-      nonMember,
-      nonMember
-        ? "The reported non-member status does not establish eligibility for the member guarantee."
-        : "Verify eligible membership, brand, booking channel, confirmed reservation and membership number attached before requesting guarantee compensation.",
-      "Ask the hotel to check eligibility for its reservation guarantee and confirm available relocation support in writing."
-    );
-  } else if (q.issueType !== "unknown") {
+  if (q.issueType !== "unknown") {
     const transport = sources(
       "US_DOT_REFUND",
       "EU261",

@@ -1,20 +1,5 @@
 [
   {
-    "script_id": "marriott_walk_frontdesk_en",
-    "source_ids": ["marriott_ultimate_reservation_guarantee"],
-    "incident_types": ["hotel_walk"],
-    "applicable_regions": ["global"],
-    "applicability_rule": "listed_provider",
-    "required_controllability": "any",
-    "provider": "Marriott",
-    "channel": "front_desk",
-    "tone": "polite_firm",
-    "language": "en",
-    "template": "Please confirm whether my booking and membership meet Marriott's Ultimate Reservation Guarantee conditions. Please explain available nearby accommodation, transport support and any applicable guarantee remedy in writing.",
-    "when_to_use": "Use at the front desk when a Marriott property says it cannot honor a confirmed reservation.",
-    "remedy": "hotel_guarantee"
-  },
-  {
     "script_id": "airline_controllable_delay_hotel_en",
     "source_ids": ["dot_airline_cancellation_delay_dashboard"],
     "incident_types": ["airline_delay", "airline_cancellation"],
@@ -28,20 +13,6 @@
     "template": "Please confirm the disruption reason and the assistance available under your current customer service commitment. Which meal, accommodation and transport support applies to my waiting time and any overnight need? Please explain any eligibility conditions in writing.",
     "when_to_use": "Use at the airport when a controllable airline delay or cancellation requires an overnight stay.",
     "remedy": "care"
-  },
-  {
-    "script_id": "hotel_walk_escalation_email_en",
-    "source_ids": ["marriott_ultimate_reservation_guarantee"],
-    "incident_types": ["hotel_walk"],
-    "applicable_regions": ["global"],
-    "applicability_rule": "any_route",
-    "required_controllability": "any",
-    "provider": "generic_hotel",
-    "channel": "corporate_escalation",
-    "tone": "polite_firm",
-    "language": "en",
-    "template": "Please review my reported reservation problem, confirm the booking status, and explain available alternate accommodation and transport support. Please identify the evidence needed to review any documented expenses or applicable guarantee. Additional goodwill is a separate discretionary request.",
-    "when_to_use": "Use after a hotel walk when the property did not fully resolve relocation or documented expenses."
   },
   {
     "script_id": "airline_controllable_cancellation_email_en",

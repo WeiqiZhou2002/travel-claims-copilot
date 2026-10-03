@@ -11,7 +11,7 @@ Read these files before making product or architecture decisions:
 
 ## Product Goal
 
-Build a demo web app where a user describes a hotel or airline disruption, and the app tells them:
+Build a demo web app where a user describes an airline disruption, and the app tells them:
 - who to contact now
 - what to ask for first and what fallback to use
 - what evidence to preserve now
@@ -76,8 +76,8 @@ Start with local JSON files if faster. Later migrate to Supabase Postgres and pg
 
 ## First Demo Scope
 
-Only support these initial issue types:
-- hotel_walk
+Only support these initial issue types (hotel problems are out of scope and must be declined
+clearly; archived hotel records live in `data/archive/hotel-knowledge.json` and are not loaded):
 - controllable_airline_delay
 - controllable_airline_cancellation
 - denied_boarding

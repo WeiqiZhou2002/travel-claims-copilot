@@ -57,7 +57,7 @@ export function releaseFixture(): {
     },
     liveEval: {
       ...base(),
-      datasetVersion: "four-scenario-v1",
+      datasetVersion: "airline-scenario-v2",
       scorerVersion: "claim-scorer-v1",
       model: "gpt-5.6-luna",
       attempted: 48,

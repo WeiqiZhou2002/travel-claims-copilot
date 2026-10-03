@@ -79,27 +79,13 @@ describe("LocalRawFactExtractor", () => {
 
   it.each([
     "I booked a Marriott room but never received confirmation, and the hotel had no room.",
-    "I had an unconfirmed reservation at Marriott, and the hotel had no room.",
-    "我订了万豪，但一直没有收到确认，到店后没有房间。",
-    "我有未确认预订，到了万豪后没有房间。",
-    "我有未确认的预订，到了万豪后没有房间。"
-  ])(
-    "does not infer a confirmed hotel reservation from an unconfirmed booking: %s",
-    async (message) => {
-      const patch = await new LocalRawFactExtractor().extract(localExtractionInput(message));
+    "I received a booking confirmation, but the Marriott had no room.",
+    "我订了万豪，但一直没有收到确认，到店后没有房间。"
+  ])("flags a hotel problem as out of scope without an airline incident: %s", async (message) => {
+    const patch = await new LocalRawFactExtractor().extract(localExtractionInput(message));
 
-      expect(patch.set.incidentType).toBe("hotel_walk");
-      expect(patch.set.wasWalked).toBe(true);
-      expect(patch.set).not.toHaveProperty("confirmedHotelReservation");
-    }
-  );
-
-  it("accepts an explicitly confirmed hotel reservation", async () => {
-    const patch = await new LocalRawFactExtractor().extract(
-      localExtractionInput("I received a booking confirmation, but the Marriott had no room.")
-    );
-
-    expect(patch.set.confirmedHotelReservation).toBe(true);
+    expect(patch.set.providerType).toBe("hotel");
+    expect(patch.set).not.toHaveProperty("incidentType");
   });
 });
 
@@ -144,7 +130,7 @@ describe("OpenAIRawFactExtractor", () => {
       required: ["set"]
     });
     expect(request.schema.properties.set.required).toEqual(RAW_FACT_PATHS);
-    expect(new Set(request.schema.properties.set.required).size).toBe(50);
+    expect(new Set(request.schema.properties.set.required).size).toBe(45);
     const outbound = JSON.parse(request.input);
     expect(outbound).toEqual({
       message: "I did not volunteer.",

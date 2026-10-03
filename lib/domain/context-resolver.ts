@@ -483,10 +483,6 @@ export function providerComparisonKey(value: string | null | undefined): string 
     .trim();
 }
 
-export function canonicalHotelGroupValue(value: string | null | undefined): string | undefined {
-  return value ? findCanonicalProviderMatch(value, "hotel")?.provider : undefined;
-}
-
 function resolved<T>(
   value: T,
   source: ResolvedValue<T>["source"],

@@ -38,12 +38,11 @@ async function expectUnprocessable(response: Response) {
 }
 
 describe("public scenario scope", () => {
-  it("publishes exactly the four frozen scenarios", async () => {
+  it("publishes exactly the three frozen airline scenarios", async () => {
     const response = await getScenarios();
     const body = await response.json();
 
     expect(body.scenarios.map(({ id }: { id: string }) => id)).toEqual([
-      "marriott_hotel_walk",
       "us_airline_disruption",
       "us_denied_boarding",
       "eu_uk_air_disruption"
@@ -169,13 +168,7 @@ describe("public scenario scope", () => {
   });
 
   it("returns a fully empty blocked domain result and no derived context", async () => {
-    const prior = claimState({
-      incidentType: "hotel_walk",
-      providerType: "hotel",
-      provider: "Hyatt",
-      confirmedHotelReservation: true,
-      wasWalked: true
-    });
+    const prior = claimState({ providerType: "hotel", provider: "Hyatt" });
     const response = await analyzeRequest({
       message: "No additional facts.",
       prior,

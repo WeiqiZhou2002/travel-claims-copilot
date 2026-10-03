@@ -85,6 +85,16 @@ function outOfScope(scenarioId: ScenarioId): ScenarioResolution {
   };
 }
 
+function outsideProductScope(): ScenarioResolution {
+  return {
+    status: "out_of_scope",
+    scenarioIds: [],
+    primaryScenario: null,
+    decisions: [],
+    missingFacts: []
+  };
+}
+
 function missingRouteOrCarrierPaths(input: ResolvedContextWithoutScenarios): RawFactPath[] {
   const paths: RawFactPath[] = [];
   if (input.jurisdiction.originRegion.value === null) paths.push("origin.airport");
@@ -112,28 +122,8 @@ export function resolveScenarioSet(input: ResolvedContextWithoutScenarios): Scen
   const destinationRegion = input.jurisdiction.destinationRegion.value;
   const decisions: ScenarioDecision[] = [];
 
-  if (facts.incidentType === "hotel_walk") {
-    if (!facts.provider && !facts.brandOrProperty) {
-      return needsInformation("marriott_hotel_walk", ["provider"]);
-    }
-    if (input.normalizedProvider.value !== "Marriott") {
-      return outOfScope("marriott_hotel_walk");
-    }
-    const admissionCandidates: Array<RawFactPath | null> = [
-      facts.confirmedHotelReservation === null ? "confirmedHotelReservation" : null,
-      facts.wasWalked === null ? "wasWalked" : null
-    ];
-    const admissionMissing = admissionCandidates.filter(
-      (path): path is RawFactPath => path !== null
-    );
-    if (admissionMissing.length > 0) {
-      return needsInformation("marriott_hotel_walk", admissionMissing);
-    }
-    if (!facts.confirmedHotelReservation || !facts.wasWalked) {
-      return outOfScope("marriott_hotel_walk");
-    }
-    return resolved(["marriott_hotel_walk"]);
-  }
+  // Hotel disruptions are outside the airline-only product scope.
+  if (facts.providerType === "hotel") return outsideProductScope();
 
   if (facts.incidentType === "denied_boarding") {
     if (originRegion === null) {

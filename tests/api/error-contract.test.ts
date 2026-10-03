@@ -100,12 +100,7 @@ const growthBooleanPaths = [
   "confirmedReservation",
   "checkedInOnTime",
   "atGateOnTime",
-  "documentsCompliant",
-  "confirmedHotelReservation",
-  "qualifyingHotelReservation",
-  "membershipAttached",
-  "wasWalked",
-  "replacementLodgingProvided"
+  "documentsCompliant"
 ] as const satisfies readonly RawFactPath[];
 
 function boundedText(marker: string, maximum: number): string {

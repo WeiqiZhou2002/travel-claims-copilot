@@ -10,26 +10,6 @@ export type BrowserJourney = {
 
 export const goldenJourneys: BrowserJourney[] = [
   {
-    name: "Marriott hotel walk",
-    message:
-      "The Marriott hotel had no room and walked me after refusing my confirmed direct reservation.",
-    corrections: {
-      confirmedHotelReservation: "true",
-      qualifyingHotelReservation: "true",
-      membershipAttached: "true",
-      bookingChannel: "direct",
-      replacementLodgingProvided: "false"
-    },
-    expectedScenarios: ["marriott hotel walk"],
-    expectedRemedies: [
-      { title: "Comparable replacement hotel", status: "Supported by current facts" },
-      {
-        title: "Hotel reservation guarantee compensation",
-        status: "Supported by current facts"
-      }
-    ]
-  },
-  {
     name: "US controllable cancellation",
     message:
       "United cancelled my flight from JFK to LAX because of a crew issue and I had to stay overnight.",

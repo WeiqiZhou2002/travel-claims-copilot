@@ -181,14 +181,7 @@ function twentyOneSetOperations(): Record<string, boolean> {
   return Object.fromEntries(twentyOneBooleanFactPaths.map((path) => [path, true]));
 }
 
-const booleanFactPaths: ReadonlySet<RawFactPath> = new Set([
-  ...twentyOneBooleanFactPaths,
-  "confirmedHotelReservation",
-  "qualifyingHotelReservation",
-  "membershipAttached",
-  "wasWalked",
-  "replacementLodgingProvided"
-]);
+const booleanFactPaths: ReadonlySet<RawFactPath> = new Set(twentyOneBooleanFactPaths);
 const integerFactPaths: ReadonlySet<RawFactPath> = new Set([
   "finalArrivalDelayMinutes",
   "cancellationNoticeHours",

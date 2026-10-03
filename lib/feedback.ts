@@ -32,7 +32,6 @@ export type FeedbackValidationContext = {
 };
 
 const scenarioIds: readonly ScenarioId[] = [
-  "marriott_hotel_walk",
   "us_airline_disruption",
   "us_denied_boarding",
   "eu_uk_air_disruption"

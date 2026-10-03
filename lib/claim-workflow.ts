@@ -408,7 +408,10 @@ async function processParsedClaimTurn(
         status: "out_of_scope",
         revision: merged.state.revision,
         extraction: extracted.extraction,
-        caution: "This competition build cannot assess this journey."
+        caution:
+          context.resolutionFacts.providerType === "hotel"
+            ? "Only airline disruptions are supported right now; hotel problems are not supported."
+            : "This competition build cannot assess this journey."
       }),
       context: null
     };

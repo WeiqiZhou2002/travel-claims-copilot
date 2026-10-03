@@ -111,13 +111,12 @@ describe("buildOutboundExtractionInput", () => {
   });
 
   it("gives the Local adapter only the original message and no mutable claim-state reference", async () => {
-    const message = "Booking #ABC123 was not honored at the synthetic hotel.";
+    const message = "Booking #ABC123 was not honored on the synthetic flight.";
     const prior = claimState({
-      incidentType: "hotel_walk",
-      providerType: "hotel",
-      provider: "Hyatt",
-      confirmedHotelReservation: true,
-      wasWalked: true
+      incidentType: "airline_delay",
+      providerType: "airline",
+      provider: "Delta",
+      isOvernight: true
     });
     const originalPrior = structuredClone(prior);
     const localExtract = vi.fn(async (input: Record<string, unknown>) => {
@@ -147,12 +146,11 @@ describe("buildOutboundExtractionInput", () => {
     const message =
       "Booking #ABC123 belongs to synthetic.traveler@example.test. Flight AF1234 CDG to JFK was delayed 180 minutes.";
     const prior = claimState({
-      incidentType: "hotel_walk",
-      providerType: "hotel",
-      provider: "Hyatt",
+      incidentType: "airline_delay",
+      providerType: "airline",
+      provider: "Delta",
       brandOrProperty: "Private synthetic property",
-      confirmedHotelReservation: true,
-      wasWalked: true,
+      isOvernight: true,
       expenses: ["Private synthetic expense"],
       evidence: ["Private synthetic evidence"],
       userGoal: "Private synthetic goal"

@@ -282,13 +282,7 @@ describe("two-stage high-risk guard", () => {
     const response = await processClaimTurn(
       {
         message: "No additional facts.",
-        prior: claimState({
-          incidentType: "hotel_walk",
-          providerType: "hotel",
-          provider: "Hyatt",
-          confirmedHotelReservation: true,
-          wasWalked: true
-        }),
+        prior: claimState({ providerType: "hotel", provider: "Hyatt" }),
         baseRevision: 0
       },
       harness.dependencies
@@ -313,8 +307,8 @@ describe("deterministic guard contract", () => {
 
   it("projects every mutable free-text field in a fixed order and no controlled values", () => {
     const facts = rawFacts({
-      incidentType: "hotel_walk",
-      providerType: "hotel",
+      incidentType: "airline_delay",
+      providerType: "airline",
       provider: "provider-text",
       brandOrProperty: "brand-text",
       operatingCarrier: "carrier-text",
@@ -334,7 +328,7 @@ describe("deterministic guard contract", () => {
       actualFinalArrival: "actual-text",
       bookingChannel: "direct",
       loyaltyStatus: "loyalty-text",
-      wasWalked: true,
+      isOvernight: true,
       expenses: ["expense-one-text", "expense-two-text"],
       evidence: ["evidence-one-text", "evidence-two-text"],
       userGoal: "goal-text"
@@ -373,7 +367,7 @@ describe("deterministic guard contract", () => {
     expect(
       postMergeGuard(
         "No direct risk phrase.",
-        rawFacts({ incidentType: "hotel_walk", reasonCategory: "crew", wasWalked: true })
+        rawFacts({ incidentType: "airline_delay", reasonCategory: "crew", isOvernight: true })
       )
     ).toEqual({ status: "pass" });
   });

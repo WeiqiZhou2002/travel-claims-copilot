@@ -113,7 +113,7 @@ describe("reviewed production carrier commitments", () => {
 describe("carrier commitment predicate evaluation", () => {
   it.each([
     ["event", eventPredicate, { incidentType: "airline_delay" }, "matched"],
-    ["event exclusion", eventPredicate, { incidentType: "hotel_walk" }, "excluded"],
+    ["event exclusion", eventPredicate, { incidentType: "denied_boarding" }, "excluded"],
     ["controllability", controllabilityPredicate, { controllability: "controllable" }, "matched"],
     [
       "controllability exclusion",

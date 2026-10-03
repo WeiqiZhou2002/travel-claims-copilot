@@ -4,14 +4,14 @@
 
 这是一个“旅行中断现场行动与沟通助手”。
 
-用户输入自己遇到的酒店或航司异常经历，系统基于：
+用户输入自己遇到的航班异常经历，系统基于：
 - 官方政策
 - 政府法规
-- 航司/酒店公开承诺
+- 航司公开承诺
 - 社区相似案例 DP
 - 历史用户反馈结果
 
-帮助用户判断现在该联系谁、先提出什么诉求、保留什么证据，并根据酒店或航司的
+帮助用户判断现在该联系谁、先提出什么诉求、保留什么证据，并根据航司的
 实际回复继续给出下一步。政策和案例是行动建议的证据层，不是主要界面。
 
 产品不提供法律意见，不承诺赔偿结果，不做代理索赔。它的核心价值是帮助用户在
@@ -25,26 +25,16 @@
 4. 页面优先展示 `What to do now`：联系谁、主要诉求、备选诉求、当前证据和不确定性。
 5. 用户可按需请求现场、电话、Chat 或邮件话术。LLM 只负责把 `ActionPlan` 改写为
    合适的表达，不得新增权益、金额、政策或事实。
-6. 用户粘贴酒店或航司的回复，系统提取承认、原因、拒绝、方案、case number 和
+6. 用户粘贴航司的回复，系统提取承认、原因、拒绝、方案、case number 和
    未回答事项，再由确定性规则生成下一步。
 
 系统应形成持续的 resolution loop，而不是在第一次分析后结束。
 
 ## 核心用户场景
 
-### 1. 酒店被 walk / confirmed reservation not honored
+产品只支持航司问题。酒店问题（到店无房、账单争议等）明确回复“暂不支持”，不做分析。
 
-示例：
-用户是 Marriott Titanium，官网订 Sheraton，到店后酒店说没房，把用户安排到附近更差酒店，没有主动给补偿。
-
-系统应输出：
-- 问题类型：hotel_walk
-- 官方依据：Marriott Ultimate Reservation Guarantee / Elite Benefit Guarantees
-- 相似案例：Marriott walk, Titanium, direct booking
-- 建议诉求：附近酒店、交通、cash/points compensation、case number
-- 话术：前台现场话术、客服邮件、corporate escalation
-
-### 2. 美国航司可控延误/取消
+### 1. 美国航司可控延误/取消
 
 示例：
 用户 United 航班因为 crew issue 取消，被改到第二天，机场不给酒店。
@@ -56,7 +46,7 @@
 - 建议诉求：rebooking、hotel、meal voucher、transportation
 - 话术：机场柜台话术、customer relations 邮件
 
-### 3. 航司超售 / denied boarding / voluntary bump
+### 2. 航司超售 / denied boarding / voluntary bump
 
 示例：
 用户遇到 AA oversold，航司询问是否有人愿意自愿改签。
@@ -67,7 +57,7 @@
 - 相似 DP 中的谈判区间
 - 谈判策略和话术
 
-### 4. EU261 / UK261 航班延误、取消、missed connection
+### 3. EU261 / UK261 航班延误、取消、missed connection
 
 示例：
 用户从 EU 出发，最终目的地晚到 4 小时。

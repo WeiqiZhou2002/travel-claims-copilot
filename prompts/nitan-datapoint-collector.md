@@ -53,17 +53,11 @@ Useful search queries:
 
 ```text
 怎么撕 category:旅行
-酒店 怎么撕 category:旅行
 航司 怎么撕 category:旅行
 延误 怎么撕 category:旅行
 取消 怎么撕 category:旅行
 托运行李 怎么撕 category:旅行
 行李 延误 怎么撕 category:旅行
-酒店 walk 怎么撕 category:旅行
-relocate 酒店 category:旅行
-Hyatt 怎么撕 category:旅行
-Marriott 怎么撕 category:旅行
-Hilton 怎么撕 category:旅行
 AA 怎么撕 category:旅行
 United 怎么撕 category:旅行
 Delta 怎么撕 category:旅行
@@ -86,68 +80,44 @@ If tag search is noisy, fall back to keyword search plus category filtering.
 
 Prioritize these issue areas first:
 
-1. `hotel_walk`
-   - confirmed reservation not honored
-   - hotel oversold
-   - hotel relocated guest at check-in
+The product is airline-only. Skip hotel datapoints entirely.
 
-2. `hotel_relocation_before_opening`
-   - hotel delayed opening
-   - brand moved guest to another property before arrival
-
-3. `hotel_room_feature_mismatch`
-   - paid upgrade feature missing
-   - advertised amenity unavailable
-   - suite/room type mismatch
-
-4. `hotel_billing_dispute`
-   - unexplained deposit
-   - incorrect hotel charge
-   - folio mismatch
-
-5. `hotel_elite_benefit_closure`
-   - lounge/club closed
-   - breakfast or elite benefit substitute
-   - late checkout / upgrade benefit not honored
-
-6. `controllable_airline_delay`
+1. `controllable_airline_delay`
    - crew, maintenance, mechanical, operational delay
    - overnight disruption
    - hotel / meal / transport request
 
-7. `controllable_airline_cancellation`
+2. `controllable_airline_cancellation`
    - controllable cancellation
    - rebooking next day
    - denied vouchers or reimbursement
 
-8. `denied_boarding`
+3. `denied_boarding`
    - involuntary denied boarding
    - voluntary bump negotiation
    - oversold flight
 
-9. `baggage_delay`
+4. `baggage_delay`
    - delayed checked bag
    - gate-checked bag missing
    - emergency purchases
 
-10. `airline_baggage_not_checked`
-    - airline/system/check-in delay caused bag not to be accepted
+5. `airline_baggage_not_checked`
+   - airline/system/check-in delay caused bag not to be accepted
 
-11. `airline_rebooking_mixed_carrier_delay`
-    - one carrier cancels, another operating carrier delays
-    - portal-issued tickets
-    - uncertainty over who owns rebooking or care
+6. `airline_rebooking_mixed_carrier_delay`
+   - one carrier cancels, another operating carrier delays
+   - portal-issued tickets
+   - uncertainty over who owns rebooking or care
 
-12. `airline_delay_trip_insurance`
-    - credit card trip delay insurance
-    - airline goodwill plus card reimbursement
+7. `airline_delay_trip_insurance`
+   - credit card trip delay insurance
+   - airline goodwill plus card reimbursement
 
 ### P1 Issue Areas
 
 Collect these after P0 has decent coverage:
 
-- hotel service issue
-- hotel property loss
 - airline downgrade
 - missed connection
 - schedule change
@@ -221,7 +191,7 @@ type Case = {
   source_type: "community_dp" | "user_submitted" | "synthetic_example";
   source_name: string;
   source_url: string;
-  provider_type: "hotel" | "airline" | "credit_card" | "ota";
+  provider_type: "airline" | "credit_card" | "ota";
   provider: string;
   brand_or_airline: string;
   issue_type: string;
@@ -288,7 +258,6 @@ https://www.uscardforum.com/t/topic/504904
 
 Choose one:
 
-- `hotel`
 - `airline`
 - `credit_card`
 - `ota`

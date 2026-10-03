@@ -145,21 +145,4 @@ describe("handling playbook", () => {
     });
     expect(playbook.askLadder.join(" ")).toContain("documented necessary expenses");
   });
-
-  it("keeps hotel recovery separate from airline ticketing", () => {
-    const playbook = buildHandlingPlaybook(
-      normalizeClaimFacts({
-        ...emptyClaimFacts(),
-        issueType: "hotel_walk",
-        providerType: "hotel",
-        provider: "Marriott"
-      })
-    );
-
-    expect(playbook).toMatchObject({
-      situation: "hotel_walk",
-      contactFirst: { role: "hotel_front_desk", name: "Marriott" },
-      ticketingChecks: []
-    });
-  });
 });

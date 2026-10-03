@@ -125,13 +125,6 @@ const fallbackEvidence = [
 ];
 
 const evidenceByIssue: Partial<Record<IssueType, string[]>> = {
-  hotel_walk: [
-    "Reservation confirmation number",
-    "Screenshot showing the active confirmed booking",
-    "Loyalty account number and status",
-    "Property notes confirming no room was available",
-    "Alternate hotel, transportation, and incidental receipts"
-  ],
   airline_cancellation: [
     "Cancellation notice",
     "Boarding pass or ticket receipt",
@@ -181,48 +174,6 @@ const evidenceByIssue: Partial<Record<IssueType, string[]>> = {
     "Hotel, food, transport, and rental receipts",
     "Card benefit claim form"
   ],
-  hotel_billing_dispute: [
-    "Hotel folio",
-    "Card transaction screenshot",
-    "Booking confirmation",
-    "Written explanation from hotel billing",
-    "Refund or adjustment confirmation"
-  ],
-  hotel_service_issue: [
-    "Order or service receipt",
-    "Photos of on-property signage or QR code",
-    "Front desk notes",
-    "Merchant refund request",
-    "Card transaction"
-  ],
-  hotel_property_loss: [
-    "Description or receipt for the lost item",
-    "Housekeeping timeline",
-    "Front desk or manager notes",
-    "Photos if available",
-    "Purchase protection terms if relevant"
-  ],
-  hotel_relocation_before_opening: [
-    "Original hotel confirmation",
-    "Relocation or opening-delay notice",
-    "Replacement hotel confirmation",
-    "Screenshots of cash rates or category difference",
-    "Transportation or incremental cost receipts"
-  ],
-  hotel_room_feature_mismatch: [
-    "Room type confirmation",
-    "Website screenshots showing advertised features",
-    "Photos or videos of missing or broken amenities",
-    "Engineer or front desk notes",
-    "Paid upgrade receipt and points activity"
-  ],
-  hotel_elite_benefit_closure: [
-    "Pre-arrival closure notice",
-    "Reservation showing club access or status",
-    "Award or elite benefit terms",
-    "Substitute breakfast details",
-    "Any denied benefit notes"
-  ],
   unknown: fallbackEvidence
 };
 
@@ -232,10 +183,6 @@ const fallbackCautions = [
 ];
 
 const cautionsByIssue: Partial<Record<IssueType, string[]>> = {
-  hotel_walk: [
-    "Brand guarantees often depend on membership, brand, status, and whether the reservation was booked through an eligible channel.",
-    "Ask for written confirmation before leaving the property if possible."
-  ],
   airline_cancellation: [
     "Airline commitments and legal remedies depend on route, carrier, cause, and timing.",
     "Keep receipts if the airline cannot issue vouchers immediately."
@@ -263,30 +210,6 @@ const cautionsByIssue: Partial<Record<IssueType, string[]>> = {
   airline_delay_trip_insurance: [
     "Weather delays can support card trip-delay claims even when they weaken airline controllability claims.",
     "Avoid asking two parties to reimburse the exact same expense."
-  ],
-  hotel_billing_dispute: [
-    "Many hotel deposits are pending holds; confirm whether the charge actually posted before disputing.",
-    "Card disputes are cleaner after the hotel has failed to provide a valid folio or correction."
-  ],
-  hotel_service_issue: [
-    "A third-party merchant refund and a hotel goodwill request are separate claims.",
-    "The hotel claim is stronger if the service was clearly presented as an on-property amenity."
-  ],
-  hotel_property_loss: [
-    "Minor personal-property claims usually depend on replacement value evidence.",
-    "Large property-loss claims are outside this demo and may need professional or insurance help."
-  ],
-  hotel_relocation_before_opening: [
-    "A relocation before arrival is not always the same as a hotel walk at check-in.",
-    "Comparable accommodation and written confirmation matter more than broad compensation demands."
-  ],
-  hotel_room_feature_mismatch: [
-    "Missing amenities support a stronger request when they were advertised and were material to a paid upgrade.",
-    "Ask for promised compensation in writing before checkout if possible."
-  ],
-  hotel_elite_benefit_closure: [
-    "A substitute breakfast may be considered reasonable even if lounge evening snacks are unavailable.",
-    "Additional goodwill is more plausible when the lost benefit was material and not fairly replaced."
   ],
   unknown: [
     "This demo could not confidently classify the issue from the current keywords.",

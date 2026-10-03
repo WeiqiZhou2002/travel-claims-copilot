@@ -9,7 +9,7 @@ function evalCase(
   overrides: Partial<EvalCase["expected"]> = {}
 ): EvalCase {
   return {
-    datasetVersion: "four-scenario-v1",
+    datasetVersion: "airline-scenario-v2",
     id,
     synthetic: true,
     language: "en",

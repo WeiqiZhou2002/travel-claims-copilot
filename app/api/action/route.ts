@@ -27,8 +27,6 @@ const scriptChannels: ActionScriptChannel[] = [
   "corporate_escalation"
 ];
 const contactRoles: HandlingContactRole[] = [
-  "hotel_front_desk",
-  "hotel_customer_care",
   "ticketing_airline",
   "ticketing_agent",
   "frequent_flyer_program",

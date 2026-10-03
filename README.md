@@ -2,7 +2,7 @@
 
 Travel Claims Copilot is a demo web app for exploring travel disruption claims and communication strategy.
 
-The user describes a hotel or airline issue, and the app returns:
+The user describes an airline disruption, and the app returns:
 
 - issue type
 - who to contact first and a conditional handling playbook
@@ -42,10 +42,11 @@ The app currently uses:
 There is no database, login, payment, scraping, email sending, or claim submission. Conversation
 state currently stays in the browser and is not persisted.
 
-The current knowledge base contains 10 policies, 55 reviewed case records (35 approved for
-retrieval), and 14 reusable scripts. The first demo publishes four incident types:
+The current knowledge base contains 9 policies, 29 reviewed case records (16 approved for
+retrieval), and 12 reusable scripts. The product is airline-only and publishes three incident
+types; a hotel problem is answered as out of scope. Earlier hotel records are preserved in
+`data/archive/hotel-knowledge.json` and are not loaded at runtime.
 
-- `hotel_walk`
 - `airline_delay`
 - `airline_cancellation`
 - `denied_boarding`
@@ -125,12 +126,6 @@ then export audited approvals with `npm run publish:cases` and commit `data/revi
 See `docs/dp-review.md`.
 
 ## Demo Test Inputs
-
-Hotel walk:
-
-```text
-I had a confirmed Marriott Sheraton reservation booked directly, but when I arrived the front desk said the hotel was oversold and had no room. They moved me to a cheaper nearby hotel and did not offer compensation.
-```
 
 Airline cancellation with a controllable reason:
 
@@ -374,7 +369,6 @@ Returns:
   handlingPlaybook?: {
     status: "actionable" | "needs_context";
     situation:
-      | "hotel_walk"
       | "planned_schedule_change"
       | "close_in_irrops"
       | "completed_disruption"
@@ -398,7 +392,6 @@ Official policies, regulations, dashboards, or company commitments.
 
 Examples:
 
-- Marriott Ultimate Reservation Guarantee
 - DOT Airline Cancellation and Delay Dashboard
 - EU261 and UK261
 - Canada Air Passenger Protection Regulations

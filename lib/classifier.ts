@@ -291,9 +291,10 @@ function matchIssue(description: string): MatchResult {
     hotelWalkSignals.length > 0 &&
     (hotelContextSignals.length > 0 || provider.providerType === "hotel")
   ) {
+    // Hotel disruptions are out of product scope; flag the provider type so the workflow can say so.
     return {
       ...shared,
-      issueType: "hotel_walk",
+      issueType: "unknown",
       providerType: "hotel",
       confidence: "high",
       signals: [...hotelContextSignals, ...hotelWalkSignals]
@@ -475,45 +476,23 @@ function matchIssue(description: string): MatchResult {
     };
   }
 
-  const hotelMatches: Array<{ issueType: IssueType; terms: string[] }> = [
-    {
-      issueType: "hotel_relocation_before_opening",
-      terms: ["delayed opening", "hotel not open", "opening postponed"]
-    },
-    {
-      issueType: "hotel_billing_dispute",
-      terms: ["billing", "security deposit", "incorrect charge", "folio"]
-    },
-    {
-      issueType: "hotel_property_loss",
-      terms: ["lost item", "personal item missing"]
-    },
-    {
-      issueType: "hotel_elite_benefit_closure",
-      terms: ["club closed", "lounge closed", "breakfast benefit", "club access"]
-    },
-    {
-      issueType: "hotel_room_feature_mismatch",
-      terms: ["room feature", "upgrade charge", "broken amenity", "missing amenity"]
-    },
-    {
-      issueType: "hotel_service_issue",
-      terms: ["restaurant closed", "undelivered service", "service issue"]
-    }
-  ];
-  const hotelMatch = hotelMatches
-    .map((candidate) => ({
-      ...candidate,
-      signals: hasAny(text, candidate.terms)
-    }))
-    .find((candidate) => candidate.signals.length > 0);
-  if (hotelMatch) {
+  const hotelSignals = hasAny(text, [
+    "delayed opening",
+    "hotel not open",
+    "opening postponed",
+    "folio",
+    "security deposit",
+    "club closed",
+    "breakfast benefit",
+    "club access"
+  ]);
+  if (hotelSignals.length > 0) {
     return {
       ...shared,
-      issueType: hotelMatch.issueType,
+      issueType: "unknown",
       providerType: "hotel",
       confidence: "high",
-      signals: hotelMatch.signals
+      signals: hotelSignals
     };
   }
 

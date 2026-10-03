@@ -1,5 +1,4 @@
 export type IssueType =
-  | "hotel_walk"
   | "airline_cancellation"
   | "airline_delay"
   | "denied_boarding"
@@ -7,17 +6,11 @@ export type IssueType =
   | "airline_delay_trip_insurance"
   | "airline_baggage_not_checked"
   | "airline_rebooking_mixed_carrier_delay"
-  | "hotel_billing_dispute"
-  | "hotel_service_issue"
-  | "hotel_property_loss"
-  | "hotel_relocation_before_opening"
-  | "hotel_room_feature_mismatch"
-  | "hotel_elite_benefit_closure"
   | "unknown";
 
 export type MvpIssueType = Extract<
   IssueType,
-  "hotel_walk" | "airline_cancellation" | "airline_delay" | "denied_boarding"
+  "airline_cancellation" | "airline_delay" | "denied_boarding"
 >;
 
 export type ProviderType = "hotel" | "airline" | "credit_card" | "ota" | "government";
@@ -110,7 +103,7 @@ export type Case = {
   source_name: string;
   source_url: string;
   provider_type: Exclude<ProviderType, "government">;
-  /** Airline cases: original ticketing/booking provider; hotels: hotel group. */
+  /** Original ticketing/booking provider. */
   provider: string | null;
   /** Operating airline of the disrupted segment, never the replacement airline. */
   carrier: string | null;
@@ -277,8 +270,6 @@ export type SuggestedAsks = {
 };
 
 export type HandlingContactRole =
-  | "hotel_front_desk"
-  | "hotel_customer_care"
   | "ticketing_airline"
   | "ticketing_agent"
   | "frequent_flyer_program"
@@ -294,12 +285,7 @@ export type HandlingGuidanceSource = {
 
 export type HandlingPlaybook = {
   status: "actionable" | "needs_context";
-  situation:
-    | "hotel_walk"
-    | "planned_schedule_change"
-    | "close_in_irrops"
-    | "completed_disruption"
-    | "unknown";
+  situation: "planned_schedule_change" | "close_in_irrops" | "completed_disruption" | "unknown";
   contactFirst: {
     role: HandlingContactRole;
     name: string | null;
@@ -382,14 +368,7 @@ export type ProviderFeedbackResult = {
 };
 
 export type RemedyDecision = {
-  id:
-    | "refund"
-    | "rebooking"
-    | "care"
-    | "fixed_compensation"
-    | "hotel_guarantee"
-    | "voluntary_offer"
-    | "goodwill";
+  id: "refund" | "rebooking" | "care" | "fixed_compensation" | "voluntary_offer" | "goodwill";
   status: "needs_verification" | "not_supported";
   title: string;
   explanation: string;

@@ -29,7 +29,7 @@ describe("raw fact schema", () => {
   it("declares the complete raw shape without derived authority", () => {
     const empty = emptyRawClaimFacts();
 
-    expect(RAW_FACT_PATHS).toHaveLength(50);
+    expect(RAW_FACT_PATHS).toHaveLength(45);
     expect(empty).toEqual(rawFacts());
     expect(RAW_FACT_PATHS).not.toContain("origin.region");
     expect(RAW_FACT_PATHS).not.toContain("operatingCarrierRegion");
@@ -43,8 +43,8 @@ describe("raw fact schema", () => {
     expect(state.revision).toBe(3);
     expect(state.facts).toEqual(rawFacts({ incidentType: "airline_delay" }));
     expect(state.unresolvedFields).toEqual(["origin.airport"]);
-    expect(fixtureResolvedContext({ incidentType: "hotel_walk" }).raw.facts).toEqual(
-      rawFacts({ incidentType: "hotel_walk" })
+    expect(fixtureResolvedContext({ incidentType: "denied_boarding" }).raw.facts).toEqual(
+      rawFacts({ incidentType: "denied_boarding" })
     );
   });
 
@@ -272,14 +272,18 @@ describe("server-owned context", () => {
   it("normalizes provider and actual carrier independently without provider fallback", () => {
     const withCarrier = resolveClaimContext({
       state: claimState(
-        rawFacts({ provider: "Sheraton", operatingCarrier: "KLM", incidentType: "hotel_walk" })
+        rawFacts({
+          provider: "Delta",
+          operatingCarrier: "KLM",
+          incidentType: "airline_cancellation"
+        })
       )
     });
     const withoutCarrier = resolveClaimContext({
       state: claimState(rawFacts({ provider: "United", incidentType: "airline_cancellation" }))
     });
 
-    expect(withCarrier.normalizedProvider.value).toBe("Marriott");
+    expect(withCarrier.normalizedProvider.value).toBe("Delta");
     expect(withCarrier.normalizedOperatingCarrier.value).toBe("KLM");
     expect(withCarrier.jurisdiction.operatingCarrierRegion.value).toBe("EU_EEA_CH");
     expect(withoutCarrier.normalizedOperatingCarrier.value).toBeNull();
@@ -387,7 +391,6 @@ describe("server-owned context", () => {
       "../../lib/domain/context-resolver.ts",
       "../../lib/domain/scenario-resolver.ts",
       "../../lib/domain/scenario-evaluator.ts",
-      "../../lib/domain/evaluators/marriott-hotel-walk.ts",
       "../../lib/domain/evaluators/us-airline-disruption.ts",
       "../../lib/domain/evaluators/us-denied-boarding.ts",
       "../../lib/domain/evaluators/eu-uk-air-disruption.ts"

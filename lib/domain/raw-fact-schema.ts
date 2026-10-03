@@ -80,12 +80,7 @@ const booleanPaths: ReadonlySet<RawFactPath> = new Set([
   "confirmedReservation",
   "checkedInOnTime",
   "atGateOnTime",
-  "documentsCompliant",
-  "confirmedHotelReservation",
-  "qualifyingHotelReservation",
-  "membershipAttached",
-  "wasWalked",
-  "replacementLodgingProvided"
+  "documentsCompliant"
 ]);
 
 function schemaForRawFactPath(path: RawFactPath): Record<string, unknown> {
@@ -182,13 +177,8 @@ export function emptyRawClaimFacts(): RawClaimFacts {
     atGateOnTime: null,
     documentsCompliant: null,
     replacementArrivalDelayMinutes: null,
-    confirmedHotelReservation: null,
-    qualifyingHotelReservation: null,
     bookingChannel: null,
     loyaltyStatus: null,
-    membershipAttached: null,
-    wasWalked: null,
-    replacementLodgingProvided: null,
     expenses: [],
     evidence: [],
     userGoal: null
@@ -419,16 +409,6 @@ export function parseRawClaimFacts(value: unknown): RawClaimFactsParseResult {
       "replacementArrivalDelayMinutes",
       errors
     ),
-    confirmedHotelReservation: parseNullableBoolean(
-      value.confirmedHotelReservation,
-      "confirmedHotelReservation",
-      errors
-    ),
-    qualifyingHotelReservation: parseNullableBoolean(
-      value.qualifyingHotelReservation,
-      "qualifyingHotelReservation",
-      errors
-    ),
     bookingChannel: parseNullableEnum(
       value.bookingChannel,
       bookingChannels,
@@ -436,17 +416,6 @@ export function parseRawClaimFacts(value: unknown): RawClaimFactsParseResult {
       errors
     ),
     loyaltyStatus: parseNullableString(value.loyaltyStatus, "loyaltyStatus", errors),
-    membershipAttached: parseNullableBoolean(
-      value.membershipAttached,
-      "membershipAttached",
-      errors
-    ),
-    wasWalked: parseNullableBoolean(value.wasWalked, "wasWalked", errors),
-    replacementLodgingProvided: parseNullableBoolean(
-      value.replacementLodgingProvided,
-      "replacementLodgingProvided",
-      errors
-    ),
     expenses: parseStringArray(value.expenses, "expenses", errors),
     evidence: parseStringArray(value.evidence, "evidence", errors),
     userGoal: parseNullableString(

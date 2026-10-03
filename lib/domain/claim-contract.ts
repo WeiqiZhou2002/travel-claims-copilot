@@ -8,7 +8,6 @@ import type {
 } from "../types";
 
 export const CANONICAL_INCIDENTS = [
-  "hotel_walk",
   "airline_delay",
   "airline_cancellation",
   "denied_boarding"
@@ -19,11 +18,7 @@ export type LegacyIncidentAlias =
   | "controllable_airline_delay"
   | "controllable_airline_cancellation"
   | "eu261_delay_or_cancellation";
-export type ScenarioId =
-  | "marriott_hotel_walk"
-  | "us_airline_disruption"
-  | "us_denied_boarding"
-  | "eu_uk_air_disruption";
+export type ScenarioId = "us_airline_disruption" | "us_denied_boarding" | "eu_uk_air_disruption";
 export type WorkflowStatus =
   | "ready"
   | "needs_information"
@@ -88,13 +83,8 @@ export type RawClaimFacts = {
   atGateOnTime: boolean | null;
   documentsCompliant: boolean | null;
   replacementArrivalDelayMinutes: number | null;
-  confirmedHotelReservation: boolean | null;
-  qualifyingHotelReservation: boolean | null;
   bookingChannel: "direct" | "ota" | "portal" | null;
   loyaltyStatus: string | null;
-  membershipAttached: boolean | null;
-  wasWalked: boolean | null;
-  replacementLodgingProvided: boolean | null;
   expenses: string[];
   evidence: string[];
   userGoal: string | null;
@@ -141,13 +131,8 @@ export const RAW_FACT_PATHS = [
   "atGateOnTime",
   "documentsCompliant",
   "replacementArrivalDelayMinutes",
-  "confirmedHotelReservation",
-  "qualifyingHotelReservation",
   "bookingChannel",
   "loyaltyStatus",
-  "membershipAttached",
-  "wasWalked",
-  "replacementLodgingProvided",
   "expenses",
   "evidence",
   "userGoal"
@@ -258,9 +243,6 @@ export type ResolvedClaimContext = {
 };
 
 export type RemedyId =
-  | "hotel_relocation"
-  | "hotel_transport"
-  | "hotel_guarantee_compensation"
   | "us_refund"
   | "us_rerouting"
   | "us_meal"
@@ -274,14 +256,6 @@ export type RemedyId =
   | "eu_uk_fixed_compensation";
 
 export const CONDITION_IDS = {
-  marriott: [
-    "confirmed_hotel_reservation",
-    "reservation_not_honored",
-    "qualifying_reservation",
-    "membership_attached",
-    "qualifying_booking_channel",
-    "replacement_lodging_missing"
-  ],
   usDisruption: [
     "us_route",
     "delay_or_cancellation",
@@ -473,7 +447,6 @@ export type PublicScenarioSummary = {
 };
 
 export const PUBLIC_SCENARIOS: readonly PublicScenarioSummary[] = [
-  { id: "marriott_hotel_walk", label: "Marriott hotel walk" },
   { id: "us_airline_disruption", label: "US airline delay or cancellation" },
   { id: "us_denied_boarding", label: "US denied boarding" },
   { id: "eu_uk_air_disruption", label: "EU/UK airline delay or cancellation" }
