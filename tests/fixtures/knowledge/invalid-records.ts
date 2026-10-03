@@ -190,8 +190,8 @@ export const invalidKnowledgeFixtures = [
   invalidFixture("empty case carrier", /carrier must be a non-empty string/i, (snapshot) => {
     snapshot.cases[0].carrier = " ";
   }),
-  invalidFixture("carrier on a hotel case", /carrier is only valid for airline/i, (snapshot) => {
-    snapshot.cases[0].provider_type = "hotel";
+  invalidFixture("carrier on a card case", /carrier is only valid for airline/i, (snapshot) => {
+    snapshot.cases[0].provider_type = "credit_card";
   }),
   invalidFixture("unknown script remedy", /remedy/i, (snapshot) => {
     snapshot.scripts[0].remedy = "cash_now";

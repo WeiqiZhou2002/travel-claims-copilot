@@ -5,19 +5,12 @@ import type {
   ScenarioId
 } from "./claim-contract";
 import { euUkAirDisruptionEvaluator } from "./evaluators/eu-uk-air-disruption";
-import { marriottHotelWalkEvaluator } from "./evaluators/marriott-hotel-walk";
 import { usAirlineDisruptionEvaluator } from "./evaluators/us-airline-disruption";
 import { usDeniedBoardingEvaluator } from "./evaluators/us-denied-boarding";
 
-export {
-  euUkAirDisruptionEvaluator,
-  marriottHotelWalkEvaluator,
-  usAirlineDisruptionEvaluator,
-  usDeniedBoardingEvaluator
-};
+export { euUkAirDisruptionEvaluator, usAirlineDisruptionEvaluator, usDeniedBoardingEvaluator };
 
 const evaluators: Record<ScenarioId, ScenarioEvaluator> = {
-  marriott_hotel_walk: marriottHotelWalkEvaluator,
   us_airline_disruption: usAirlineDisruptionEvaluator,
   us_denied_boarding: usDeniedBoardingEvaluator,
   eu_uk_air_disruption: euUkAirDisruptionEvaluator

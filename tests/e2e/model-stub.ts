@@ -47,10 +47,9 @@ const unitedChinaCancellation: FactPatch = {
 const modelTurns: Record<string, FactPatch> = {
   "I have a confirmed Marriott reservation booked directly, but the hotel had no room when I arrived.":
     {
-      issueType: "hotel_walk",
+      issueType: "unknown",
       providerType: "hotel",
       provider: "Marriott",
-      disruptionType: "hotel_walk",
       bookingChannel: "direct",
       confidence: "high"
     },

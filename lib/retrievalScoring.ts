@@ -7,7 +7,7 @@ import {
   policyAppliesToRoute,
   policyRegionsFromCountry
 } from "./policyScope";
-import { canonicalHotelGroup, providerMatchKey, providersMatch } from "./provider";
+import { providerMatchKey, providersMatch } from "./provider";
 import { resolveRetrievalLimits } from "./retrieval-limits";
 import type {
   PolicyApplicability,
@@ -267,8 +267,6 @@ function legacyRankCases(
   skipEligibility = false
 ): ScoredRetrievalItem<Case>[] {
   const aliases = new Set<string>(getIssueAliases(query.issueType));
-  const queryHotelGroup =
-    query.providerType === "hotel" ? canonicalHotelGroup(query.provider) : undefined;
   const candidates = cases.filter((item) => {
     if (skipEligibility) return true;
     if (
@@ -297,11 +295,6 @@ function legacyRankCases(
     if (query.deniedBoardingKind && query.deniedBoardingKind !== "unknown") {
       const kind = detectDeniedBoardingKind(candidateReason);
       if (kind !== "unknown" && kind !== query.deniedBoardingKind) return false;
-    }
-    if (queryHotelGroup) {
-      const caseHotelGroup =
-        canonicalHotelGroup(item.provider) ?? canonicalHotelGroup(item.brand_or_airline);
-      return item.provider_type === "hotel" && caseHotelGroup === queryHotelGroup;
     }
     if (item.provider_type !== "airline") return true;
     // Without route geography, a shared incident alone is too weak a basis
@@ -572,7 +565,6 @@ function queryFromContext(context: ResolvedClaimContext): RetrievalQuery {
 
 export function scenariosForIncident(value: string): readonly ScenarioId[] {
   const normalized = normalizeIncidentInput(value)?.incident;
-  if (normalized === "hotel_walk") return ["marriott_hotel_walk"];
   if (normalized === "denied_boarding") return ["us_denied_boarding"];
   if (normalized === "airline_delay" || normalized === "airline_cancellation") {
     return ["us_airline_disruption", "eu_uk_air_disruption"];
@@ -583,8 +575,7 @@ export function scenariosForIncident(value: string): readonly ScenarioId[] {
 const GENERIC_PROVIDER_SENTINELS = new Set([
   "generic us airline",
   "european union",
-  "generic_airline",
-  "generic_hotel"
+  "generic_airline"
 ]);
 
 function comparableProviderKey(value: string | null | undefined): string | null {

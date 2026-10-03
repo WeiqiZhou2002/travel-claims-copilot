@@ -18,12 +18,19 @@ The application only retrieves `approved` cases. Current review summary:
 
 | Status | Count |
 | --- | ---: |
-| approved | 35 |
-| needs_review | 13 |
-| excluded | 7 |
-| total | 55 |
+| approved | 16 |
+| needs_review | 7 |
+| excluded | 6 |
+| total | 29 |
 
-The 55 records contain 50 unique community source URLs and 5 explicitly labeled synthetic demo examples. Of the approved records, 30 are community datapoints and 5 are synthetic examples.
+The 29 records contain 25 unique community source URLs and 4 explicitly labeled synthetic demo examples. Of the approved records, 12 are community datapoints and 4 are synthetic examples.
+
+## Archived hotel records
+
+The product is airline-only. The 26 hotel cases, the Marriott reservation-guarantee policy, and
+the 2 hotel scripts were moved unchanged to `archive/hotel-knowledge.json`. They are preserved for
+provenance and possible reinstatement, are not loaded at runtime, and are not validated by
+`npm run validate:data`.
 
 ## Review rules
 
@@ -52,7 +59,7 @@ Run `npm run validate:data` after editing any JSON file.
 - Use government legislation, regulator guidance, or a provider's own published terms.
 - Store geography in `applicable_regions` and the legal framework in `legal_regime`.
 - Encode route direction and operating-carrier requirements in `applicability_rule`.
-- Keep statutory rights separate from airline or hotel commitments.
+- Keep statutory rights separate from airline commitments.
 - State conditions and exclusions conservatively; do not convert a contextual remedy into a
   universal fixed amount.
 - Record `last_checked` whenever the official source and current status are verified.

@@ -24,9 +24,6 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const FRESHNESS_DAYS = 30;
 
 const titles: Record<RemedyId, string> = {
-  hotel_relocation: "Comparable replacement hotel",
-  hotel_transport: "Transportation to replacement lodging",
-  hotel_guarantee_compensation: "Hotel reservation guarantee compensation",
   us_refund: "Refund for a cancellation or significant change",
   us_rerouting: "Carrier rerouting commitment",
   us_meal: "Carrier meal commitment",

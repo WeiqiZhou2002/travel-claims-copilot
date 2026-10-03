@@ -13,7 +13,6 @@ type DimensionResult = "matched" | "missing" | "excluded";
 type Dimension = "scenario" | "incident" | "route" | "provider_scope" | "controllability";
 
 const scenarioByRegime: Partial<Record<LegalRegime, ScenarioId>> = {
-  provider_policy: "marriott_hotel_walk",
   US_DOT_REFUND: "us_airline_disruption",
   US_AIRLINE_COMMITMENT: "us_airline_disruption",
   US_DOT_DENIED_BOARDING: "us_denied_boarding",

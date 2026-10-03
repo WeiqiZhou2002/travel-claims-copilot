@@ -17,16 +17,14 @@ test("starts with an empty answer and the action-first guided intake", async ({ 
   await expect(page.getByRole("button", { name: "Start", exact: true })).toBeDisabled();
 });
 
-test("completes a Marriott hotel-walk analysis", async ({ page }) => {
+test("tells the traveler a hotel problem is outside the airline-only scope", async ({ page }) => {
   await submit(
     page,
     "I have a confirmed Marriott reservation booked directly, but the hotel had no room when I arrived."
   );
 
-  await expect(page.getByText("What to do now", { exact: true })).toBeVisible();
-  await expect(page.getByText("Hotel walk", { exact: true }).first()).toBeVisible();
-  await expect(page.getByRole("link", { name: /Ultimate Reservation Guarantee/ })).toBeVisible();
-  await expect(page.getByText(/comparable room/i).first()).toBeVisible();
+  await expect(page.getByText(/Only airline disruptions are supported/)).toBeVisible();
+  await expect(page.getByText("What to do now", { exact: true })).toHaveCount(0);
 });
 
 test("handles an unavailable airline reason without repeating the question", async ({ page }) => {

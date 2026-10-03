@@ -22,9 +22,6 @@ const channelLabels: Record<ActionScriptChannel, string> = {
 };
 
 function channelsFor(plan: ActionPlan): ActionScriptChannel[] {
-  if (plan.situation === "hotel_walk") {
-    return ["front_desk", "phone", "corporate_escalation"];
-  }
   if (plan.situation === "close_in_irrops") {
     return ["airport_counter", "chat", "phone"];
   }

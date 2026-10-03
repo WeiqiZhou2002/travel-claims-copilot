@@ -19,12 +19,6 @@ const airlinePolicyRequired: HandlingGuidanceSource = {
   url: null
 };
 
-const hotelPolicyRequired: HandlingGuidanceSource = {
-  sourceType: "official_policy_required",
-  title: "Current hotel or hotel-group reservation guarantee",
-  url: null
-};
-
 const bookingChannelLabels: Record<ClaimFacts["bookingChannel"], string | null> = {
   direct: null,
   ota: "the original online travel agency",
@@ -201,32 +195,6 @@ function uncertaintiesFor(facts: ClaimFacts): string[] {
 }
 
 export function buildHandlingPlaybook(facts: ClaimFacts): HandlingPlaybook {
-  if (facts.issueType === "hotel_walk") {
-    return {
-      status: "actionable",
-      situation: "hotel_walk",
-      contactFirst: {
-        role: "hotel_front_desk",
-        name: facts.provider,
-        reason:
-          "The property should first document the confirmed reservation and arrange immediate relocation or another on-property solution."
-      },
-      askLadder: [
-        "Ask for a comparable nearby room and necessary transportation before discussing goodwill.",
-        "Ask the property to document that it cannot honor the confirmed reservation.",
-        "Ask the hotel group to apply any verified reservation guarantee or elite commitment that matches the booking."
-      ],
-      ticketingChecks: [],
-      fallback: [
-        "Obtain the manager's name and case number, then escalate to the hotel group's customer-care channel.",
-        "Keep the original confirmation and receipts for reasonable relocation costs."
-      ],
-      uncertainties: [],
-      sources: [hotelPolicyRequired],
-      notGuaranteed: true
-    };
-  }
-
   if (facts.providerType !== "airline") {
     return {
       status: "needs_context",

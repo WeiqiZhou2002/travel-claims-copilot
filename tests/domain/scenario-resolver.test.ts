@@ -58,24 +58,16 @@ describe("scenario set resolution", () => {
     expect(unknownDeparture.scenarios.missingFacts).toEqual(["origin.airport"]);
   });
 
-  it("excludes non-Marriott hotel walks", () => {
-    const context = resolvedContext({
-      incidentType: "hotel_walk",
-      provider: "Hyatt",
-      confirmedHotelReservation: true,
-      wasWalked: true
-    });
+  it.each(["Marriott", "Hyatt"])(
+    "keeps a %s hotel problem out of the airline-only scope",
+    (provider) => {
+      const context = resolvedContext({ providerType: "hotel", provider });
 
-    expect(context.scenarios.status).toBe("out_of_scope");
-    expect(context.scenarios.decisions).toEqual([
-      {
-        scenarioId: "marriott_hotel_walk",
-        status: "excluded",
-        reasons: ["admission_rule_not_matched"],
-        missingFacts: []
-      }
-    ]);
-  });
+      expect(context.scenarios.status).toBe("out_of_scope");
+      expect(context.scenarios.scenarioIds).toEqual([]);
+      expect(context.scenarios.decisions).toEqual([]);
+    }
+  );
 
   it("returns needs information for a route whose possible regimes are unknown", () => {
     const context = resolvedContext({
@@ -136,25 +128,6 @@ describe("scenario set resolution", () => {
       { scenarioId: "us_airline_disruption", status: "unresolved" }
     ]);
     expect(context.scenarios.missingFacts).toEqual(["destination.airport"]);
-  });
-
-  it.each([
-    ["confirmedHotelReservation", { confirmedHotelReservation: true, wasWalked: true }],
-    ["wasWalked", { confirmedHotelReservation: true, wasWalked: true }]
-  ] as const)("masks prior hotel admission fact %s", (path, overrides) => {
-    const context = resolvedContext(
-      {
-        incidentType: "hotel_walk",
-        provider: "Marriott",
-        ...overrides
-      },
-      [path]
-    );
-
-    expect(context.scenarios.status).toBe("needs_information");
-    expect(context.scenarios.missingFacts).toEqual([path]);
-    expect(context.resolutionFacts[path]).toBeNull();
-    expect(context.raw.facts[path]).toBe(true);
   });
 
   it("masks a prior route fact from admission while preserving it for fact review", () => {

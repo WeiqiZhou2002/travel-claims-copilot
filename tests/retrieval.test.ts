@@ -26,15 +26,6 @@ type GoldenScenario = {
 
 const goldenScenarios: GoldenScenario[] = [
   {
-    name: "Marriott hotel walk",
-    description:
-      "I booked directly and arrived as a Marriott Titanium member with a confirmed Sheraton reservation. The hotel front desk said it was oversold and had no room.",
-    expectedIssue: "hotel_walk",
-    expectedProvider: "Marriott",
-    expectedPolicyId: "marriott_ultimate_reservation_guarantee",
-    expectedTopCaseId: undefined
-  },
-  {
     name: "United controllable cancellation",
     description:
       "My United flight was cancelled because the crew timed out. I was rebooked the next morning and needed an overnight hotel.",
@@ -139,23 +130,23 @@ describe("classification safeguards", () => {
     expect(involuntary.deniedBoardingKind).toBe("involuntary");
   });
 
-  it("does not confuse a hotel walk with airline denied boarding", () => {
+  it("flags an oversold hotel as out of scope instead of airline denied boarding", () => {
     const facts = classifyInput(
       "The Marriott hotel front desk said the property was oversold and had no room for my confirmed reservation."
     );
 
-    expect(facts.issueType).toBe("hotel_walk");
+    expect(facts.issueType).toBe("unknown");
+    expect(facts.providerType).toBe("hotel");
   });
 
-  it("extracts provider and loyalty metadata from a Chinese hotel description", () => {
+  it("flags a Chinese hotel description as out of scope", () => {
     const facts = classifyInput(
       "我是万豪钛金会员，通过官网预订喜来登，到店后前台说酒店超售没有房间。"
     );
 
-    expect(facts.issueType).toBe("hotel_walk");
+    expect(facts.issueType).toBe("unknown");
+    expect(facts.providerType).toBe("hotel");
     expect(facts.provider).toBe("Marriott");
-    expect(facts.bookingChannel).toBe("direct");
-    expect(facts.loyaltyStatus).toBe("Titanium");
   });
 
   it("recognizes a Chinese voluntary-bump description", () => {
@@ -168,20 +159,6 @@ describe("classification safeguards", () => {
 });
 
 describe("retrieval quality controls", () => {
-  it("matches a Chinese Marriott alias to Marriott policy and cases only", () => {
-    const facts = {
-      ...classifyInput("我订了万豪酒店，但是到店无房。"),
-      provider: "万豪酒店"
-    };
-    const retrieval = retrieveKnowledge(facts, policies, cases, scripts);
-
-    expect(retrieval.officialBasis.map((policy) => policy.policy_id)).toContain(
-      "marriott_ultimate_reservation_guarantee"
-    );
-    expect(retrieval.similarCases).toEqual([]);
-    expect(retrieval.similarCases.every((item) => item.provider === "Marriott")).toBe(true);
-  });
-
   it("selects official policies by incident, jurisdiction, provider, and controllability", () => {
     const euCancellation = retrieveKnowledge(
       classifyInput("My Air France flight from Paris was cancelled because of a mechanical issue."),

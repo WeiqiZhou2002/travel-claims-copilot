@@ -1,14 +1,12 @@
 import {
-  canonicalHotelGroupValue,
   findCanonicalProviderMatch,
   findExactCanonicalProviderMatch,
   findMentionedAirlines,
   providerComparisonKey,
   type CanonicalProviderMatch
 } from "./domain/context-resolver";
-import type { ProviderType } from "./types";
-
-type KnownProviderType = Extract<ProviderType, "hotel" | "airline">;
+// Hotel providers stay recognizable so a hotel problem can be reported as out of scope.
+type KnownProviderType = "hotel" | "airline";
 
 export type ProviderMatch = CanonicalProviderMatch;
 
@@ -109,8 +107,4 @@ export function providersMatch(
 ): boolean {
   const leftKey = providerMatchKey(left);
   return Boolean(leftKey && leftKey === providerMatchKey(right));
-}
-
-export function canonicalHotelGroup(value: string | null | undefined): string | undefined {
-  return canonicalHotelGroupValue(value);
 }

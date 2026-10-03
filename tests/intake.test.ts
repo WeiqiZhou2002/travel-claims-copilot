@@ -34,11 +34,11 @@ describe("workflow status safety predicate", () => {
   });
 });
 
-const hotel = (): ClaimFacts => ({
+const delayed = (): ClaimFacts => ({
   ...emptyClaimFacts(),
-  issueType: "hotel_walk",
-  providerType: "hotel",
-  provider: "Marriott",
+  issueType: "airline_delay",
+  providerType: "airline",
+  provider: "United",
   confidence: "high"
 });
 
@@ -75,21 +75,38 @@ describe("LLM-only guided intake contract (mocked model output, not accuracy eva
     expect(result.status).toBe("needs_info");
   });
 
+  it("reports a hotel problem as outside the airline-only scope", async () => {
+    const output = {
+      ...emptyClaimFacts(),
+      providerType: "hotel" as const,
+      provider: "Marriott",
+      confidence: "high" as const
+    };
+    const result = await processIntake("万豪到店没有房间了", emptyClaimFacts(), {
+      llmClient: { generate: vi.fn().mockResolvedValue(output) }
+    });
+    expect(result.status).toBe("out_of_scope");
+    expect(result.question).toBeNull();
+    expect(result.cautions).toEqual([
+      "目前只支持航班问题：延误、取消和超售拒载。酒店问题暂不支持。"
+    ]);
+  });
+
   it("passes prior facts and the latest correction to the model without mutating prior facts", async () => {
-    const prior = hotel();
+    const prior = delayed();
     const before = structuredClone(prior);
-    const generate = vi.fn().mockResolvedValue({ ...hotel(), provider: "Hyatt" });
-    const result = await processIntake("Correction: Hyatt", prior, { llmClient: { generate } });
+    const generate = vi.fn().mockResolvedValue({ ...delayed(), provider: "Delta" });
+    const result = await processIntake("Correction: Delta", prior, { llmClient: { generate } });
     expect(JSON.parse(generate.mock.calls[0][0].input)).toEqual({
       priorFacts: prior,
-      latestUserMessage: "Correction: Hyatt"
+      latestUserMessage: "Correction: Delta"
     });
     expect(prior).toEqual(before);
-    expect(result.facts.provider).toBe("Hyatt");
+    expect(result.facts.provider).toBe("Delta");
   });
 
   it("preserves model unknowns and explicit acceptance decisions", async () => {
-    const output = { ...hotel(), acceptedAlternative: false, arrivalDelayMinutes: null };
+    const output = { ...delayed(), acceptedAlternative: false, arrivalDelayMinutes: null };
     const result = await processIntake("Automatically rebooked", emptyClaimFacts(), {
       llmClient: { generate: vi.fn().mockResolvedValue(output) }
     });
@@ -99,7 +116,7 @@ describe("LLM-only guided intake contract (mocked model output, not accuracy eva
 
   it("fails clearly when unconfigured instead of classifying with rules", async () => {
     await expect(
-      processIntake("Marriott oversold", hotel(), { llmClient: null })
+      processIntake("United oversold", delayed(), { llmClient: null })
     ).rejects.toMatchObject({ category: "not_configured", status: 503 });
   });
 
@@ -111,19 +128,19 @@ describe("LLM-only guided intake contract (mocked model output, not accuracy eva
     [new SyntaxError("invalid JSON"), "invalid_output"],
     [new Error("network failed"), "upstream"]
   ])("propagates model failure without changing facts (%s)", async (error, category) => {
-    const prior = hotel();
+    const prior = delayed();
     await expect(
       processIntake("United cancelled", prior, {
         llmClient: { generate: vi.fn().mockRejectedValue(error) }
       })
     ).rejects.toMatchObject({ category });
-    expect(prior).toEqual(hotel());
+    expect(prior).toEqual(delayed());
   });
 
   it("rejects malformed structured output instead of invoking fallback", async () => {
     await expect(
-      processIntake("Marriott oversold", emptyClaimFacts(), {
-        llmClient: { generate: vi.fn().mockResolvedValue({ provider: "Marriott" }) }
+      processIntake("United oversold", emptyClaimFacts(), {
+        llmClient: { generate: vi.fn().mockResolvedValue({ provider: "United" }) }
       })
     ).rejects.toMatchObject({ category: "invalid_output" });
   });
@@ -338,10 +355,8 @@ describe("intake API", () => {
   it("preserves a legacy out-of-scope block without returning an ordinary ask", async () => {
     const currentFacts = normalizeClaimFacts({
       ...emptyClaimFacts(),
-      issueType: "hotel_walk",
       providerType: "hotel",
       provider: "Hyatt",
-      disruptionType: "hotel_walk",
       confidence: "high"
     });
     const handler = createIntakePostHandler({
@@ -364,7 +379,9 @@ describe("intake API", () => {
     expect(result.status).toBe("out_of_scope");
     expect(result.question).toBeNull();
     expect(result.missingFields).toEqual([]);
-    expect(result.cautions).toEqual(["This competition build cannot assess this journey."]);
+    expect(result.cautions).toEqual([
+      "Only airline disruptions are supported right now; hotel problems are not supported."
+    ]);
   });
 });
 
@@ -392,13 +409,7 @@ describe("canonical revision-safe intake", () => {
       "out-of-scope",
       {
         message: "No additional facts.",
-        prior: claimState({
-          incidentType: "hotel_walk",
-          providerType: "hotel",
-          provider: "Hyatt",
-          confirmedHotelReservation: true,
-          wasWalked: true
-        }),
+        prior: claimState({ providerType: "hotel", provider: "Hyatt" }),
         baseRevision: 0,
         requestedMode: "local"
       },
@@ -791,10 +802,10 @@ describe("canonical revision-safe intake", () => {
     expect(extract).toHaveBeenCalledWith(expect.objectContaining({ message }));
   });
 
-  it("does not mark an unconfirmed hotel reservation ready in canonical intake", async () => {
+  it("reports a hotel problem as outside the airline-only scope in canonical intake", async () => {
     const response = await processClaimTurn(
       {
-        message: "I had an unconfirmed reservation at Marriott, and the hotel had no room.",
+        message: "I had a reservation at Marriott, and the hotel had no room.",
         prior: claimState(),
         baseRevision: 0,
         requestedMode: "local"
@@ -802,9 +813,9 @@ describe("canonical revision-safe intake", () => {
       { localExtractor: new LocalRawFactExtractor() }
     );
 
-    expect(response.status).toBe("needs_information");
-    expect(response.claimState.facts.incidentType).toBe("hotel_walk");
-    expect(response.claimState.facts.confirmedHotelReservation).not.toBe(true);
+    expect(response.status).toBe("out_of_scope");
+    expect(response.claimState.facts.providerType).toBe("hotel");
+    expect(response.claimState.facts.incidentType).toBeNull();
   });
 
   it("masks a legacy dual-extractor conflict instead of projecting the old value as ready", async () => {
@@ -842,10 +853,13 @@ describe("canonical revision-safe intake", () => {
   it("asks a generic legacy question when an unresolved field is not a legacy missing field", async () => {
     const currentFacts = normalizeClaimFacts({
       ...emptyClaimFacts(),
-      issueType: "hotel_walk",
-      providerType: "hotel",
-      provider: "Marriott",
-      loyaltyStatus: "Titanium",
+      issueType: "denied_boarding",
+      providerType: "airline",
+      provider: "Delta",
+      origin: { city: null, airport: "JFK", country: "United States", region: "US" },
+      disruptionType: "denied_boarding",
+      deniedBoardingKind: "voluntary",
+      loyaltyStatus: "Gold Medallion",
       confidence: "high"
     });
     const localExtractor: RawFactExtractor = {

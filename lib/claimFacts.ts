@@ -6,12 +6,7 @@ import type { MvpIssueType, PolicyRouteRegion } from "./types";
 export type ClaimIssueType = MvpIssueType | "unknown";
 export type ClaimProviderType = "hotel" | "airline" | "unknown";
 export type ClaimRegion = PolicyRouteRegion;
-export type ClaimDisruptionType =
-  | "hotel_walk"
-  | "delay"
-  | "cancellation"
-  | "denied_boarding"
-  | "unknown";
+export type ClaimDisruptionType = "delay" | "cancellation" | "denied_boarding" | "unknown";
 export type ClaimDisruptionReason =
   | "crew"
   | "mechanical"
@@ -109,7 +104,6 @@ export type ClaimFactsParseResult =
   | { success: false; errors: string[] };
 
 const issueTypes: ClaimIssueType[] = [
-  "hotel_walk",
   "airline_delay",
   "airline_cancellation",
   "denied_boarding",
@@ -118,7 +112,6 @@ const issueTypes: ClaimIssueType[] = [
 const providerTypes: ClaimProviderType[] = ["hotel", "airline", "unknown"];
 const regions: ClaimRegion[] = ["EU_EEA_CH", "UK", "US", "CA", "AU", "CN", "other"];
 const disruptionTypes: ClaimDisruptionType[] = [
-  "hotel_walk",
   "delay",
   "cancellation",
   "denied_boarding",
@@ -550,23 +543,19 @@ export function normalizeClaimFacts(facts: ClaimFacts): ClaimFacts {
   const operatingCarrier = canonicalizeProviderName(normalized.operatingCarrier, "airline");
   const disruptionType =
     normalized.disruptionType === "unknown"
-      ? normalized.issueType === "hotel_walk"
-        ? "hotel_walk"
-        : normalized.issueType === "airline_delay"
-          ? "delay"
-          : normalized.issueType === "airline_cancellation"
-            ? "cancellation"
-            : normalized.issueType === "denied_boarding"
-              ? "denied_boarding"
-              : "unknown"
+      ? normalized.issueType === "airline_delay"
+        ? "delay"
+        : normalized.issueType === "airline_cancellation"
+          ? "cancellation"
+          : normalized.issueType === "denied_boarding"
+            ? "denied_boarding"
+            : "unknown"
       : normalized.disruptionType;
   const providerType =
     normalized.providerType === "unknown"
-      ? normalized.issueType === "hotel_walk"
-        ? "hotel"
-        : normalized.issueType !== "unknown"
-          ? "airline"
-          : "unknown"
+      ? normalized.issueType !== "unknown"
+        ? "airline"
+        : "unknown"
       : normalized.providerType;
   // Every concrete reason, including passenger-side and otherwise uncategorized
   // reported causes, is an answered question rather than missing information.

@@ -78,24 +78,6 @@ describe("action plan", () => {
     );
   });
 
-  it("keeps hotel recovery first and excludes unrelated or synthetic references", () => {
-    const result = analyze({
-      issueType: "hotel_walk",
-      providerType: "hotel",
-      provider: "Marriott",
-      disruptionType: "hotel_walk",
-      bookingChannel: "direct",
-      journeyStage: "en_route"
-    });
-
-    expect(result.actionPlan?.primaryAsk).toContain("comparable nearby room");
-    const communityReferences =
-      result.actionPlan?.references.filter((reference) => reference.kind === "community") ?? [];
-    expect(result.actionPlan?.sourceIds).toContain("marriott_ultimate_reservation_guarantee");
-    expect(communityReferences).toHaveLength(0);
-    expect(communityReferences.some((reference) => /Hyatt|IHG/i.test(reference.title))).toBe(false);
-  });
-
   it("does not invent an action when the servicing context is unresolved", () => {
     const result = analyze({
       issueType: "airline_cancellation",

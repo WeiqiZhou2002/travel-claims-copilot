@@ -253,13 +253,8 @@ function copyRawFacts(facts: RawClaimFacts): RawClaimFacts {
     atGateOnTime: facts.atGateOnTime,
     documentsCompliant: facts.documentsCompliant,
     replacementArrivalDelayMinutes: facts.replacementArrivalDelayMinutes,
-    confirmedHotelReservation: facts.confirmedHotelReservation,
-    qualifyingHotelReservation: facts.qualifyingHotelReservation,
     bookingChannel: facts.bookingChannel,
     loyaltyStatus: facts.loyaltyStatus,
-    membershipAttached: facts.membershipAttached,
-    wasWalked: facts.wasWalked,
-    replacementLodgingProvided: facts.replacementLodgingProvided,
     expenses: [...facts.expenses],
     evidence: [...facts.evidence],
     userGoal: facts.userGoal

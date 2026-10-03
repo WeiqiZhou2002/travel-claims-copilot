@@ -126,7 +126,7 @@ Rules:
 - acceptedAlternative is true only when the user accepted or used an offered alternative flight, credit or voucher; false only when explicitly declined. An automatic rebooking alone does not establish acceptance.
 - autoRebooked records whether the airline or ticketing agent already supplied a replacement itinerary. Preserve the itinerary text when stated.
 - recoveryPriorities may only contain preferences explicitly expressed by the user. preferredAlternatives contains specific flights, dates, routes, or airports the user asks for.
-- A hotel with no room for a confirmed guest is hotel_walk.
+- Only airline disruptions are supported. When the problem is with a hotel or other lodging rather than an airline, set providerType to hotel and issueType to unknown. Lodging the airline arranged during a flight disruption remains an airline fact.
 - Classify the incident as airline_delay or airline_cancellation independently from policy jurisdiction.
 - Airline oversales or bumping is denied_boarding; distinguish voluntary from involuntary when stated.
 - Weather is not a controllable airline reason.
@@ -138,6 +138,12 @@ Rules:
 - Route regions determine which policies may apply; do not encode EU261 or another legal regime as the issue type.
 - Return only the schema-defined structured output.`;
 
+function airlineOnlyMessage(chinese: boolean): string {
+  return chinese
+    ? "目前只支持航班问题：延误、取消和超售拒载。酒店问题暂不支持。"
+    : "Only airline disruptions are supported right now: delays, cancellations, and denied boarding. Hotel problems are not supported.";
+}
+
 const informationalCaution =
   "This is an informational condition assessment, not legal advice or a promise of compensation.";
 
@@ -145,16 +151,12 @@ function isChinese(text: string): boolean {
   return /[\p{Script=Han}]/u.test(text);
 }
 
-function questionForMissingFields(
-  fields: ClaimFactField[],
-  chinese: boolean,
-  facts: ClaimFacts
-): string {
+function questionForMissingFields(fields: ClaimFactField[], chinese: boolean): string {
   const selected = fields.slice(0, 3);
   if (selected.includes("issueType")) {
     return chinese
-      ? "具体发生了什么：酒店到店无房、航班延误或取消，还是航班超售拒载？"
-      : "What happened: a hotel had no room, a flight was delayed or cancelled, or you were bumped from an oversold flight?";
+      ? "具体发生了什么：航班延误、取消，还是航班超售拒载？"
+      : "What happened: was the flight delayed or cancelled, or were you bumped from an oversold flight?";
   }
   const needsOrigin = selected.includes("origin");
   const needsDestination = selected.includes("destination");
@@ -174,17 +176,9 @@ function questionForMissingFields(
       : "Where did the flight fly to? A city name or airport code is enough.";
   }
   if (selected.includes("provider")) {
-    if (facts.providerType === "hotel" || facts.issueType === "hotel_walk") {
-      return chinese ? "是哪家酒店或酒店集团？" : "Which hotel or hotel group was involved?";
-    }
-    if (facts.providerType === "airline") {
-      return chinese
-        ? "实际承运这趟航班的是哪家航司？"
-        : "Which airline actually operated the flight?";
-    }
     return chinese
-      ? "是哪家酒店或实际承运航司？"
-      : "Which hotel or operating airline was involved?";
+      ? "实际承运这趟航班的是哪家航司？"
+      : "Which airline actually operated the flight?";
   }
   if (selected.includes("deniedBoardingKind")) {
     return chinese
@@ -309,15 +303,24 @@ export async function processIntake(
   const extractedSafety = assessClaimSafety(message, facts);
   if (extractedSafety) return blockedIntake(message, currentFacts, facts, extractedSafety);
 
+  if (facts.providerType === "hotel") {
+    return {
+      status: "out_of_scope",
+      facts,
+      missingFields: [],
+      question: null,
+      extractionMode: "llm",
+      cautions: [airlineOnlyMessage(isChinese(message))]
+    };
+  }
+
   const missingFields = getMissingIntakeFields(facts);
   return {
     status: missingFields.length === 0 ? "ready" : "needs_info",
     facts,
     missingFields,
     question:
-      missingFields.length > 0
-        ? questionForMissingFields(missingFields, isChinese(message), facts)
-        : null,
+      missingFields.length > 0 ? questionForMissingFields(missingFields, isChinese(message)) : null,
     extractionMode: "llm",
     cautions: [informationalCaution]
   };
@@ -443,7 +446,6 @@ function rawFactsToLegacyFacts(facts: RawClaimFacts, prior: ClaimFacts): ClaimFa
     NonNullable<RawClaimFacts["incidentType"]>,
     ClaimFacts["disruptionType"]
   > = {
-    hotel_walk: "hotel_walk",
     airline_delay: "delay",
     airline_cancellation: "cancellation",
     denied_boarding: "denied_boarding"
@@ -531,9 +533,7 @@ async function processCanonicalIntakeAdapter(
     status: needsInformation ? "needs_info" : "ready",
     facts,
     missingFields,
-    question: needsInformation
-      ? questionForMissingFields(missingFields, isChinese(message), facts)
-      : null,
+    question: needsInformation ? questionForMissingFields(missingFields, isChinese(message)) : null,
     extractionMode,
     cautions: [...response.result.cautions],
     ...(warning ? { warning } : {})

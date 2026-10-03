@@ -31,7 +31,6 @@ const initialMessages: ConversationMessage[] = [
 ];
 
 const issueLabels: Partial<Record<ClaimFacts["issueType"], string>> = {
-  hotel_walk: "Hotel walk",
   airline_cancellation: "Airline cancellation",
   airline_delay: "Airline delay",
   denied_boarding: "Denied boarding",
@@ -132,6 +131,19 @@ export default function Home() {
             role: "assistant",
             content:
               intake.safety?.message ?? "This request is outside the supported scope of the demo."
+          }
+        ]);
+        return;
+      }
+
+      if (intake.status === "out_of_scope") {
+        setMessages([
+          ...nextMessages,
+          {
+            id: `assistant-${Date.now()}`,
+            role: "assistant",
+            content:
+              intake.cautions?.[0] ?? "This request is outside the supported scope of the demo."
           }
         ]);
         return;

@@ -9,26 +9,26 @@ import {
   type EvalTag
 } from "../../evals/eval-contract";
 
-const datasetPath = path.join(process.cwd(), "evals/cases/v1.jsonl");
+const datasetPath = path.join(process.cwd(), "evals/cases/v2.jsonl");
 
-describe("four-scenario-v1 bilingual dataset", () => {
+describe("airline-scenario-v2 bilingual dataset", () => {
   it("contains exactly 48 anonymous balanced synthetic cases", () => {
     const cases = loadEvalCases(datasetPath);
 
-    expect(DATASET_VERSION).toBe("four-scenario-v1");
+    expect(DATASET_VERSION).toBe("airline-scenario-v2");
     expect(cases).toHaveLength(48);
     expect(new Set(cases.map(({ id }) => id)).size).toBe(48);
     expect(cases.filter(({ language }) => language === "en")).toHaveLength(24);
     expect(cases.filter(({ language }) => language === "zh")).toHaveLength(24);
     expect(cases.filter(({ tags }) => tags.some((tag) => tag.startsWith("journey:")))).toHaveLength(
-      32
+      24
     );
     expect(cases.filter(({ tags }) => tags.includes("ambiguity"))).toHaveLength(8);
     expect(cases.filter(({ tags }) => tags.includes("high_risk"))).toHaveLength(4);
     expect(cases.filter(({ tags }) => tags.includes("injection"))).toHaveLength(4);
 
     const journeyTags: EvalTag[] = [
-      "journey:marriott_hotel_walk",
+      "out_of_scope",
       "journey:us_airline_disruption",
       "journey:us_denied_boarding",
       "journey:eu_uk_air_disruption"

@@ -4,8 +4,8 @@
 
 用户自然语言经过多轮 intake 后形成的结构化事实。事件、法律适用和操作阶段必须分开：
 
-- `issueType`: `hotel_walk | airline_delay | airline_cancellation | denied_boarding | unknown`
-- `providerType`: `hotel | airline | unknown`
+- `issueType`: `airline_delay | airline_cancellation | denied_boarding | unknown`
+- `providerType`: `hotel | airline | unknown`（`hotel` 仅用于识别并拒绝范围外的酒店问题）
 - `provider`: string | null
 - `origin`, `destination`: city / airport / country / region
 - `disruptionType`, `disruptionReason`, `disruptionReasonStatus`
@@ -35,7 +35,7 @@
 由服务器根据 `ClaimFacts` 确定性生成的操作建议，不由 LLM 自由生成：
 
 - `status`: `actionable | needs_context`
-- `situation`: `hotel_walk | planned_schedule_change | close_in_irrops | completed_disruption | unknown`
+- `situation`: `planned_schedule_change | close_in_irrops | completed_disruption | unknown`
 - `contactFirst`: role / name / reason
 - `askLadder`: string[]
 - `ticketingChecks`: string[]
@@ -89,7 +89,7 @@ LLM 只能调整表达，不得改变 `contactNow`、诉求顺序、引用来源
 
 ## ProviderFeedbackResult
 
-用户粘贴酒店或航司回复后生成：
+用户粘贴航司回复后生成：
 
 - `summary`: 对方回复的简洁事实性摘要
 - `signals.responseStatus`: `approved | partial_offer | denied | needs_clarification | no_decision`
@@ -104,17 +104,17 @@ LLM 只提取 provider response 信号；是否接受、追问、升级或结束
 
 ## Policy
 
-官方政策、法规、航司/酒店公开承诺。
+官方政策、法规、航司公开承诺。
 
 字段：
 
 - policy_id: string
-- provider_type: "hotel" | "airline" | "credit_card" | "ota" | "government"
+- provider_type: "airline" | "credit_card" | "ota" | "government"
 - provider: string
 - policy_name: string
 - legal_regime: "provider_policy" | "EU261" | "UK261" | "US_DOT_REFUND" | "US_DOT_DENIED_BOARDING" | "US_AIRLINE_COMMITMENT" | "CA_APPR" | "AU_ACL" | "CN_FLIGHT_REGULATION"
 - applicability_rule: "any_route" | "listed_provider" | "origin_region" | "origin_or_destination_region" | "eu261_route" | "uk261_route" | "australia_consumer_law" | "china_flight_regulation"
-- incident_types: ("hotel_walk" | "airline_delay" | "airline_cancellation" | "denied_boarding")[]
+- incident_types: ("airline_delay" | "airline_cancellation" | "denied_boarding")[]
 - applicable_regions: ("EU_EEA_CH" | "UK" | "US" | "CA" | "AU" | "CN" | "other" | "global")[]
 - applicable_providers: string[]
 - required_controllability: "controllable" | "uncontrollable" | "unknown" | "any"
@@ -142,8 +142,8 @@ An umbrella `US_AIRLINE_COMMITMENT` policy is regulator context only and therefo
 - source_type: "community_dp" | "user_submitted" | "synthetic_example"
 - source_name: string
 - source_url: string
-- provider_type: "hotel" | "airline" | "credit_card" | "ota"
-- provider: string | null（航司案例为原出票 / 订票方；酒店案例为酒店集团）
+- provider_type: "airline" | "credit_card" | "ota"
+- provider: string | null（原出票 / 订票方）
 - carrier: string | null（航司案例为受影响航段的实际承运方；非航司案例必须为 null）
 - brand_or_airline: string
 - issue_type: string
@@ -179,7 +179,7 @@ and merged with the seed cases by `lib/case-library.ts`; each published case car
 - script_id: string
 - source_ids: string[] (required; 1..8 unique IDs from the same snapshot's `Policy.policy_id`
   namespace only)
-- incident_types: ("hotel_walk" | "airline_delay" | "airline_cancellation" | "denied_boarding")[]
+- incident_types: ("airline_delay" | "airline_cancellation" | "denied_boarding")[]
 - applicable_regions: ("EU_EEA_CH" | "UK" | "US" | "CA" | "AU" | "CN" | "other" | "global")[]
 - applicability_rule: same deterministic route rule vocabulary as `Policy`
 - required_controllability: "controllable" | "uncontrollable" | "unknown" | "any"

@@ -429,7 +429,7 @@ export async function runLiveEval({
   if (outputPath !== path.resolve(cwd, RELEASE_OUTPUT)) {
     throw new Error("live_eval_output_path_invalid");
   }
-  const cases = loadEvalCases(path.join(cwd, "evals/cases/v1.jsonl"));
+  const cases = loadEvalCases(path.join(cwd, "evals/cases/v2.jsonl"));
   const capture = capturingFetcher();
   const client = new OpenAIResponsesClient({
     apiKey,

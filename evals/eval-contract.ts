@@ -8,12 +8,13 @@ import {
   type WorkflowStatus
 } from "../lib/domain/claim-contract";
 
-export const DATASET_VERSION = "four-scenario-v1" as const;
+export const DATASET_VERSION = "airline-scenario-v2" as const;
 export const SCORER_VERSION = "claim-scorer-v1" as const;
 
 export type EvalLanguage = "en" | "zh";
 export type EvalTag =
   | `journey:${ScenarioId}`
+  | "out_of_scope"
   | "ambiguity"
   | "overlap"
   | "missing_information"
@@ -91,7 +92,6 @@ const expectedKeys = [
   "fallback"
 ] as const;
 const scenarioIds: readonly ScenarioId[] = [
-  "marriott_hotel_walk",
   "us_airline_disruption",
   "us_denied_boarding",
   "eu_uk_air_disruption"
@@ -104,6 +104,7 @@ const statuses: readonly WorkflowStatus[] = [
 ];
 const tagSet = new Set<EvalTag>([
   ...scenarioIds.map((scenario) => `journey:${scenario}` as const),
+  "out_of_scope",
   "ambiguity",
   "overlap",
   "missing_information",

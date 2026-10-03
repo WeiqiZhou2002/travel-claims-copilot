@@ -19,7 +19,7 @@ describe("strict raw fact patches", () => {
       required: ["set"]
     });
     expect(setSchema).toMatchObject({ type: "object", additionalProperties: false });
-    expect(Object.keys(setSchema.properties)).toHaveLength(50);
+    expect(Object.keys(setSchema.properties)).toHaveLength(45);
     expect(Object.keys(setSchema.properties)).not.toEqual(
       expect.arrayContaining([
         "region",

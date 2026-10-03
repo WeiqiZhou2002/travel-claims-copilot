@@ -1,32 +1,5 @@
 [
   {
-    "policy_id": "marriott_ultimate_reservation_guarantee",
-    "provider_type": "hotel",
-    "provider": "Marriott",
-    "policy_name": "Ultimate Reservation Guarantee",
-    "legal_regime": "provider_policy",
-    "applicability_rule": "listed_provider",
-    "incident_types": ["hotel_walk"],
-    "applicable_regions": ["global"],
-    "applicable_providers": ["Marriott"],
-    "required_controllability": "any",
-    "source_url": "https://www.marriott.com/loyalty/member-benefits/guarantee.mi",
-    "source_type": "official_policy",
-    "authority_level": "high",
-    "applicable_conditions": [
-      "Bonvoy member",
-      "Member number attached to reservation",
-      "Property unable to honor confirmed reservation"
-    ],
-    "compensation_or_rights": [
-      "Nearby hotel accommodation",
-      "Potential cash compensation depending on brand and status",
-      "Potential points compensation depending on brand and status"
-    ],
-    "summary": "Marriott describes an Ultimate Reservation Guarantee for situations where a participating hotel cannot honor a reservation. Compensation depends on brand and member status.",
-    "last_checked": "2026-07-19"
-  },
-  {
     "policy_id": "dot_airline_cancellation_delay_dashboard",
     "provider_type": "government",
     "provider": "US DOT",

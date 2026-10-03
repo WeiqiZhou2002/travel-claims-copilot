@@ -24,16 +24,6 @@ type EvaluatorFixture = {
 };
 
 const scenarioDefaults: Record<ScenarioId, DeepPartial<RawClaimFacts>> = {
-  marriott_hotel_walk: {
-    incidentType: "hotel_walk",
-    provider: "Marriott",
-    confirmedHotelReservation: true,
-    qualifyingHotelReservation: true,
-    membershipAttached: true,
-    bookingChannel: "direct",
-    wasWalked: true,
-    replacementLodgingProvided: false
-  },
   us_airline_disruption: {
     incidentType: "airline_cancellation",
     origin: { airport: "JFK" },
@@ -116,13 +106,6 @@ function conditionIds(
 
 const requiredFixtures: EvaluatorFixture[] = [
   {
-    name: "Marriott missing membership",
-    scenario: "marriott_hotel_walk",
-    facts: { membershipAttached: null },
-    remedyId: "hotel_guarantee_compensation",
-    missing: "membership_attached"
-  },
-  {
     name: "US weather cancellation",
     scenario: "us_airline_disruption",
     facts: { incidentType: "airline_cancellation", reasonCategory: "weather" },
@@ -157,7 +140,6 @@ describe("four scenario condition matrices", () => {
   );
 
   it.each([
-    ["Marriott", "marriott_hotel_walk", "hotel_guarantee_compensation", {}, "membership_attached"],
     ["US disruption", "us_airline_disruption", "us_hotel", {}, "overnight_disruption"],
     [
       "US denied boarding",
@@ -185,13 +167,6 @@ describe("four scenario condition matrices", () => {
   );
 
   it.each([
-    [
-      "Marriott",
-      "marriott_hotel_walk",
-      "hotel_guarantee_compensation",
-      { membershipAttached: null },
-      "membership_attached"
-    ],
     [
       "US disruption",
       "us_airline_disruption",
@@ -223,13 +198,6 @@ describe("four scenario condition matrices", () => {
   );
 
   it.each([
-    [
-      "Marriott",
-      "marriott_hotel_walk",
-      "hotel_guarantee_compensation",
-      { bookingChannel: "ota" },
-      "qualifying_booking_channel"
-    ],
     [
       "US disruption",
       "us_airline_disruption",
@@ -431,12 +399,7 @@ describe("four scenario condition matrices", () => {
       })
     });
     const outOfScope = resolveClaimContext({
-      state: claimState({
-        incidentType: "hotel_walk",
-        provider: "Hyatt",
-        confirmedHotelReservation: true,
-        wasWalked: true
-      })
+      state: claimState({ providerType: "hotel", provider: "Hyatt" })
     });
 
     expect(needsInformation.scenarios.status).toBe("needs_information");
@@ -486,14 +449,6 @@ describe("four scenario condition matrices", () => {
 
   it("defines the frozen condition catalog and emits no carrier commitment condition", () => {
     expect(CONDITION_IDS).toEqual({
-      marriott: [
-        "confirmed_hotel_reservation",
-        "reservation_not_honored",
-        "qualifying_reservation",
-        "membership_attached",
-        "qualifying_booking_channel",
-        "replacement_lodging_missing"
-      ],
       usDisruption: [
         "us_route",
         "delay_or_cancellation",
@@ -536,7 +491,7 @@ describe("four scenario condition matrices", () => {
       ...remedy.exclusions
     ]);
 
-    expect(remedies).toHaveLength(14);
+    expect(remedies).toHaveLength(11);
     expect(remedies.every(({ material }) => material)).toBe(true);
     expect(conditions.map(({ id }) => id)).not.toContain("matching_carrier_commitment");
     conditions.forEach(({ factFields }) => {

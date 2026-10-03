@@ -33,8 +33,6 @@ function headlineFor(playbook: HandlingPlaybook): string {
   }
 
   switch (playbook.situation) {
-    case "hotel_walk":
-      return `Ask ${contact} to secure a comparable room now.`;
     case "close_in_irrops":
       return `Ask ${contact} to restore your trip before discussing compensation.`;
     case "planned_schedule_change":
@@ -102,7 +100,7 @@ function evidenceForCurrentStage(
   analysis: ActionPlanAnalysis,
   playbook: HandlingPlaybook
 ): string[] {
-  if (facts.issueType === "denied_boarding" || playbook.situation === "hotel_walk") {
+  if (facts.issueType === "denied_boarding") {
     return analysis.evidenceChecklist;
   }
   if (playbook.situation === "close_in_irrops") {
@@ -158,7 +156,7 @@ export function buildActionPlan(
       .filter((reference) => reference.kind === "official")
       .map((reference) => reference.id),
     providerFeedbackPrompt:
-      "Paste what the hotel or airline says next. I’ll identify what they answered and what to do after that.",
+      "Paste what the airline says next. I’ll identify what they answered and what to do after that.",
     notGuaranteed: true
   };
 }

@@ -33,10 +33,10 @@ describe("request boundaries", () => {
   it("checks safety in structured facts even when description is omitted", async () => {
     const facts = {
       ...emptyClaimFacts(),
-      issueType: "hotel_walk",
-      providerType: "hotel",
-      provider: "Marriott",
-      userGoal: "I want to sue the hotel over my injury and hospitalization"
+      issueType: "airline_delay",
+      providerType: "airline",
+      provider: "United",
+      userGoal: "I want to sue the airline over my injury and hospitalization"
     };
     const response = await analyzePost(
       new Request("http://localhost/api/analyze", {
@@ -72,30 +72,13 @@ describe("consistent analysis", () => {
   it("does not use synthetic success stories as similar traveler cases", () => {
     const result = analyze({
       ...emptyClaimFacts(),
-      issueType: "hotel_walk",
-      providerType: "hotel",
-      provider: "Marriott"
+      issueType: "airline_cancellation",
+      providerType: "airline",
+      provider: "United"
     });
     expect(result.similarCases.some((item) => item.source_type === "synthetic_example")).toBe(
       false
     );
-  });
-  it("does not claim Bonvoy membership or hide unverified guarantee requirements", () => {
-    const result = analyze({
-      ...emptyClaimFacts(),
-      issueType: "hotel_walk",
-      providerType: "hotel",
-      provider: "Marriott",
-      loyaltyStatus: "Not a member",
-      bookingChannel: "ota"
-    });
-    expect(result.scripts.map((script) => script.template).join(" ")).not.toContain(
-      "my Marriott Bonvoy number attached"
-    );
-    expect(
-      result.evidenceCoverage.unresolvedConditionCount +
-        result.evidenceCoverage.unmetRemedyConditionCount
-    ).toBeGreaterThan(0);
   });
   it("does not request an unused-ticket refund after a completed short delay", async () => {
     const intake = {
